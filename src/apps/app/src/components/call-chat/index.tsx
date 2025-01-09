@@ -6,6 +6,8 @@ import { User } from 'better-auth';
 import { formatDistance } from 'date-fns';
 import { Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { formatInTimeZone, fromZonedTime, toDate, toZonedTime } from 'date-fns-tz';
+import { es } from 'date-fns/locale';
 const CallCHat = ({ id, user }: { id: string; user: User }) => {
   return (
     <>
@@ -65,7 +67,13 @@ const ChatList = ({ userId, appointmentId }: { userId: string; appointmentId: st
             >
               {message.text}
               <span className={`text-xs ${isUserMessage ? '' : 'text-muted-foreground'}`}>
-                {formatDistance(new Date(message.createdAt!), new Date(), { addSuffix: true })}
+                {
+                  formatDistance(
+                    toDate(message.createdAt!, { timeZone: 'UTC' }), 
+                    fromZonedTime(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone),
+                    { addSuffix: false, locale: es }
+                  )
+                }
               </span>
             </div>
           </div>
