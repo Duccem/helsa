@@ -32,7 +32,9 @@ const Page = async ({ params }: { params: { id: string } }) => {
         <div className="p-0 bg-transparent items-center justify-end  hover:bg-transparent flex h-full gap-3">
           {user?.data?.role === UserRoleValue.PATIENT && <DetailsDoctor data={appointment} />}
           {user?.data?.role === UserRoleValue.DOCTOR && <Details data={appointment} />}
-          <Actions data={appointment} pathologies={pathologies?.data ?? []} />
+          {user?.data?.role === UserRoleValue.DOCTOR && (
+            <Actions data={appointment} pathologies={pathologies?.data ?? []} />
+          )}
         </div>
       </div>
       <div className="w-full h-full box-border grid grid-cols-8 max-md:grid-cols-1 py-5  gap-4">

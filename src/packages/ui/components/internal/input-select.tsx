@@ -26,7 +26,7 @@ export function InputSelect({ onChange, options }: Props) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
         />
-        <Select onValueChange={(v) => setOther(v)} value={other} defaultValue={options[0]} className="">
+        <Select onValueChange={(v) => setOther(v)} value={other} defaultValue={options[0]}>
           <SelectTrigger className="outline-none rounded-none shadow-none focus-visible:z-10 w-fit gap-2">
             <SelectValue className=""></SelectValue>
           </SelectTrigger>
