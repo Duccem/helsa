@@ -1,12 +1,11 @@
-import logo from '@/src/assets/images/Helsa Logo white - black.png';
+import logo from '@/src/assets/images/HELSA NUEVO BLANCO.png';
 import banner from '@/src/assets/images/banner.png';
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="grid grid-cols-1 box-border h-full w-full lg:grid-cols-2">
       <div className="flex flex-col h-full justify-center items-center">
         <div className="flex justify-center gap-2 mt-2 items-center">
-          <img src={logo.src} alt="logo" className="h-10 w-10 rounded-lg" />
-          <h1 className="text-3xl font-semibold">Helsa</h1>
+          <img src={logo.src} alt="logo" className="h-10  rounded-lg" />
         </div>
         <div className="w-full">{children}</div>
       </div>

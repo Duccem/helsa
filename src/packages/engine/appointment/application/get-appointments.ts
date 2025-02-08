@@ -18,12 +18,12 @@ export class GetAppointments {
     let criteria: Criteria;
     criteria = role === 'DOCTOR' ? AppointmentCriteria.searchByDoctorId(id) : AppointmentCriteria.searchByPatientId(id);
     criteria.and(transformFiltersToCriteria(filters));
-    if (pagination && pagination.page && pagination.pageSize) {
-      criteria.paginate(pagination.pageSize, pagination.page);
-    }
+    criteria.paginate(pagination?.pageSize ?? 10, pagination?.page ?? 0);
 
     if (sort && sort.order && sort.sortBy) {
       criteria.orderBy(sort.sortBy, sort.order as Direction);
+    } else {
+      criteria.orderBy('day', Direction.DESC);
     }
     const response = await this.repository.search(criteria);
     return {

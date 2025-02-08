@@ -1,34 +1,24 @@
+import Diagnosis from '@/src/components/appointment/call/diagnosis';
+import Treatment from '@/src/components/appointment/call/treatment';
+import { Primitives } from '@helsa/ddd/types/primitives';
+import { Appointment } from '@helsa/engine/appointment/domain/appointment';
+import { Pathology } from '@helsa/engine/diagnostic/domain/pathology';
 import { Button } from '@helsa/ui/components/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@helsa/ui/components/dropdown-menu';
-import { Ambulance, BookmarkCheck, Calendar, PlusCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@helsa/ui/components/dropdown-menu';
+import { PlusCircle } from 'lucide-react';
 
-const Actions = () => {
+const Actions = ({ data, pathologies }: { data: Primitives<Appointment>; pathologies: Primitives<Pathology>[] }) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button variant={'outline'} className="gap-2">
           Actions
           <PlusCircle />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="rounded-none" align="end">
-        <DropdownMenuItem className="rounded-none gap-2">
-          <Calendar className="size-4" />
-          Re agendar
-        </DropdownMenuItem>
-        <DropdownMenuItem className="rounded-none gap-2">
-          <BookmarkCheck className="size-4" />
-          Finalizar
-        </DropdownMenuItem>
-        <DropdownMenuItem className="rounded-none gap-2">
-          <Ambulance className="size-4" />
-          Remitir
-        </DropdownMenuItem>
+      <DropdownMenuContent className="rounded-none flex flex-col gap-1" align="end">
+        <Diagnosis data={data} pathologies={pathologies} />
+        <Treatment data={data} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

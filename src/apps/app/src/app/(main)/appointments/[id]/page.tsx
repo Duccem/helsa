@@ -1,22 +1,25 @@
 import { generateUserToken } from '@/src/actions/appointment/generate-user-token';
 import { getAppointment } from '@/src/actions/appointment/get-appointment';
+import { getPathologies } from '@/src/actions/diagnostic/get-pathologies';
 import { getCurrentUser } from '@/src/actions/user/get-current-user';
 import Actions from '@/src/components/appointment/call/actions';
 import Details from '@/src/components/appointment/call/details';
 import DetailsDoctor from '@/src/components/appointment/call/details-doctor';
-import Diagnosis from '@/src/components/appointment/call/diagnosis';
 import { VideoCall } from '@/src/components/call';
 import CallCHat from '@/src/components/call-chat';
 import { UserRoleValue } from '@helsa/engine/user/domain/user-role';
 
 const Page = async ({ params }: { params: { id: string } }) => {
-  const response = await getAppointment({ appointmentId: params.id });
-  const tokenResponse = await generateUserToken();
-  const user = await getCurrentUser();
+  const [response, tokenResponse, user, pathologies] = await Promise.all([
+    getAppointment({ appointmentId: params.id }),
+    generateUserToken(),
+    getCurrentUser(),
+    getPathologies(),
+  ]);
   const appointment = response?.data!;
 
   return (
-    <div className="w-full h-full flex flex-col justify-between px-5" defaultValue="chat">
+    <div className="w-full h-full flex flex-col justify-between px-5" defaultValue="chat" suppressHydrationWarning>
       <div className="w-full grid grid-cols-2 gap-3 max-md:grid-cols-1">
         <div>
           <h1 className="text-3xl font-bold">Consulta con</h1>
@@ -29,8 +32,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
         <div className="p-0 bg-transparent items-center justify-end  hover:bg-transparent flex h-full gap-3">
           {user?.data?.role === UserRoleValue.PATIENT && <DetailsDoctor data={appointment} />}
           {user?.data?.role === UserRoleValue.DOCTOR && <Details data={appointment} />}
-          <Diagnosis data={appointment} />
-          <Actions />
+          <Actions data={appointment} pathologies={pathologies?.data ?? []} />
         </div>
       </div>
       <div className="w-full h-full box-border grid grid-cols-8 max-md:grid-cols-1 py-5  gap-4">

@@ -7,7 +7,7 @@ import { env } from '@helsa/env';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { nextCookies } from 'better-auth/next-js';
-import { emailOTP } from 'better-auth/plugins';
+import { bearer, emailOTP } from 'better-auth/plugins';
 import { headers } from 'next/headers';
 import { cache } from 'react';
 
@@ -40,18 +40,17 @@ export const auth = betterAuth({
     emailOTP({
       otpLength: 6,
       sendVerificationOTP: async ({ email, otp, type }) => {
-        console.log('code', otp);
         if (type === 'forget-password') {
           await resend.emails.send({
             to: email,
-            from: 'Acme <onboarding@resend.dev>',
+            from: 'Helsa <contact@helsahealthcare.com>',
             subject: 'Verify your email',
             react: ForgetPassword({ verificationCode: otp }),
           });
         } else if (type === 'email-verification') {
           await resend.emails.send({
             to: email,
-            from: 'Acme <onboarding@resend.dev>',
+            from: 'Helsa <contact@helsahealthcare.com>',
             subject: 'Verify your email',
             react: VerifyEmail({ verificationCode: otp }),
           });
@@ -61,6 +60,7 @@ export const auth = betterAuth({
     }),
     nextCookies(),
     expo(),
+    bearer(),
   ],
   socialProviders: {
     google: {

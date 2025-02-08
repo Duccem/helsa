@@ -8,9 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from './popover';
 type Props = {
   selected?: Date;
   onSelect: (date?: Date) => void;
+  placeholder?: string;
 };
 
-export function DatePicker({ onSelect, selected }: Props) {
+export function DatePicker({ onSelect, selected, placeholder = 'Pick a date' }: Props) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -19,7 +20,7 @@ export function DatePicker({ onSelect, selected }: Props) {
           className={cn('gap-3 w-full justify-center text-left font-normal', !selected && 'text-muted-foreground')}
         >
           <CalendarIcon className="size-4" />
-          {selected ? format(selected, 'PPP') : <span>Pick a date</span>}
+          {selected ? format(selected, 'PPP') : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 rounded-none" align="start">

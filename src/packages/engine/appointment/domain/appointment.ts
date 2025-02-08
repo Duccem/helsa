@@ -7,6 +7,7 @@ import { Diagnostic } from '../../diagnostic/domain/diagnostic';
 import { Doctor } from '../../doctor/domain/doctor';
 import { Price } from '../../doctor/domain/price';
 import { Patient } from '../../patient/domain/patient';
+import { Treatment } from '../../treatment/domain/treatment';
 import { AppointmentType } from './appointment-type';
 import { AppointmentScheduled } from './events/appointment-scheduled';
 import { AppointmentNote } from './note';
@@ -44,7 +45,8 @@ export class Appointment extends Aggregate {
     public patient?: Patient,
     public price?: Price,
     public symptoms?: Symptom[],
-    public diagnostics?: Diagnostic[]
+    public diagnostics?: Diagnostic[],
+    public treatments?: Treatment[]
   ) {
     super(id, createdAt, updatedAt);
   }
@@ -75,6 +77,7 @@ export class Appointment extends Aggregate {
       price: this.price ? this.price.toPrimitives() : undefined,
       symptoms: this.symptoms ? this.symptoms.map((symptom) => symptom.toPrimitives()) : undefined,
       diagnostics: this.diagnostics ? this.diagnostics.map((diagnosis) => diagnosis.toPrimitives()) : undefined,
+      treatments: this.treatments ? this.treatments.map((treatment) => treatment.toPrimitives()) : undefined,
     };
   }
 
@@ -103,7 +106,8 @@ export class Appointment extends Aggregate {
       data.patient ? Patient.fromPrimitives(data.patient) : undefined,
       data.price ? Price.fromPrimitives(data.price) : undefined,
       data.symptoms ? data.symptoms.map((symptom) => Symptom.fromPrimitives(symptom)) : undefined,
-      data.diagnostics ? data.diagnostics.map((diagnosis) => Diagnostic.fromPrimitives(diagnosis)) : undefined
+      data.diagnostics ? data.diagnostics.map((diagnosis) => Diagnostic.fromPrimitives(diagnosis)) : undefined,
+      data.treatments ? data.treatments.map((treatment) => Treatment.fromPrimitives(treatment)) : undefined
     );
   }
 

@@ -6,17 +6,17 @@ model Patient {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
-  allergies   Allergy[]
-  diseases    ChronicDisease[]
-  contacts    PatientContact[]
-  vaccines    Vaccine[]
-  surgeries   Surgery[]
+  allergies Allergy[]
+  diseases  ChronicDisease[]
+  contacts  PatientContact[]
+  vaccines  Vaccine[]
+  surgeries Surgery[]
 
-  diagnostics Diagnostic[]
-  treatments  Treatment[]
-  tests       MedicalTest[]
-  documents   MedicalDocument[]
-  ratings     Rating[]
+  diagnostics  Diagnostic[]
+  treatments   Treatment[]
+  tests        MedicalTest[]
+  documents    MedicalDocument[]
+  ratings      Rating[]
   appointments Appointment[]
 
   createdAt DateTime @default(now())
@@ -38,7 +38,6 @@ model Allergy {
   diagnosticDate DateTime
   patientId      String
   patient        Patient         @relation(fields: [patientId], references: [id])
-  treatments      Treatment[]      @relation("AllergyTreatment")
 }
 
 enum ChronicDiseaseType {
@@ -56,7 +55,6 @@ model ChronicDisease {
   actualState    String
   patientId      String
   patient        Patient            @relation(fields: [patientId], references: [id])
-  treatments      Treatment[]       @relation("DiseaseTreatment")
 }
 
 model PatientContact {
@@ -69,24 +67,24 @@ model PatientContact {
 }
 
 model Vaccine {
-  id          String @id @default(uuid())
-  name        String
-  dose        Int
-  date       DateTime
-  notes       String?
-  nextDose    DateTime?
+  id       String    @id @default(uuid())
+  name     String
+  dose     Int
+  date     DateTime
+  notes    String?
+  nextDose DateTime?
 
   patientId String
   patient   Patient @relation(fields: [patientId], references: [id])
 }
 
 model Surgery {
-  id          String @id @default(uuid())
-  date        DateTime
-  type        String
-  details     String
-  surgeon     String
-  hospital    String
+  id       String   @id @default(uuid())
+  date     DateTime
+  type     String
+  details  String
+  surgeon  String
+  hospital String
 
   patientId String
   patient   Patient @relation(fields: [patientId], references: [id])

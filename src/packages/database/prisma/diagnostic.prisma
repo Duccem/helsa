@@ -26,8 +26,7 @@ model Diagnostic {
   appointment Appointment @relation(fields: [appointmentId], references: [id])
   pathology   Pathology   @relation(fields: [pathologyId], references: [id])
 
-  treatments Treatment[]
-  symptoms   Symptom[]   @relation("DiagnosticSymptom")
+  symptoms Symptom[] @relation("DiagnosticSymptom")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

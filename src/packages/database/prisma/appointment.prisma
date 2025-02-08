@@ -32,6 +32,7 @@ model Appointment {
   recipes     AppointmentRecipe?
   notes       AppointmentNote[]
   diagnostics Diagnostic[]
+  treatments  Treatment[]
 }
 
 enum AppointmentStatus {
@@ -86,14 +87,12 @@ model AppointmentTelemetry {
 }
 
 model AppointmentRecipe {
-  id            String             @id @default(uuid())
+  id            String        @id @default(uuid())
   date          DateTime
   description   String
-  treatments    Treatment[]
-  tests         MedicalTest[]
-  references    MedicalReference[]
-  appointmentId String             @unique
-  appointment   Appointment        @relation(fields: [appointmentId], references: [id])
+  appointmentId String        @unique
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
+  MedicalTest   MedicalTest[]
 }
 
 model MedicalReference {
@@ -103,9 +102,6 @@ model MedicalReference {
 
   referencedId String
   referenced   Doctor @relation(fields: [referencedId], references: [id])
-
-  recipeId String
-  recipe   AppointmentRecipe @relation(fields: [recipeId], references: [id])
 }
 
 model AppointmentNote {

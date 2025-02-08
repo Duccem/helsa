@@ -1,7 +1,7 @@
 enum TreatmentType {
   MEDICATION
-  SURGERY
-  PHYSIOTHERAPY
+  PROCEDURE
+  THERAPY
 }
 
 enum TreatmentStatus {
@@ -12,40 +12,51 @@ enum TreatmentStatus {
 }
 
 model Treatment {
-  id         String           @id @default(uuid())
+  id          String @id @default(uuid())
   description String
-  type        TreatmentType
-  instructions String
-  status      TreatmentStatus
-  startDate   DateTime
-  endDate     DateTime
+
+  type      TreatmentType
+  status    TreatmentStatus
+  startDate DateTime
+  endDate   DateTime
 
   patientId     String
-  doctorId      String
-  recipeId String
-  diagnosticId  String
+  doctorId      String?
+  appointmentId String?
 
-  patient      Patient    @relation(fields: [patientId], references: [id])
-  doctor       Doctor     @relation(fields: [doctorId], references: [id])
-  diagnostic   Diagnostic  @relation(fields: [diagnosticId], references: [id])
-  recipe  AppointmentRecipe @relation(fields: [recipeId], references: [id])
+  patient     Patient      @relation(fields: [patientId], references: [id])
+  doctor      Doctor?      @relation(fields: [doctorId], references: [id])
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
 
-  medications Medication[]
-  allergies  Allergy[] @relation("AllergyTreatment")
-  diseases   ChronicDisease[] @relation("DiseaseTreatment")
+  medication Medication?
+  therapy    Therapy?
+  procedure  Procedure?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Medication {
-  id         String   @id @default(uuid())
-  name        String
-  description String
-  dose      String
-  frequency   String
-  duration    String
-  treatmentId String
+  id           String @id @default(uuid())
+  name         String
+  dose         String
+  frequency    String
+  presentation String
 
-  treatment Treatment @relation(fields: [treatmentId], references: [id])
+  treatmentId String    @unique
+  treatment   Treatment @relation(fields: [treatmentId], references: [id])
+}
+
+model Therapy {
+  id          String    @id @default(uuid())
+  description String
+  treatmentId String    @unique
+  treatment   Treatment @relation(fields: [treatmentId], references: [id])
+}
+
+model Procedure {
+  id          String    @id @default(uuid())
+  description String
+  treatmentId String    @unique
+  treatment   Treatment @relation(fields: [treatmentId], references: [id])
 }

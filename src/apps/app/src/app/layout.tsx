@@ -1,4 +1,4 @@
-import icon from '@/src/assets/images/Helsa Logo black - white.png';
+import icon from '@/src/assets/images/HELSA NUEVO BLANCO ISOTIPO.png';
 import { Provider as Analytics } from '@helsa/analytics/client';
 import { DesignSystemProvider } from '@helsa/ui';
 import '@helsa/ui/styles/global.css';
