@@ -1,10 +1,11 @@
+import { InvalidArgument } from "../errors/invalid-argument";
 import { ValueObject } from "../value-object";
 import { format, isValid } from "date-fns";
 
 export class Timestamp extends ValueObject<Date> {
   validate(): void {
     if (!isValid(this.value)) {
-      throw new Error(`Invalid Timestamp: ${this.value}`);
+      throw new InvalidArgument({ argument: this.name, value: this.value });
     }
   }
 

@@ -3,15 +3,25 @@ import { getOrganization } from "@/modules/auth/infrastructure/helpers/get-organ
 import { getSession } from "@/modules/auth/infrastructure/helpers/get-session";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { NotAuthorized } from "../../domain/errors/not-authorized";
 
 export async function authenticate() {
   const session = await getSession();
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new NotAuthorized();
   }
 
-  return session;
+  const organization = await getOrganization();
+
+  if (!organization) {
+    throw new NotAuthorized();
+  }
+
+  return {
+    session,
+    organization,
+  };
 }
 
 export async function authenticateOrg() {

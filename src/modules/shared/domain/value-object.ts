@@ -1,9 +1,11 @@
 export abstract class ValueObject<T> {
   public readonly value: T;
+  protected readonly name: string;
 
   constructor(value: T) {
     this.value = value;
     this.validate();
+    this.name = this.constructor.name;
   }
 
   equals(other: ValueObject<T>): boolean {
@@ -31,6 +33,10 @@ export class StringValueObject extends ValueObject<string> {
       throw new Error("Value cannot be empty");
     }
   }
+
+  static fromString(value: string): StringValueObject {
+    return new StringValueObject(value);
+  }
 }
 
 export class NumberValueObject extends ValueObject<number> {
@@ -38,6 +44,10 @@ export class NumberValueObject extends ValueObject<number> {
     if (isNaN(this.value)) {
       throw new Error("Value must be a number");
     }
+  }
+
+  static fromNumber(value: number): NumberValueObject {
+    return new NumberValueObject(value);
   }
 }
 
