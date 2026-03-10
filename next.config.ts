@@ -1,8 +1,11 @@
-import type { NextConfig } from "next";
+import "@/modules/shared/infrastructure/env";
+import { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./src/modules/shared/infrastructure/translation/request.ts");
+export default withNextIntl(nextConfig);
+
