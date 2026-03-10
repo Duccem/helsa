@@ -20,13 +20,21 @@ const insertAppointmentSchema = z.object({
 });
 
 export const POST = async (request: NextRequest) => {
-  await authenticate();
+  const { organization } = await authenticate();
   const body = await parseBody(request, insertAppointmentSchema);
   const service = new ScheduleAppointment(new DrizzleAppointmentRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(body.patientId, body.doctorId, body.date, body.motive, body.type, body.mode);
+      await service.execute(
+        organization.id,
+        body.patientId,
+        body.doctorId,
+        body.date,
+        body.motive,
+        body.type,
+        body.mode,
+      );
 
       return HttpNextResponse.created();
     },
