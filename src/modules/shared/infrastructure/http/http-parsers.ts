@@ -21,7 +21,7 @@ export async function parseParams<R>(params: Promise<R>, schema?: ZodType<R>): P
   return schema.parse(resolvedParams);
 }
 
-export async function parseQuery<R>(req: NextRequest, schema?: ZodType<R>): Promise<R> {
+export function parseQuery<R>(req: NextRequest, schema?: ZodType<R>): R {
   const queryParams = Object.fromEntries(req.nextUrl.searchParams.entries()) as unknown as R;
   if (!schema) {
     return queryParams as R;

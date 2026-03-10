@@ -18,7 +18,7 @@ export async function authenticateOrg() {
   const organization = await getOrganization();
 
   if (!organization) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    throw new Error("Organization not found");
   }
 
   return organization;
