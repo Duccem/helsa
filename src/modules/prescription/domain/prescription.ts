@@ -140,30 +140,26 @@ export class Prescription extends Aggregate {
     this.updated_at = PrescriptionUpdatedAt.now();
   }
 
-  markReminderAsTaken(reminder_id: string): void {
-    const reminder = this.findReminder(reminder_id);
-
-    reminder.markAsTaken();
-    this.updated_at = PrescriptionUpdatedAt.now();
-  }
-
-  markRemindersAsForgotten(reminder_ids: string[]): void {
-    const reminders = reminder_ids.map((reminder_id) => this.findReminder(reminder_id));
-
-    reminders.forEach((reminder) => reminder.markAsForgotten());
-    this.updated_at = PrescriptionUpdatedAt.now();
-  }
-
-  private findReminder(reminder_id: string): MedicationReminder {
-    const reminder = this.medications
-      ?.map((medication) => medication.reminder)
-      .find((item) => item?.id.value === reminder_id);
-
-    if (!reminder) {
-      throw new MedicationReminderNotFound(reminder_id);
+  markMedicationAsTaken(medication_id: string, reminder_id: string): void {
+    const medication = this.medications?.find((item) => item.id.value === medication_id);
+    if (!medication) {
+      throw new MedicationNotFound(medication_id);
     }
 
-    return reminder;
+    medication.markAsTaken(reminder_id);
+    medication.addNewReminder();
+    this.updated_at = PrescriptionUpdatedAt.now();
+  }
+
+  markMedicationAsForgotten(medication_id: string, reminder_id: string): void {
+    const medication = this.medications?.find((item) => item.id.value === medication_id);
+    if (!medication) {
+      throw new MedicationNotFound(medication_id);
+    }
+
+    medication.markAsForgotten(reminder_id);
+    medication.addNewReminder();
+    this.updated_at = PrescriptionUpdatedAt.now();
   }
 }
 

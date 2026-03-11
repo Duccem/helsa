@@ -1,6 +1,6 @@
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 import { database } from "@/modules/shared/infrastructure/database/client";
-import { and, between, count, eq, ilike, or } from "drizzle-orm";
+import { and, between, count, eq, gte, ilike, or } from "drizzle-orm";
 import { Prescription, PrescriptionId } from "../../domain/prescription";
 import {
   MedicationSearchCriteria,
@@ -27,7 +27,7 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
 
     await database.transaction(async (tx) => {
       for (const item of medications) {
-        const { reminder, ...medicationPrimitives } = item;
+        const { reminders, ...medicationPrimitives } = item;
 
         await tx
           .insert(medication)
@@ -49,20 +49,22 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
             },
           });
 
-        if (reminder) {
-          await tx
-            .insert(medication_reminder)
-            .values(reminder)
-            .onConflictDoUpdate({
-              target: medication_reminder.medication_id,
-              set: {
-                scheduled_time: reminder.scheduled_time,
-                is_taken: reminder.is_taken,
-                forgotten: reminder.forgotten,
-                taken_at: reminder.taken_at,
-                updated_at: reminder.updated_at,
-              },
-            });
+        if (reminders) {
+          for (const reminder of reminders) {
+            await tx
+              .insert(medication_reminder)
+              .values(reminder)
+              .onConflictDoUpdate({
+                target: medication_reminder.id,
+                set: {
+                  scheduled_time: reminder.scheduled_time,
+                  is_taken: reminder.is_taken,
+                  forgotten: reminder.forgotten,
+                  taken_at: reminder.taken_at ? reminder.taken_at : null,
+                  updated_at: reminder.updated_at,
+                },
+              });
+          }
         }
       }
     });
@@ -74,7 +76,7 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
       with: {
         medications: {
           with: {
-            reminder: true,
+            reminders: true,
           },
         },
       },
@@ -88,11 +90,11 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
       ...item,
       medications: item.medications.map((entry) => ({
         ...entry,
-        notes: entry.notes ?? undefined,
-        end_date: entry.end_date ?? undefined,
+        notes: entry.notes ?? null,
+        end_date: entry.end_date ?? null,
         alternatives: entry.alternatives ?? [],
         state: entry.state as MedicationStateValues,
-        reminder: entry.reminder ? entry.reminder : undefined,
+        reminders: entry.reminders ? entry.reminders : null,
       })),
     });
   }
@@ -143,7 +145,7 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
       database.query.medication.findMany({
         where: query,
         with: {
-          reminder: true,
+          reminders: true,
         },
         limit: criteria.pageSize,
         offset: (criteria.page - 1) * criteria.pageSize,
@@ -157,11 +159,11 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
     const data = items.map((item) =>
       Medication.fromPrimitives({
         ...item,
-        notes: item.notes ?? undefined,
-        end_date: item.end_date ?? undefined,
+        notes: item.notes ?? null,
+        end_date: item.end_date ?? null,
         alternatives: item.alternatives ?? [],
         state: item.state as MedicationStateValues,
-        reminder: item.reminder ? item.reminder : undefined,
+        reminders: item.reminders ? item.reminders : null,
       }),
     );
 
@@ -177,31 +179,44 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
     const items = await database.query.medication.findMany({
       where: eq(medication.prescription_id, prescription_id.value),
       with: {
-        reminder: true,
+        reminders: true,
       },
     });
 
-    return items.filter((item) => item.reminder).map((item) => MedicationReminder.fromPrimitives(item.reminder));
+    return items
+      .filter((item) => item.reminders && item.reminders.length > 0)
+      .flatMap((item) => item.reminders!.map((reminder) => MedicationReminder.fromPrimitives(reminder)));
   }
 
   async searchReminders(query: ReminderSearchCriteria): Promise<PaginatedResult<MedicationReminder>> {
-    const whereClause = and(
-      query.is_taken !== undefined ? eq(medication_reminder.is_taken, query.is_taken) : undefined,
-      query.start_date && query.end_date
-        ? between(medication_reminder.scheduled_time, query.start_date, query.end_date)
-        : undefined,
-    );
+    const whereClause = [];
+
+    if (query.is_taken) {
+      whereClause.push(eq(medication_reminder.is_taken, query.is_taken));
+    }
+
+    if (query.forgotten) {
+      whereClause.push(eq(medication_reminder.forgotten, query.forgotten));
+    }
+
+    if (query.start_date && query.end_date) {
+      whereClause.push(between(medication_reminder.scheduled_time, query.start_date, query.end_date));
+    } else if (query.start_date) {
+      whereClause.push(gte(medication_reminder.scheduled_time, query.start_date));
+    } else if (query.end_date) {
+      whereClause.push(gte(medication_reminder.scheduled_time, query.end_date));
+    }
 
     const [items, total] = await Promise.all([
       database.query.medication_reminder.findMany({
-        where: whereClause,
+        where: and(...whereClause),
         limit: query.pageSize,
         offset: (query.page - 1) * query.pageSize,
       }),
       database
         .select({ count: count(medication_reminder.medication_id) })
         .from(medication_reminder)
-        .where(whereClause),
+        .where(and(...whereClause)),
     ]);
 
     const data = items.map((item) => MedicationReminder.fromPrimitives(item));

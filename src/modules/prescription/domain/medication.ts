@@ -63,9 +63,9 @@ export class Medication {
     public state: MedicationState,
     public created_at: MedicationCreatedAt,
     public updated_at: MedicationUpdatedAt,
-    public end_date?: MedicationEndDate,
-    public notes?: MedicationNotes,
-    public reminder?: MedicationReminder,
+    public end_date: MedicationEndDate | null,
+    public notes: MedicationNotes | null,
+    public reminders: MedicationReminder[] | null,
   ) {}
 
   toPrimitives(): Primitives<Medication> {
@@ -80,12 +80,12 @@ export class Medication {
       administration_method: this.administration_method.value,
       alternatives: this.alternatives,
       start_date: this.start_date.value,
-      end_date: this.end_date?.value,
-      notes: this.notes?.value,
+      end_date: this.end_date ? this.end_date?.value : null,
+      notes: this.notes ? this.notes?.value : null,
       state: this.state.value,
       created_at: this.created_at.value,
       updated_at: this.updated_at.value,
-      reminder: this.reminder?.toPrimitives(),
+      reminders: this.reminders ? this.reminders.map((reminder) => reminder.toPrimitives()) : null,
     };
   }
 
@@ -104,9 +104,9 @@ export class Medication {
       MedicationState.fromString(primitives.state),
       MedicationCreatedAt.fromDate(primitives.created_at),
       MedicationUpdatedAt.fromDate(primitives.updated_at),
-      primitives.end_date ? MedicationEndDate.fromDate(primitives.end_date) : undefined,
-      primitives.notes ? MedicationNotes.fromString(primitives.notes) : undefined,
-      primitives.reminder ? MedicationReminder.fromPrimitives(primitives.reminder) : undefined,
+      primitives.end_date ? MedicationEndDate.fromDate(primitives.end_date) : null,
+      primitives.notes ? MedicationNotes.fromString(primitives.notes) : null,
+      primitives.reminders ? primitives.reminders.map((reminder) => MedicationReminder.fromPrimitives(reminder)) : null,
     );
   }
 
@@ -138,17 +138,60 @@ export class Medication {
       MedicationState.fromString(params.state ?? MedicationStateValues.PENDING),
       MedicationCreatedAt.now(),
       MedicationUpdatedAt.now(),
-      params.end_date ? MedicationEndDate.fromDate(params.end_date) : undefined,
-      params.notes ? MedicationNotes.fromString(params.notes) : undefined,
+      params.end_date ? MedicationEndDate.fromDate(params.end_date) : null,
+      params.notes ? MedicationNotes.fromString(params.notes) : null,
+      null,
     );
 
-    medication.reminder = MedicationReminder.create(
-      medication.id.value,
-      medication.patient_id.value,
-      medication.frequency.value,
+    medication.reminders = [];
+    medication.reminders.push(
+      MedicationReminder.create(
+        medication.id.value,
+        medication.prescription_id.value,
+        medication.patient_id.value,
+        medication.frequency.value,
+      ),
     );
 
     return medication;
+  }
+
+  addNewReminder(): void {
+    if (!this.reminders) {
+      this.reminders = [];
+    }
+
+    this.reminders.push(
+      MedicationReminder.create(this.id.value, this.prescription_id.value, this.patient_id.value, this.frequency.value),
+    );
+  }
+
+  markAsTaken(reminder_id: string): void {
+    if (!this.reminders) {
+      return;
+    }
+
+    const reminder = this.reminders.find((r) => r.id.value === reminder_id);
+
+    if (!reminder) {
+      return;
+    }
+
+    reminder.markAsTaken();
+  }
+
+  markAsForgotten(reminder_id: string): void {
+    if (!this.reminders) {
+      return;
+    }
+
+    const reminder = this.reminders.find((r) => r.id.value === reminder_id);
+
+    if (!reminder) {
+      return;
+    }
+
+    reminder.markAsForgotten();
   }
 
   update(params: {
@@ -187,12 +230,12 @@ export class Medication {
       this.start_date = MedicationStartDate.fromDate(params.start_date);
     }
     if (params.end_date === null) {
-      this.end_date = undefined;
+      this.end_date = null;
     } else if (params.end_date) {
       this.end_date = MedicationEndDate.fromDate(params.end_date);
     }
     if (params.notes === null) {
-      this.notes = undefined;
+      this.notes = null;
     } else if (params.notes) {
       this.notes = MedicationNotes.fromString(params.notes);
     }
@@ -200,10 +243,13 @@ export class Medication {
       this.state = MedicationState.fromString(params.state);
     }
 
-    if (params.frequency && params.frequency !== previousFrequency && this.reminder) {
-      this.reminder.updateFrequency(params.frequency);
+    if (params.frequency && params.frequency !== previousFrequency && this.reminders) {
+      this.reminders.forEach((reminder) => {
+        reminder.updateFrequency(params.frequency!);
+      });
     }
 
     this.updated_at = MedicationUpdatedAt.now();
   }
 }
+

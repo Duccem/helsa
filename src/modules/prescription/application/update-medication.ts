@@ -1,7 +1,8 @@
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
-import { MedicationAlternativeDrug, MedicationStateValues, PrescriptionId } from "../domain/prescription";
+import { PrescriptionId } from "../domain/prescription";
 import { PrescriptionNotFound } from "../domain/prescription-not-found";
 import { PrescriptionRepository } from "../domain/prescription-repository";
+import { MedicationAlternativeDrug, MedicationStateValues } from "../domain/medication";
 
 export class UpdateMedication {
   constructor(private readonly repository: PrescriptionRepository) {}

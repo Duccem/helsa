@@ -54,6 +54,9 @@ export const medication_reminder = pgTable("medication_reminder", {
     .unique()
     .notNull()
     .references(() => medication.id),
+  prescription_id: uuid("prescription_id")
+    .notNull()
+    .references(() => prescription.id),
   patient_id: uuid("patient_id").notNull(),
   scheduled_time: timestamp("scheduled_time").notNull(),
   is_taken: boolean("is_taken").default(false),
@@ -70,10 +73,7 @@ export const prescription_relations = relations(prescription, ({ many }) => ({
   medications: many(medication),
 }));
 
-export const medication_relations = relations(medication, ({ one }) => ({
-  reminder: one(medication_reminder, {
-    fields: [medication.id],
-    references: [medication_reminder.medication_id],
-  }),
+export const medication_relations = relations(medication, ({ many }) => ({
+  reminders: many(medication_reminder),
 }));
 

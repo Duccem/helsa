@@ -14,16 +14,20 @@ import z from "zod";
 const paramsSchema = z.object({
   id: z.uuid(),
   reminderId: z.uuid(),
+  medicationId: z.uuid(),
 });
 
-export const PUT = async (_: NextRequest, ctx: RouteContext<"/api/prescription/[id]/reminder/[reminderId]/taken">) => {
+export const PUT = async (
+  _: NextRequest,
+  ctx: RouteContext<"/api/prescription/[id]/medication/[medicationId]/[reminderId]/taken">,
+) => {
   const { organization } = await authenticate();
-  const { id, reminderId } = await parseParams(ctx.params, paramsSchema);
+  const { id, reminderId, medicationId } = await parseParams(ctx.params, paramsSchema);
   const service = new MarkReminderAsTaken(new DrizzlePrescriptionRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(id, reminderId, organization.id);
+      await service.execute(id, reminderId, medicationId, organization.id);
 
       return HttpNextResponse.noContent();
     },

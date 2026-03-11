@@ -6,6 +6,7 @@ import { MedicationReminderScheduleCalculator } from "./medication-reminder-sche
 
 export class MedicationReminderId extends Uuid {}
 export class MedicationReminderMedicationId extends Uuid {}
+export class MedicationReminderPrescriptionId extends Uuid {}
 export class MedicationReminderPatientId extends Uuid {}
 export class MedicationReminderScheduledTime extends Timestamp {}
 export class MedicationReminderTakenAt extends Timestamp {}
@@ -34,6 +35,7 @@ export class MedicationReminder {
   constructor(
     public id: MedicationReminderId,
     public medication_id: MedicationReminderMedicationId,
+    public prescription_id: MedicationReminderPrescriptionId,
     public patient_id: MedicationReminderPatientId,
     public scheduled_time: MedicationReminderScheduledTime,
     public is_taken: MedicationReminderIsTaken | null,
@@ -46,6 +48,7 @@ export class MedicationReminder {
   toPrimitives(): Primitives<MedicationReminder> {
     return {
       id: this.id.value,
+      prescription_id: this.prescription_id.value,
       medication_id: this.medication_id.value,
       patient_id: this.patient_id.value,
       scheduled_time: this.scheduled_time.value,
@@ -61,6 +64,7 @@ export class MedicationReminder {
     return new MedicationReminder(
       MedicationReminderId.fromString(primitives.id),
       MedicationReminderMedicationId.fromString(primitives.medication_id),
+      MedicationReminderPrescriptionId.fromString(primitives.prescription_id),
       MedicationReminderPatientId.fromString(primitives.patient_id),
       MedicationReminderScheduledTime.fromDate(primitives.scheduled_time),
       primitives.is_taken === null ? null : MedicationReminderIsTaken.fromBoolean(primitives.is_taken),
@@ -71,10 +75,16 @@ export class MedicationReminder {
     );
   }
 
-  static create(medication_id: string, patient_id: string, frequency: string): MedicationReminder {
+  static create(
+    medication_id: string,
+    prescription_id: string,
+    patient_id: string,
+    frequency: string,
+  ): MedicationReminder {
     return new MedicationReminder(
       MedicationReminderId.generate(),
       MedicationReminderMedicationId.fromString(medication_id),
+      MedicationReminderPrescriptionId.fromString(prescription_id),
       MedicationReminderPatientId.fromString(patient_id),
       MedicationReminderScheduledTime.fromDate(
         MedicationReminderScheduleCalculator.calculateNextScheduledTime(frequency),

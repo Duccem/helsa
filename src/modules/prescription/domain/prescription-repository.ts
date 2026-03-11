@@ -18,6 +18,7 @@ export type MedicationSearchCriteria = PaginatedQuery & {
 
 export type ReminderSearchCriteria = PaginatedQuery & {
   is_taken?: boolean;
+  forgotten?: boolean;
   start_date?: Date;
   end_date?: Date;
 };
