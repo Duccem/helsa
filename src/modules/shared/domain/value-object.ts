@@ -57,5 +57,9 @@ export class BooleanValueObject extends ValueObject<boolean> {
       throw new Error("Value must be a boolean");
     }
   }
+
+  static fromBoolean(value: boolean): BooleanValueObject {
+    return new BooleanValueObject(value);
+  }
 }
 
