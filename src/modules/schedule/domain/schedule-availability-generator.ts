@@ -1,5 +1,4 @@
 import { AvailabilitySlot, AvailabilitySlotStateValues } from "./availability-slot";
-import { DoctorAppointment } from "./schedule-appointment-source";
 import { Schedule } from "./schedule";
 import {
   addMinutes,
