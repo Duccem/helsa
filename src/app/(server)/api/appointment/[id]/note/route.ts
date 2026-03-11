@@ -1,4 +1,4 @@
-import { AddAppointmentNote } from "@/modules/appointment/application/add-note";
+import { AddAppointmentNote, AddAppointmentNoteErrors } from "@/modules/appointment/application/add-note";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
 import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
@@ -25,11 +25,11 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/appoint
 
   return routeHandler(
     async () => {
-      await service.execute(id, note, organization.id);
+      await service.execute({ appointment_id: id, note, organization_id: organization.id });
 
       return HttpNextResponse.noContent();
     },
-    (error: AppointmentNotFound) => {
+    (error: AddAppointmentNoteErrors) => {
       switch (true) {
         case error instanceof AppointmentNotFound:
           return HttpNextResponse.domainError(error, 404);
