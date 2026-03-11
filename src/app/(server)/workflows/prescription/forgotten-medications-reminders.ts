@@ -1,26 +1,27 @@
 import { SearchReminders } from "@/modules/prescription/application/search-reminders";
 import { DrizzlePrescriptionRepository } from "@/modules/prescription/infrastructure/persistence/drizzle-prescription-repository";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
-import { addMinutes } from "date-fns";
+import { subHours } from "date-fns";
 
-export const nextMedicationsReminders = inngest.createFunction(
-  { id: "next-medications-reminders", name: "Next Medications Reminders" },
-  { cron: "TZ=America/Caracas */15 * * * *" },
+export const forgottenMedicationsReminders = inngest.createFunction(
+  { id: "forgotten-medications-reminders", name: "Forgotten Medications Reminders" },
+  { cron: "TZ=America/Caracas 0 * * * *" },
   async ({ step }) => {
-    const inFifteenMinutes = addMinutes(new Date(), 15);
-    const reminders = await step.run("get-next-medications-reminders", async () => {
+    const inLastHour = subHours(new Date(), 1);
+    const reminders = await step.run("get-forgotten-medications-reminders", async () => {
       const service = new SearchReminders(new DrizzlePrescriptionRepository());
       const data = await service.execute({
-        start_date: new Date(),
-        end_date: inFifteenMinutes,
+        end_date: new Date(),
+        start_date: inLastHour,
         page: 1,
         pageSize: 1000,
+        is_taken: false,
       });
 
       return data.data;
     });
     const newEvents = reminders.map((reminder) => ({
-      name: "helsa/prescription.send-reminder",
+      name: "helsa/prescription.send-forgotten-reminder",
       data: { id: reminder.id, medication_id: reminder.medication_id, patient_id: reminder.patient_id },
     }));
 
@@ -28,9 +29,9 @@ export const nextMedicationsReminders = inngest.createFunction(
   },
 );
 
-export const sendNextMedicationsReminders = inngest.createFunction(
-  { id: "send-next-medications-reminders", name: "Send Next Medications Reminders" },
-  { event: "helsa/prescription.send-reminder" },
+export const sendForgottenMedicationsReminders = inngest.createFunction(
+  { id: "send-next-medications-reminders", name: "Send Forgotten Medications Reminders" },
+  { event: "helsa/prescription.send-forgotten-reminder" },
   async ({ event, step }) => {
     const { id, medication_id } = event.data;
     const patient = await step.run("get-patient-info", async () => {

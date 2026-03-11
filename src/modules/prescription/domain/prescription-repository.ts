@@ -16,11 +16,18 @@ export type MedicationSearchCriteria = PaginatedQuery & {
   query?: string;
 };
 
+export type ReminderSearchCriteria = PaginatedQuery & {
+  is_taken?: boolean;
+  start_date?: Date;
+  end_date?: Date;
+};
+
 export interface PrescriptionRepository {
   save(prescription: Prescription): Promise<void>;
   find(id: PrescriptionId): Promise<Prescription | null>;
   search(criteria: PrescriptionSearchCriteria): Promise<PaginatedResult<Prescription>>;
   searchMedications(criteria: MedicationSearchCriteria): Promise<PaginatedResult<Medication>>;
   listRemindersForPrescription(prescription_id: PrescriptionId): Promise<MedicationReminder[]>;
+  searchReminders(query: ReminderSearchCriteria): Promise<PaginatedResult<MedicationReminder>>;
 }
 

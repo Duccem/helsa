@@ -1,11 +1,12 @@
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 import { database } from "@/modules/shared/infrastructure/database/client";
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, between, count, eq, ilike, or } from "drizzle-orm";
 import { Prescription, PrescriptionId } from "../../domain/prescription";
 import {
   MedicationSearchCriteria,
   PrescriptionRepository,
   PrescriptionSearchCriteria,
+  ReminderSearchCriteria,
 } from "../../domain/prescription-repository";
 import { medication, medication_reminder, prescription } from "./prescription.schema";
 import { Medication, MedicationStateValues } from "../../domain/medication";
@@ -181,6 +182,35 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
     });
 
     return items.filter((item) => item.reminder).map((item) => MedicationReminder.fromPrimitives(item.reminder));
+  }
+
+  async searchReminders(query: ReminderSearchCriteria): Promise<PaginatedResult<MedicationReminder>> {
+    const whereClause = and(
+      query.is_taken !== undefined ? eq(medication_reminder.is_taken, query.is_taken) : undefined,
+      query.start_date && query.end_date
+        ? between(medication_reminder.scheduled_time, query.start_date, query.end_date)
+        : undefined,
+    );
+
+    const [items, total] = await Promise.all([
+      database.query.medication_reminder.findMany({
+        where: whereClause,
+        limit: query.pageSize,
+        offset: (query.page - 1) * query.pageSize,
+      }),
+      database
+        .select({ count: count(medication_reminder.medication_id) })
+        .from(medication_reminder)
+        .where(whereClause),
+    ]);
+
+    const data = items.map((item) => MedicationReminder.fromPrimitives(item));
+    const pagination = buildPagination(total[0].count, query.page, query.pageSize);
+
+    return {
+      data,
+      pagination,
+    };
   }
 }
 
