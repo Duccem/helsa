@@ -63,8 +63,8 @@ export class MedicationReminder {
       MedicationReminderMedicationId.fromString(primitives.medication_id),
       MedicationReminderPatientId.fromString(primitives.patient_id),
       MedicationReminderScheduledTime.fromDate(primitives.scheduled_time),
-      primitives.is_taken ? MedicationReminderIsTaken.fromBoolean(primitives.is_taken) : null,
-      primitives.forgotten ? MedicationReminderForgotten.fromBoolean(primitives.forgotten) : null,
+      primitives.is_taken === null ? null : MedicationReminderIsTaken.fromBoolean(primitives.is_taken),
+      primitives.forgotten === null ? null : MedicationReminderForgotten.fromBoolean(primitives.forgotten),
       MedicationReminderCreatedAt.fromDate(primitives.created_at),
       MedicationReminderUpdatedAt.fromDate(primitives.updated_at),
       primitives.taken_at ? MedicationReminderTakenAt.fromDate(primitives.taken_at) : null,
@@ -90,6 +90,20 @@ export class MedicationReminder {
     this.scheduled_time = MedicationReminderScheduledTime.fromDate(
       MedicationReminderScheduleCalculator.calculateNextScheduledTime(frequency),
     );
+    this.updated_at = MedicationReminderUpdatedAt.now();
+  }
+
+  markAsTaken(): void {
+    this.is_taken = MedicationReminderIsTaken.taken();
+    this.forgotten = MedicationReminderForgotten.notForgotten();
+    this.taken_at = MedicationReminderTakenAt.now();
+    this.updated_at = MedicationReminderUpdatedAt.now();
+  }
+
+  markAsForgotten(): void {
+    this.forgotten = MedicationReminderForgotten.forgotten();
+    this.is_taken = MedicationReminderIsTaken.notTaken();
+    this.taken_at = null;
     this.updated_at = MedicationReminderUpdatedAt.now();
   }
 }

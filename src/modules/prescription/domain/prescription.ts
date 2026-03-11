@@ -3,8 +3,9 @@ import { Primitives } from "@/modules/shared/domain/primitives";
 import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { MedicationAddedDomainEvent } from "./medication-added-domain-event";
-import { MedicationNotFound } from "./medication-not-found";
+import { MedicationNotFound, MedicationReminderNotFound } from "./medication-not-found";
 import { Medication, MedicationAlternativeDrug, MedicationStateValues } from "./medication";
+import { MedicationReminder } from "./medication-reminder";
 import { StringValueObject } from "@/modules/shared/domain/value-object";
 
 export class PrescriptionId extends Uuid {}
@@ -137,6 +138,32 @@ export class Prescription extends Aggregate {
 
     medication.update(params);
     this.updated_at = PrescriptionUpdatedAt.now();
+  }
+
+  markReminderAsTaken(reminder_id: string): void {
+    const reminder = this.findReminder(reminder_id);
+
+    reminder.markAsTaken();
+    this.updated_at = PrescriptionUpdatedAt.now();
+  }
+
+  markRemindersAsForgotten(reminder_ids: string[]): void {
+    const reminders = reminder_ids.map((reminder_id) => this.findReminder(reminder_id));
+
+    reminders.forEach((reminder) => reminder.markAsForgotten());
+    this.updated_at = PrescriptionUpdatedAt.now();
+  }
+
+  private findReminder(reminder_id: string): MedicationReminder {
+    const reminder = this.medications
+      ?.map((medication) => medication.reminder)
+      .find((item) => item?.id.value === reminder_id);
+
+    if (!reminder) {
+      throw new MedicationReminderNotFound(reminder_id);
+    }
+
+    return reminder;
   }
 }
 
