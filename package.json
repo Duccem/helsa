@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "workflow:dev": "npx --ignore-scripts=false inngest-cli@latest dev -u http://localhost:3000/api/workflows --no-poll",
+    "database:build": "drizzle-kit generate",
+    "database:migrate": "drizzle-kit migrate",
+    "database:dev": "drizzle-kit studio --port 3001 --verbose"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
@@ -18,8 +22,6 @@
     "@polar-sh/sdk": "^0.46.3",
     "@t3-oss/env-core": "^0.13.10",
     "@uploadthing/react": "^7.3.3",
-    "@upstash/qstash": "^2.9.0",
-    "@upstash/workflow": "^1.1.1",
     "ai": "^6.0.116",
     "better-auth": "^1.5.4",
     "class-variance-authority": "^0.7.1",
@@ -27,6 +29,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
+    "inngest": "^3.52.6",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "next-intl": "^4.8.3",
