@@ -15,13 +15,6 @@ export class AvailabilitySlotHour extends StringValueObject {
       throw new Error("AvailabilitySlotHour must be in HH:mm:ss format");
     }
   }
-
-  static fromDate(date: Date): AvailabilitySlotHour {
-    const hour = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(
-      date.getSeconds(),
-    ).padStart(2, "0")}`;
-    return new AvailabilitySlotHour(hour);
-  }
 }
 
 export enum AvailabilitySlotStateValues {
@@ -80,13 +73,14 @@ export class AvailabilitySlot {
   static create(
     doctor_id: string,
     date: Date,
+    hour: string,
     state: AvailabilitySlotStateValues = AvailabilitySlotStateValues.AVAILABLE,
   ): AvailabilitySlot {
     return new AvailabilitySlot(
       AvailabilitySlotId.generate(),
       AvailabilitySlotDoctorId.fromString(doctor_id),
       AvailabilitySlotDate.fromDate(date),
-      AvailabilitySlotHour.fromDate(date),
+      AvailabilitySlotHour.fromString(hour),
       AvailabilitySlotState.fromString(state),
       AvailabilitySlotCreatedAt.now(),
       AvailabilitySlotUpdatedAt.now(),

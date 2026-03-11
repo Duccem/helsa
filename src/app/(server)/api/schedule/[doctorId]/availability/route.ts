@@ -2,11 +2,10 @@ import { GenerateAvailability } from "@/modules/schedule/application/generate-av
 import { GetAvailabilities } from "@/modules/schedule/application/get-availabilities";
 import { AvailabilitySlotStateValues } from "@/modules/schedule/domain/availability-slot";
 import { ScheduleNotFound } from "@/modules/schedule/domain/schedule-not-found";
-import { DrizzleScheduleAppointmentSource } from "@/modules/schedule/infrastructure/persistence/drizzle-schedule-appointment-source";
 import { DrizzleScheduleRepository } from "@/modules/schedule/infrastructure/persistence/drizzle-schedule-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
-import { parseBody, parseParams, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
+import { parseParams, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
 import { routeHandler } from "@/modules/shared/infrastructure/http/route-handler";
 import { NextRequest } from "next/server";
@@ -16,20 +15,14 @@ const paramsSchema = z.object({
   doctorId: z.uuid(),
 });
 
-const generateAvailabilityBodySchema = z.object({
-  startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
-});
-
-export const POST = async (request: NextRequest, ctx: RouteContext<"/api/schedule/[doctorId]/availability">) => {
+export const POST = async (_: NextRequest, ctx: RouteContext<"/api/schedule/[doctorId]/availability">) => {
   await authenticate();
   const { doctorId } = await parseParams(ctx.params, paramsSchema);
-  const body = await parseBody(request, generateAvailabilityBodySchema);
-  const service = new GenerateAvailability(new DrizzleScheduleRepository(), new DrizzleScheduleAppointmentSource());
+  const service = new GenerateAvailability(new DrizzleScheduleRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(doctorId, body.startDate, body.endDate);
+      await service.execute(doctorId);
       return HttpNextResponse.noContent();
     },
     (error: ScheduleNotFound | InvalidArgument) => {

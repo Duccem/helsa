@@ -13,6 +13,10 @@ export class Timestamp extends ValueObject<Date> {
     return format(this.value, "yyyy-MM-dd HH:mm:ss");
   }
 
+  toString(): string {
+    return this.value.toISOString();
+  }
+
   static now(): Timestamp {
     return new Timestamp(new Date());
   }

@@ -7,6 +7,7 @@ export const schedule = pgTable("schedule", {
   doctor_id: uuid("doctor_id").notNull().unique(),
   appointment_duration: integer("appointment_duration").notNull().default(30),
   max_appointments_per_day: integer("max_appointments_per_day").notNull().default(5),
+  next_availability_generation: timestamp("next_availability_generation").notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at")
     .notNull()
