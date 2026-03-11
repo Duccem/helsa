@@ -4,4 +4,5 @@ export * from "@/modules/diagnosis/infrastructure/persistence/diagnosis.schema";
 export * from "@/modules/doctor/infrastructure/persistence/doctor.schema";
 export * from "@/modules/patient/infrastructure/persistence/patient.schema";
 export * from "@/modules/prescription/infrastructure/persistence/prescription.schema";
+export * from "@/modules/schedule/infrastructure/persistence/schedule.schema";
 
