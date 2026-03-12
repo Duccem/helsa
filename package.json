@@ -11,7 +11,9 @@
     "workflow:dev": "npx --ignore-scripts=false inngest-cli@latest dev -u http://localhost:3000/workflows --no-poll",
     "database:build": "drizzle-kit generate",
     "database:migrate": "drizzle-kit migrate",
-    "database:dev": "drizzle-kit studio --port 3001 --verbose"
+    "database:dev": "drizzle-kit studio --port 3001 --verbose",
+    "email:dev": "email dev --dir ./src/modules/shared/infrastructure/email/templates --port 3002",
+    "email:build": "email build --dir ./src/modules/shared/infrastructure/email/templates"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
@@ -20,6 +22,7 @@
     "@neondatabase/serverless": "^1.0.2",
     "@polar-sh/nextjs": "^0.9.4",
     "@polar-sh/sdk": "^0.46.3",
+    "@react-email/components": "1.0.9",
     "@t3-oss/env-core": "^0.13.10",
     "@uploadthing/react": "^7.3.3",
     "ai": "^6.0.116",
@@ -35,6 +38,7 @@
     "next-intl": "^4.8.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "resend": "^6.9.3",
     "shadcn": "^4.0.2",
     "tailwind-merge": "^3.5.0",
     "tw-animate-css": "^1.4.0",
@@ -44,12 +48,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@react-email/preview-server": "5.2.9",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "drizzle-kit": "^0.31.9",
+    "react-email": "5.2.9",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"

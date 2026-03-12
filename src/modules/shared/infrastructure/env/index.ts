@@ -14,6 +14,7 @@ export const env = createEnv({
     POLAR_SUCCESS_URL: z.string(),
     POLAR_MODE: z.enum(["sandbox", "production"]),
     POLAR_WEBHOOK_SECRET: z.string(),
+    RESEND_API_KEY: z.string(),
   },
   client: {
     NEXT_PUBLIC_BASE_URL: z.string(),
