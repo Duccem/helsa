@@ -11,4 +11,3 @@ Generate code for Next.js API routes following the conventions of the codebase a
 - Use the helpers and utilities available in the codebase for common tasks such as authentication, authorization, and response formatting.
 - Generate the schema validations for params, queries and body of the requests using the existing codebase as a reference.
 - For routes that retrive collections of information, use the same patron for pagination, filtering and sorting as the existing codebase.
-
