@@ -8,7 +8,7 @@ export class File extends ValueObject<string> {
     }
   }
 
-  fromString(value: string): File {
+  static fromString(value: string): File {
     return new File(value);
   }
 }

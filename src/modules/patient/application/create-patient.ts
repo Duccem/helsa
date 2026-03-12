@@ -7,6 +7,7 @@ export class CreatePatient {
 
   async execute(params: {
     organization_id: string;
+    user_id: string;
     email: string;
     name: string;
     birth_date: Date;
@@ -18,7 +19,14 @@ export class CreatePatient {
       throw new PatientAlreadyExists(params.organization_id, params.email);
     }
 
-    const patient = Patient.create(params.organization_id, params.email, params.name, params.birth_date, params.gender);
+    const patient = Patient.create(
+      params.organization_id,
+      params.user_id,
+      params.email,
+      params.name,
+      params.birth_date,
+      params.gender,
+    );
 
     if (params.contact_info) {
       for (const contactInfo of params.contact_info) {

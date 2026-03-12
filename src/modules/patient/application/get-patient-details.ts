@@ -11,7 +11,7 @@ export class GetPatientDetails {
       throw new PatientNotFound(patientId);
     }
 
-    return patient;
+    return patient.toPrimitives();
   }
 }
 

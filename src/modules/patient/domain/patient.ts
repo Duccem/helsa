@@ -8,6 +8,7 @@ import { ContactInfo } from "./contact-info";
 
 export class PatientId extends Uuid {}
 export class PatientOrganizationId extends Uuid {}
+export class PatientUserId extends Uuid {}
 export class PatientEmail extends StringValueObject {}
 export class PatientName extends StringValueObject {}
 export class PatientBirthDate extends Timestamp {}
@@ -38,6 +39,7 @@ export class Patient extends Aggregate {
   constructor(
     public id: PatientId,
     public organization_id: PatientOrganizationId,
+    public user_id: PatientUserId,
     public email: PatientEmail,
     public name: PatientName,
     public birth_date: PatientBirthDate,
@@ -53,6 +55,7 @@ export class Patient extends Aggregate {
     return {
       id: this.id.value,
       organization_id: this.organization_id.value,
+      user_id: this.user_id.value,
       email: this.email.value,
       name: this.name.value,
       birth_date: this.birth_date.value,
@@ -67,6 +70,7 @@ export class Patient extends Aggregate {
     return new Patient(
       PatientId.fromString(primitives.id),
       PatientOrganizationId.fromString(primitives.organization_id),
+      PatientUserId.fromString(primitives.user_id),
       PatientEmail.fromString(primitives.email),
       PatientName.fromString(primitives.name),
       PatientBirthDate.fromDate(primitives.birth_date),
@@ -79,6 +83,7 @@ export class Patient extends Aggregate {
 
   static create(
     organization_id: string,
+    user_id: string,
     email: string,
     name: string,
     birth_date: Date,
@@ -87,6 +92,7 @@ export class Patient extends Aggregate {
     return new Patient(
       PatientId.generate(),
       PatientOrganizationId.fromString(organization_id),
+      PatientUserId.fromString(user_id),
       PatientEmail.fromString(email),
       PatientName.fromString(name),
       PatientBirthDate.fromDate(birth_date),

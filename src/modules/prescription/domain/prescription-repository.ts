@@ -1,6 +1,6 @@
 import { PaginatedQuery, PaginatedResult } from "@/modules/shared/domain/query";
 import { Prescription, PrescriptionId } from "./prescription";
-import { Medication } from "./medication";
+import { Medication, MedicationId } from "./medication";
 import { MedicationReminder } from "./medication-reminder";
 
 export type PrescriptionSearchCriteria = PaginatedQuery & {
@@ -28,6 +28,7 @@ export interface PrescriptionRepository {
   find(id: PrescriptionId): Promise<Prescription | null>;
   search(criteria: PrescriptionSearchCriteria): Promise<PaginatedResult<Prescription>>;
   searchMedications(criteria: MedicationSearchCriteria): Promise<PaginatedResult<Medication>>;
+  findMedication(id: MedicationId): Promise<Medication | null>;
   listRemindersForPrescription(prescription_id: PrescriptionId): Promise<MedicationReminder[]>;
   searchReminders(query: ReminderSearchCriteria): Promise<PaginatedResult<MedicationReminder>>;
 }

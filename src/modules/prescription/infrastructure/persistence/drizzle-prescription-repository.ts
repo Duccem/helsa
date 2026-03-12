@@ -9,7 +9,7 @@ import {
   ReminderSearchCriteria,
 } from "../../domain/prescription-repository";
 import { medication, medication_reminder, prescription } from "./prescription.schema";
-import { Medication, MedicationStateValues } from "../../domain/medication";
+import { Medication, MedicationId, MedicationStateValues } from "../../domain/medication";
 import { MedicationReminder } from "../../domain/medication-reminder";
 
 export class DrizzlePrescriptionRepository implements PrescriptionRepository {
@@ -226,6 +226,25 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
       data,
       pagination,
     };
+  }
+
+  async findMedication(id: MedicationId): Promise<Medication | null> {
+    const item = await database.query.medication.findFirst({
+      where: eq(medication.id, id.value),
+    });
+
+    if (!item) {
+      return null;
+    }
+
+    return Medication.fromPrimitives({
+      ...item,
+      notes: item.notes ?? null,
+      end_date: item.end_date ?? null,
+      alternatives: item.alternatives ?? [],
+      state: item.state as MedicationStateValues,
+      reminders: null,
+    });
   }
 }
 

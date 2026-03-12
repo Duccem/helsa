@@ -31,7 +31,7 @@ const createPatientSchema = z.object({
 });
 
 export const POST = async (request: NextRequest) => {
-  const { organization } = await authenticate();
+  const { organization, session } = await authenticate();
   const body = await parseBody(request, createPatientSchema);
   const service = new CreatePatient(new DrizzlePatientRepository());
 
@@ -39,6 +39,7 @@ export const POST = async (request: NextRequest) => {
     async () => {
       await service.execute({
         organization_id: organization.id,
+        user_id: session.user.id,
         email: body.email,
         name: body.name,
         birth_date: body.birthDate,
