@@ -8,8 +8,11 @@ import { nextCookies } from "better-auth/next-js";
 import { ac, roles } from "./roles";
 import { ResendAuthNotifier } from "./email/resend-auth-notifier";
 import { createAuthMiddleware } from "better-auth/api";
+import { OrganizationCreation } from "../application/organization-creation";
+import { InngestEventBus } from "@/modules/shared/infrastructure/event-bus/inngest-event-bus";
 
 const notifier = new ResendAuthNotifier();
+const organizationCreationService = new OrganizationCreation(notifier, new InngestEventBus());
 
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
@@ -61,7 +64,7 @@ export const auth = betterAuth({
       },
       organizationHooks: {
         afterCreateOrganization: async ({ organization, user }) => {
-          await notifier.notifyOrganizationCreated({ id: organization.id, name: organization.name }, user.email);
+          await organizationCreationService.execute({ id: organization.id, name: organization.name }, user.email);
         },
         afterAcceptInvitation: async ({ organization, user }) => {
           await notifier.notifyInvitationAccepted(
