@@ -1,5 +1,6 @@
 import { SearchReminders } from "@/modules/prescription/application/search-reminders";
 import { DrizzlePrescriptionRepository } from "@/modules/prescription/infrastructure/persistence/drizzle-prescription-repository";
+import { ResendReminderNotifier } from "@/modules/prescription/infrastructure/resend-reminder-notifier";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
 import { addMinutes } from "date-fns";
 
@@ -44,6 +45,8 @@ export const sendNextMedicationsReminders = inngest.createFunction(
       return {};
     });
     await step.run("send-reminder-notification", async () => {
+      const notifier = new ResendReminderNotifier();
+      await notifier.notifyNextReminder("", "", new Date());
       console.log(`Sending reminder for medication ${medication_id} to patient ${patient}`);
     });
   },
