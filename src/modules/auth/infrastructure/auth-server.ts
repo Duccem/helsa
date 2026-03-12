@@ -6,9 +6,10 @@ import { env } from "@/modules/shared/infrastructure/env";
 import { bearer, lastLoginMethod, openAPI, organization } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { ac, roles } from "./roles";
-import { OrganizationCreatedNotify } from "../application/organization-created-notify";
-import { InvitationAccepted } from "../application/invitation-accepted";
-import { SendInvitation } from "../application/send-invitation";
+import { ResendAuthNotifier } from "./email/resend-auth-notifier";
+import { createAuthMiddleware } from "better-auth/api";
+
+const notifier = new ResendAuthNotifier();
 
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
@@ -19,9 +20,10 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ token, url, user }) => {
-      console.log("Send reset password email to:", user.email);
-      console.log("Reset password URL:", url);
-      console.log("Reset password token:", token);
+      await notifier.notifyPasswordResetRequest(user.email, url, token);
+    },
+    onPasswordReset: async ({ user }) => {
+      await notifier.notifyPasswordResetSuccess(user.email, user.name);
     },
     resetPasswordTokenExpiresIn: 60 * 10,
     revokeSessionsOnPasswordReset: true,
@@ -39,23 +41,33 @@ export const auth = betterAuth({
       generateId: false,
     },
   },
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path.startsWith("/sign-up")) {
+        const newSession = ctx.context.newSession;
+        if (newSession) {
+          await notifier.notifyWelcomeEmail(newSession.user.email, newSession.user.name);
+        }
+      }
+    }),
+  },
   plugins: [
     organization({
       ac,
       roles,
       creatorRole: "admin",
       sendInvitationEmail: async ({ email, role }) => {
-        await new SendInvitation().execute({ email, role });
+        await notifier.notifyInvitationSent(email, role);
       },
       organizationHooks: {
-        afterCreateOrganization: async ({ organization }) => {
-          await new OrganizationCreatedNotify().execute({ id: organization.id, name: organization.name });
+        afterCreateOrganization: async ({ organization, user }) => {
+          await notifier.notifyOrganizationCreated({ id: organization.id, name: organization.name }, user.email);
         },
         afterAcceptInvitation: async ({ organization, user }) => {
-          await new InvitationAccepted().execute({
-            organization: { id: organization.id, name: organization.name },
-            user: { email: user.email },
-          });
+          await notifier.notifyInvitationAccepted(
+            { id: organization.id, name: organization.name },
+            { email: user.email },
+          );
         },
       },
     }),
