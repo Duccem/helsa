@@ -118,7 +118,7 @@ export const ChangePasswordForm = () => {
         </form.Subscribe>
       </FieldGroup>
       <div className="text-center text-sm text-muted-foreground">
-        <Link href="/sign-in" className="text-primary hover:underline">
+        <Link href="/sign-in" className="text-indigo-500 hover:underline">
           Cancel
         </Link>
       </div>
