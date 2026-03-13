@@ -25,6 +25,7 @@ const NAV_ITEMS: Array<{ href: string; label: string }> = [
   { href: "#how-it-works", label: "How it works" },
   { href: "#for-doctors", label: "For professionals" },
   { href: "#for-clinics", label: "For clinics" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export default function Header() {
