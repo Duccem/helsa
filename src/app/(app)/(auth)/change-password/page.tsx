@@ -1,6 +1,8 @@
+import { requireAnon } from "@/modules/auth/infrastructure/guards/require-anon";
 import { ChangePasswordForm } from "@/modules/auth/presentation/components/change-password";
 
-export default function ChangePasswordPage() {
+export default async function ChangePasswordPage() {
+  await requireAnon();
   return (
     <div className="flex flex-col gap-6 w-2/3">
       <div className="space-y-2 text-center">
@@ -11,3 +13,4 @@ export default function ChangePasswordPage() {
     </div>
   );
 }
+

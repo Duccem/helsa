@@ -1,6 +1,8 @@
+import { requireAnon } from "@/modules/auth/infrastructure/guards/require-anon";
 import { SignUpForm } from "@/modules/auth/presentation/components/sign-up-form";
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  await requireAnon();
   return (
     <div className="flex flex-col gap-6 w-2/3">
       <div className="space-y-2 text-center">

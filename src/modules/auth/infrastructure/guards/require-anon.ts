@@ -5,7 +5,7 @@ export async function requireAnon() {
   const session = await getSession();
 
   if (session) {
-    return redirect("/dashboard" as any);
+    return redirect("/home" as any);
   }
 
   return null;

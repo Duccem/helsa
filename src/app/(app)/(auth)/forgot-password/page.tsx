@@ -1,6 +1,8 @@
+import { requireAnon } from "@/modules/auth/infrastructure/guards/require-anon";
 import { RecoveryForm } from "@/modules/auth/presentation/components/recovery-form";
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  await requireAnon();
   return (
     <div className="flex flex-col gap-6 w-2/3">
       <div className="space-y-2 text-center">
@@ -13,3 +15,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+
