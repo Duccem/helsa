@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Nunito_Sans } from "next/font/google";
 import "./globals.css";
+import "highlight.js/styles/monokai-sublime.css";
 import { cn } from "@/modules/shared/presentation/lib/utils";
 import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/modules/shared/presentation/components/providers";

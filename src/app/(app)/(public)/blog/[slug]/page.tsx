@@ -1,8 +1,40 @@
 import markdownToHtml from "@/modules/shared/infrastructure/cms/markdown-to-html";
-import { getPostBySlug } from "@/modules/shared/infrastructure/cms/utils";
+import { getAllPosts, getPostBySlug } from "@/modules/shared/infrastructure/cms/utils";
 import { ArrowLeft } from "lucide-react";
+import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
+export async function generateStaticParams() {
+  const posts = getAllPosts();
+  return posts.map((post) => ({ slug: post.slug }));
+}
+
+// Generate SEO metadata dynamically
+export async function generateMetadata(props: PageProps<"/blog/[slug]">): Promise<Metadata> {
+  const params = await props.params;
+  const post = getPostBySlug(params.slug);
+
+  if (!post) return {};
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.date,
+      images: [{ url: post.ogImage.url }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      images: [post.ogImage.url],
+    },
+  };
+}
 
 export default async function BlogEntryPage(props: PageProps<"/blog/[slug]">) {
   const { slug } = await props.params;
