@@ -41,7 +41,7 @@ export const forgottenMedicationsReminders = inngest.createFunction(
 );
 
 export const sendForgottenMedicationsReminders = inngest.createFunction(
-  { id: "send-next-medications-reminders", name: "Send Forgotten Medications Reminders" },
+  { id: "send-forgotten-medications-reminders", name: "Send Forgotten Medications Reminders" },
   { event: "helsa/prescription.send-forgotten-reminder" },
   async ({ event, step }) => {
     const { id, medication_id, patient_id, prescription_id } = event.data;
