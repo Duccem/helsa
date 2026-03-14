@@ -1,6 +1,6 @@
-import { getSession } from "@/modules/shared/auth/infrastructure/get-session";
+import { getSession } from "@/modules/auth/infrastructure/helpers/get-session";
+import { polar } from "@/modules/billing/infrastructure/polar-client";
 import { env } from "@/modules/shared/infrastructure/env";
-import { polar } from "@/lib/payments/client";
 import { CustomerPortal } from "@polar-sh/nextjs";
 import { NextRequest } from "next/server";
 

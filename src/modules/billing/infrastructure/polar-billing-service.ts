@@ -9,7 +9,7 @@ import {
   SubscriptionStatus,
 } from "../domain/billing-service";
 import { polar } from "./polar-client";
-import { products } from "./polar-products";
+import { medicalProducts } from "./polar-products";
 
 export class PolarBillingService implements BillingService {
   async createCustomer(organization: OrganizationCustomer): Promise<Customer> {
@@ -23,7 +23,7 @@ export class PolarBillingService implements BillingService {
   }
 
   async createSubscription(customerId: string, planId: string): Promise<Subscription> {
-    const product = products.find((p) => p.id === planId);
+    const product = medicalProducts.find((p) => p.id === planId);
     if (!product) {
       throw new Error("Invalid plan ID");
     }
