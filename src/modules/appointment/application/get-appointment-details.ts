@@ -6,15 +6,13 @@ import { AppointmentRepository } from "../domain/appointment-repository";
 export class GetAppointmentDetails {
   constructor(private readonly repository: AppointmentRepository) {}
 
-  async execute(appointmentId: string, organizationId: string) {
+  async execute(appointmentId: string) {
     const appointment = await this.repository.find(AppointmentId.fromString(appointmentId));
     if (!appointment) {
       throw new AppointmentNotFound(appointmentId);
     }
-
-    if (appointment.organization_id.getValue() !== organizationId) {
-      throw new NotAuthorized("You are not authorized to access this appointment.");
-    }
+    // TODO: Check if the user that wanna access the appointment is the patient or the doctor of the appointment
+    // or the admin of the organization
     return appointment;
   }
 }

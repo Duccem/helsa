@@ -83,7 +83,7 @@ export class DrizzleAppointmentRepository implements AppointmentRepository {
 
   async search(criteria: AppointmentSearchCriteria): Promise<PaginatedResult<Appointment>> {
     const query = and(
-      eq(appointment.organization_id, criteria.organization_id),
+      criteria.organization_id ? eq(appointment.organization_id, criteria.organization_id) : undefined,
       criteria.patient_id ? eq(appointment.patient_id, criteria.patient_id) : undefined,
       criteria.doctor_id ? eq(appointment.doctor_id, criteria.doctor_id) : undefined,
       criteria.status ? eq(appointment.status, criteria.status) : undefined,

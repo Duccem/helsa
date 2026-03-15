@@ -4,7 +4,6 @@ import { Medication, MedicationId } from "./medication";
 import { MedicationReminder } from "./medication-reminder";
 
 export type PrescriptionSearchCriteria = PaginatedQuery & {
-  organization_id: string;
   patient_id?: string;
   doctor_id?: string;
   query?: string;

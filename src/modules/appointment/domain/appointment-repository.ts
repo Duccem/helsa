@@ -2,7 +2,7 @@ import { PaginatedQuery, PaginatedResult } from "@/modules/shared/domain/query";
 import { Appointment, AppointmentId, AppointmentStatusValues } from "./appointment";
 
 export type AppointmentSearchCriteria = PaginatedQuery & {
-  organization_id: string;
+  organization_id?: string;
   patient_id?: string;
   doctor_id?: string;
   date_from?: Date;

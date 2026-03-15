@@ -16,13 +16,13 @@ const createPrescriptionSchema = z.object({
 });
 
 export const POST = async (request: NextRequest) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const body = await parseBody(request, createPrescriptionSchema);
   const service = new AddPrescription(new DrizzlePrescriptionRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(body.patientId, body.doctorId, organization.id, body.observation);
+      await service.execute(body.patientId, body.doctorId, body.observation);
 
       return HttpNextResponse.created();
     },
@@ -46,14 +46,13 @@ const searchPrescriptionsSchema = z.object({
 });
 
 export const GET = async (request: NextRequest) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const query = parseQuery(request, searchPrescriptionsSchema);
   const service = new SearchPrescriptions(new DrizzlePrescriptionRepository());
 
   return routeHandler(
     async () => {
       const result = await service.execute({
-        organization_id: organization.id,
         patient_id: query.patientId,
         doctor_id: query.doctorId,
         query: query.query,

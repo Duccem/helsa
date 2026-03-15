@@ -20,7 +20,7 @@ export class AppointmentUpdatedAt extends Timestamp {}
 export class Appointment extends Aggregate {
   constructor(
     public id: AppointmentId,
-    public organization_id: AppointmentOrganizationId,
+    public organization_id: AppointmentOrganizationId | null,
     public patient_id: AppointmentPatientId,
     public doctor_id: AppointmentDoctorId,
     public date: AppointmentDate,
@@ -39,7 +39,7 @@ export class Appointment extends Aggregate {
   toPrimitives(): Primitives<Appointment> {
     return {
       id: this.id.value,
-      organization_id: this.organization_id.value,
+      organization_id: this.organization_id ? this.organization_id.value : null,
       patient_id: this.patient_id.value,
       doctor_id: this.doctor_id.value,
       date: this.date.value,
@@ -57,7 +57,7 @@ export class Appointment extends Aggregate {
   static fromPrimitives(primitives: Primitives<Appointment>): Appointment {
     return new Appointment(
       AppointmentId.fromString(primitives.id),
-      AppointmentOrganizationId.fromString(primitives.organization_id),
+      primitives.organization_id ? AppointmentOrganizationId.fromString(primitives.organization_id) : null,
       AppointmentPatientId.fromString(primitives.patient_id),
       AppointmentDoctorId.fromString(primitives.doctor_id),
       AppointmentDate.fromDate(primitives.date),
@@ -73,17 +73,17 @@ export class Appointment extends Aggregate {
   }
 
   static create(
-    organization_id: string,
     patient_id: string,
     doctor_id: string,
     date: Date,
     motive: string,
     type: string = AppointmentTypeValues.INITIAL,
     mode: string = AppointmentModeValues.ONLINE,
+    organization_id: string | null = null,
   ): Appointment {
     return new Appointment(
       AppointmentId.generate(),
-      AppointmentOrganizationId.fromString(organization_id),
+      organization_id ? AppointmentOrganizationId.fromString(organization_id) : null,
       AppointmentPatientId.fromString(patient_id),
       AppointmentDoctorId.fromString(doctor_id),
       AppointmentDate.fromDate(date),

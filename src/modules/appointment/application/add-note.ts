@@ -6,7 +6,6 @@ import { AppointmentRepository } from "../domain/appointment-repository";
 export type AddAppointmentNoteInputDTO = {
   appointment_id: string;
   note: string;
-  organization_id: string;
 };
 
 export type AddAppointmentNoteErrors = AppointmentNotFound | NotAuthorized;
@@ -18,10 +17,6 @@ export class AddAppointmentNote {
     const appointment = await this.repository.find(AppointmentId.fromString(payload.appointment_id));
     if (!appointment) {
       throw new AppointmentNotFound(payload.appointment_id);
-    }
-
-    if (appointment.organization_id.getValue() !== payload.organization_id) {
-      throw new NotAuthorized(`You are not authorized to add a note to this appointment`);
     }
 
     appointment.addNote(payload.note);

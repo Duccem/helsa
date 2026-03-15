@@ -6,7 +6,6 @@ import { AppointmentRepository } from "../domain/appointment-repository";
 export type AppointmentAddRatingInputDto = {
   appointment_id: string;
   rating: number;
-  organization_id: string;
 };
 
 export type AppointmentAddRatingErrors = AppointmentNotFound | NotAuthorized;
@@ -18,10 +17,6 @@ export class AppointmentAddRating {
     const appointment = await this.repository.find(AppointmentId.fromString(payload.appointment_id));
     if (!appointment) {
       throw new AppointmentNotFound(payload.appointment_id);
-    }
-
-    if (appointment.organization_id.getValue() !== payload.organization_id) {
-      throw new NotAuthorized(`You are not authorized to add a rating to this appointment`);
     }
 
     appointment.addRating(payload.rating);

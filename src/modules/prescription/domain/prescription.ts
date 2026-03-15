@@ -11,7 +11,6 @@ import { StringValueObject } from "@/modules/shared/domain/value-object";
 export class PrescriptionId extends Uuid {}
 export class PrescriptionPatientId extends Uuid {}
 export class PrescriptionDoctorId extends Uuid {}
-export class PrescriptionOrganizationId extends Uuid {}
 export class PrescriptionObservation extends StringValueObject {}
 export class PrescriptionCreatedAt extends Timestamp {}
 export class PrescriptionUpdatedAt extends Timestamp {}
@@ -21,7 +20,6 @@ export class Prescription extends Aggregate {
     public id: PrescriptionId,
     public patient_id: PrescriptionPatientId,
     public doctor_id: PrescriptionDoctorId,
-    public organization_id: PrescriptionOrganizationId,
     public observation: PrescriptionObservation,
     public created_at: PrescriptionCreatedAt,
     public updated_at: PrescriptionUpdatedAt,
@@ -35,7 +33,6 @@ export class Prescription extends Aggregate {
       id: this.id.value,
       patient_id: this.patient_id.value,
       doctor_id: this.doctor_id.value,
-      organization_id: this.organization_id.value,
       observation: this.observation.value,
       created_at: this.created_at.value,
       updated_at: this.updated_at.value,
@@ -48,7 +45,6 @@ export class Prescription extends Aggregate {
       PrescriptionId.fromString(primitives.id),
       PrescriptionPatientId.fromString(primitives.patient_id),
       PrescriptionDoctorId.fromString(primitives.doctor_id),
-      PrescriptionOrganizationId.fromString(primitives.organization_id),
       PrescriptionObservation.fromString(primitives.observation),
       PrescriptionCreatedAt.fromDate(primitives.created_at),
       PrescriptionUpdatedAt.fromDate(primitives.updated_at),
@@ -56,17 +52,11 @@ export class Prescription extends Aggregate {
     );
   }
 
-  static create(params: {
-    patient_id: string;
-    doctor_id: string;
-    organization_id: string;
-    observation: string;
-  }): Prescription {
+  static create(params: { patient_id: string; doctor_id: string; observation: string }): Prescription {
     return new Prescription(
       PrescriptionId.generate(),
       PrescriptionPatientId.fromString(params.patient_id),
       PrescriptionDoctorId.fromString(params.doctor_id),
-      PrescriptionOrganizationId.fromString(params.organization_id),
       PrescriptionObservation.fromString(params.observation),
       PrescriptionCreatedAt.now(),
       PrescriptionUpdatedAt.now(),

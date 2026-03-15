@@ -15,13 +15,13 @@ const paramsSchema = z.object({
 });
 
 export const GET = async (_: NextRequest, ctx: RouteContext<"/api/appointment/[id]">) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const service = new GetAppointmentDetails(new DrizzleAppointmentRepository());
   const { id } = await parseParams(ctx.params, paramsSchema);
 
   return routeHandler(
     async () => {
-      const data = await service.execute(id, organization.id);
+      const data = await service.execute(id);
 
       return HttpNextResponse.json(data);
     },
@@ -53,14 +53,14 @@ const bodySchema = z.object({
 });
 
 export const PUT = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]">) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const service = new UpdateAppointmentStatus(new DrizzleAppointmentRepository());
   const { id } = await parseParams(ctx.params, paramsSchema);
   const { status } = await parseBody(request, bodySchema);
 
   return routeHandler(
     async () => {
-      await service.execute(id, status, organization.id);
+      await service.execute(id, status);
 
       return HttpNextResponse.noContent();
     },

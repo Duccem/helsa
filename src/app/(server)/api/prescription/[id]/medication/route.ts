@@ -37,7 +37,7 @@ const bodySchema = z.object({
 });
 
 export const POST = async (request: NextRequest, ctx: RouteContext<"/api/prescription/[id]/medication">) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
   const service = new AddMedicationToPrescription(new DrizzlePrescriptionRepository());
@@ -46,7 +46,6 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/prescri
     async () => {
       await service.execute(
         id,
-        organization.id,
         body.name,
         body.dosage,
         body.dosageUnit,
@@ -71,8 +70,6 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/prescri
       switch (true) {
         case error instanceof PrescriptionNotFound:
           return HttpNextResponse.domainError(error, 404);
-        case error instanceof NotAuthorized:
-          return HttpNextResponse.domainError(error, 403);
         case error instanceof InvalidArgument:
           return HttpNextResponse.domainError(error, 400);
         default:

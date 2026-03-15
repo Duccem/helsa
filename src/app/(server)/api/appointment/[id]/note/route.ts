@@ -18,14 +18,14 @@ const paramsSchema = z.object({
 });
 
 export const POST = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]/note">) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const service = new AddAppointmentNote(new DrizzleAppointmentRepository());
   const { id } = await parseParams(ctx.params, paramsSchema);
   const { note } = await parseBody(request, bodySchema);
 
   return routeHandler(
     async () => {
-      await service.execute({ appointment_id: id, note, organization_id: organization.id });
+      await service.execute({ appointment_id: id, note });
 
       return HttpNextResponse.noContent();
     },

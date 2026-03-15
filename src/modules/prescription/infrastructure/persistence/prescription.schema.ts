@@ -16,7 +16,6 @@ export const prescription = pgTable("prescription", {
   id: uuid("id").primaryKey().notNull().$defaultFn(v7),
   patient_id: uuid("patient_id").notNull(),
   doctor_id: uuid("doctor_id").notNull(),
-  organization_id: uuid("organization_id").notNull(),
   observation: text("observation").notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at")

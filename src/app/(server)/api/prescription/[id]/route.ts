@@ -16,13 +16,13 @@ const paramsSchema = z.object({
 });
 
 export const GET = async (_: NextRequest, ctx: RouteContext<"/api/prescription/[id]">) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const service = new GetPrescriptionDetails(new DrizzlePrescriptionRepository());
 
   return routeHandler(
     async () => {
-      const data = await service.execute(id, organization.id);
+      const data = await service.execute(id);
 
       return HttpNextResponse.json(data);
     },
@@ -44,23 +44,21 @@ const updatePrescriptionSchema = z.object({
 });
 
 export const PUT = async (request: NextRequest, ctx: RouteContext<"/api/prescription/[id]">) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, updatePrescriptionSchema);
   const service = new UpdatePrescription(new DrizzlePrescriptionRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(id, organization.id, body.observation);
+      await service.execute(id, body.observation);
 
       return HttpNextResponse.noContent();
     },
-    (error: PrescriptionNotFound | NotAuthorized | InvalidArgument) => {
+    (error: PrescriptionNotFound | InvalidArgument) => {
       switch (true) {
         case error instanceof PrescriptionNotFound:
           return HttpNextResponse.domainError(error, 404);
-        case error instanceof NotAuthorized:
-          return HttpNextResponse.domainError(error, 403);
         case error instanceof InvalidArgument:
           return HttpNextResponse.domainError(error, 400);
         default:

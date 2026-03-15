@@ -101,7 +101,6 @@ export class DrizzlePrescriptionRepository implements PrescriptionRepository {
 
   async search(criteria: PrescriptionSearchCriteria): Promise<PaginatedResult<Prescription>> {
     const query = and(
-      eq(prescription.organization_id, criteria.organization_id),
       criteria.patient_id ? eq(prescription.patient_id, criteria.patient_id) : undefined,
       criteria.doctor_id ? eq(prescription.doctor_id, criteria.doctor_id) : undefined,
       criteria.query ? ilike(prescription.observation, `%${criteria.query}%`) : undefined,

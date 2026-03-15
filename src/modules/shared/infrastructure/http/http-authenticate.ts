@@ -12,11 +12,8 @@ export async function authenticate() {
     throw new NotAuthorized();
   }
 
-  const organization = await getOrganization();
-
   return {
     session,
-    organization: organization!,
   };
 }
 

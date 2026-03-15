@@ -42,14 +42,14 @@ export const PUT = async (
   request: NextRequest,
   ctx: RouteContext<"/api/prescription/[id]/medication/[medicationId]">,
 ) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const { id, medicationId } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
   const service = new UpdateMedication(new DrizzlePrescriptionRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(id, medicationId, organization.id, {
+      await service.execute(id, medicationId, {
         name: body.name,
         dosage: body.dosage,
         dosage_unit: body.dosageUnit,
@@ -76,8 +76,6 @@ export const PUT = async (
           return HttpNextResponse.domainError(error, 404);
         case error instanceof MedicationNotFound:
           return HttpNextResponse.domainError(error, 404);
-        case error instanceof NotAuthorized:
-          return HttpNextResponse.domainError(error, 403);
         case error instanceof InvalidArgument:
           return HttpNextResponse.domainError(error, 400);
         default:

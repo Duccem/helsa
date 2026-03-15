@@ -18,7 +18,7 @@ export const appointment_status = pgEnum("appointment_status", [
 
 export const appointment = pgTable("appointment", {
   id: uuid("id").$defaultFn(v7).primaryKey(),
-  organization_id: uuid("organization_id").notNull(),
+  organization_id: uuid("organization_id"),
   patient_id: uuid("patient_id").notNull(),
   doctor_id: uuid("doctor_id").notNull(),
   date: timestamp("date").notNull(),

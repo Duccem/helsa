@@ -17,17 +17,18 @@ const insertAppointmentSchema = z.object({
   motive: z.string().describe("The reason for the appointment."),
   mode: z.enum(["ONLINE", "IN_PERSON"]),
   type: z.enum(["THERAPY", "INITIAL"]),
+  organizationId: z.uuid().optional(),
 });
 
 export const POST = async (request: NextRequest) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const body = await parseBody(request, insertAppointmentSchema);
   const service = new ScheduleAppointment(new DrizzleAppointmentRepository());
 
   return routeHandler(
     async () => {
       await service.execute(
-        organization.id,
+        body.organizationId || null,
         body.patientId,
         body.doctorId,
         body.date,
@@ -71,17 +72,18 @@ const searchAppointmentsSchema = z.object({
   endDate: z.coerce.date().optional(),
   page: z.coerce.number().min(1).default(1),
   pageSize: z.coerce.number().min(1).max(100).default(20),
+  organizationId: z.uuid().optional(),
 });
 
 export const GET = async (request: NextRequest) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const query = parseQuery(request, searchAppointmentsSchema);
   const service = new SearchAppointments(new DrizzleAppointmentRepository());
 
   return routeHandler(
     async () => {
       const result = await service.execute({
-        organization_id: organization.id,
+        organization_id: query.organizationId,
         doctor_id: query.doctorId,
         patient_id: query.patientId,
         status: query.state as any,
