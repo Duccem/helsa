@@ -14,13 +14,9 @@ export async function authenticate() {
 
   const organization = await getOrganization();
 
-  if (!organization) {
-    throw new NotAuthorized();
-  }
-
   return {
     session,
-    organization,
+    organization: organization!,
   };
 }
 

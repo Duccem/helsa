@@ -56,7 +56,7 @@ export const SignInForm = () => {
   const oauthSignIn = async (provider: "google" | "facebook") => {
     try {
       await authClient.signIn.social({
-        provider: "google",
+        provider,
         callbackURL: callbackURL || `${window.location.origin}/dashboard`,
       });
     } catch (error) {

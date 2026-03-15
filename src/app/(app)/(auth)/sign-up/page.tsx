@@ -1,15 +1,18 @@
 import { requireAnon } from "@/modules/auth/infrastructure/guards/require-anon";
 import { SignUpForm } from "@/modules/auth/presentation/components/sign-up-form";
+import Link from "next/link";
 
 export default async function SignUpPage() {
   await requireAnon();
   return (
     <div className="flex flex-col gap-6 w-2/3">
-      <div className="space-y-2 text-center">
-        <h2 className="text-3xl text-foreground">Create Account</h2>
-        <p className="text-muted-foreground">Create a new account to get started with Helsa.</p>
-      </div>
       <SignUpForm />
+      <div className="text-center text-sm text-muted-foreground">
+        Already Have An Account?{" "}
+        <Link href="/sign-in" className="text-indigo-500 hover:underline">
+          Sign In.
+        </Link>
+      </div>
     </div>
   );
 }
