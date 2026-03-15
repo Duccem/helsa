@@ -66,8 +66,9 @@ export const auth = betterAuth({
       ac,
       roles,
       creatorRole: "admin",
-      sendInvitationEmail: async ({ email, role }) => {
-        await notifier.notifyInvitationSent(email, role);
+      sendInvitationEmail: async ({ id, email, role, organization }) => {
+        const invitationUrl = `${env.NEXT_PUBLIC_BASE_URL}/accept-invitation?invitationId=${encodeURIComponent(id)}`;
+        await notifier.notifyInvitationSent(email, role, organization.name, invitationUrl);
       },
       organizationHooks: {
         afterCreateOrganization: async ({ organization, user }) => {

@@ -24,12 +24,17 @@ export class ResendAuthNotifier implements AuthNotifier {
       react: PasswordChangedEmail({ userName: name }),
     });
   }
-  async notifyInvitationSent(email: string, role: string): Promise<void> {
+  async notifyInvitationSent(
+    email: string,
+    role: string,
+    organizationName: string,
+    invitationUrl: string,
+  ): Promise<void> {
     await resend.emails.send({
       from: "Helsa <onboarding@resend.dev>",
       to: [email],
       subject: "Invitation to join your organization",
-      react: OrganizationInvitationEmail({ role }),
+      react: OrganizationInvitationEmail({ role, organizationName, invitationUrl }),
     });
   }
   async notifyInvitationAccepted(organization: { id: string; name: string }, user: { email: string }): Promise<void> {
