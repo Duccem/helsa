@@ -38,7 +38,6 @@ export const POST = async (request: NextRequest) => {
   return routeHandler(
     async () => {
       await service.execute({
-        organization_id: organization.id,
         user_id: session.user.id,
         email: body.email,
         name: body.name,
@@ -71,14 +70,13 @@ const searchPatientsSchema = z.object({
 });
 
 export const GET = async (request: NextRequest) => {
-  const { organization } = await authenticate();
+  await authenticate();
   const query = parseQuery(request, searchPatientsSchema);
   const service = new SearchPatients(new DrizzlePatientRepository());
 
   return routeHandler(
     async () => {
       const result = await service.execute({
-        organization_id: organization.id,
         query: query.query,
         email: query.email,
         gender: query.gender as PatientGenderValues,

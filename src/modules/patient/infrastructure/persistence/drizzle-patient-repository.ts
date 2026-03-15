@@ -56,9 +56,9 @@ export class DrizzlePatientRepository implements PatientRepository {
     });
   }
 
-  async findByEmail(organization_id: string, email: string): Promise<Patient | null> {
+  async findByEmail(email: string): Promise<Patient | null> {
     const item = await database.query.patient.findFirst({
-      where: and(eq(patient.organization_id, organization_id), eq(patient.email, email)),
+      where: eq(patient.email, email),
       with: {
         contact_info: true,
       },
@@ -81,7 +81,6 @@ export class DrizzlePatientRepository implements PatientRepository {
 
   async search(criteria: PatientSearchCriteria): Promise<PaginatedResult<Patient>> {
     const query = and(
-      eq(patient.organization_id, criteria.organization_id),
       criteria.gender ? eq(patient.gender, criteria.gender) : undefined,
       criteria.email ? ilike(patient.email, `%${criteria.email}%`) : undefined,
       criteria.query

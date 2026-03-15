@@ -3,13 +3,14 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "./persistence/auth.schema";
 import { env } from "@/modules/shared/infrastructure/env";
-import { bearer, lastLoginMethod, openAPI, organization } from "better-auth/plugins";
+import { bearer, lastLoginMethod, openAPI, organization, admin } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { ac, roles } from "./roles";
 import { ResendAuthNotifier } from "./email/resend-auth-notifier";
 import { createAuthMiddleware } from "better-auth/api";
 import { OrganizationCreation } from "../application/organization-creation";
 import { InngestEventBus } from "@/modules/shared/infrastructure/event-bus/inngest-event-bus";
+import { acAdmin, adminRoles } from "./roles-admin";
 
 const notifier = new ResendAuthNotifier();
 const organizationCreationService = new OrganizationCreation(notifier, new InngestEventBus());
@@ -55,6 +56,12 @@ export const auth = betterAuth({
     }),
   },
   plugins: [
+    admin({
+      ac: acAdmin,
+      roles: adminRoles,
+      adminRoles: ["superadmin", "admin"],
+      defaultRole: "doctor",
+    }),
     organization({
       ac,
       roles,

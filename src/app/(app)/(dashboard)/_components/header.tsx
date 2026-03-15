@@ -55,10 +55,10 @@ const UserButton = () => {
     return (
       <Button
         size="icon"
-        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-none"
+        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded"
       >
         <Avatar className="h-7 w-7">
-          <AvatarFallback className="rounded-none bg-transparent">CN</AvatarFallback>
+          <AvatarFallback className="rounded bg-transparent">CN</AvatarFallback>
         </Avatar>
       </Button>
     );
@@ -86,7 +86,7 @@ const UserButton = () => {
         <DropdownMenuGroup>
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <Avatar className="h-8 w-8 rounded-none">
+              <Avatar className="h-8 w-8 rounded">
                 <AvatarImage src={session?.user.image ?? ""} alt={session?.user.name} className="object-contain" />
                 <AvatarFallback className="">CN</AvatarFallback>
               </Avatar>

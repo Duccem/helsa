@@ -14,14 +14,8 @@ const doctor = ac.newRole({
   member: [],
 });
 
-const patient = ac.newRole({
-  organization: [],
-  invitation: [],
-  member: [],
-});
-
 export const roles = {
   admin,
   doctor,
-  patient,
 };
+

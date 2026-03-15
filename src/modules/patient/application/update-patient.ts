@@ -19,9 +19,9 @@ export class UpdatePatient {
     }
 
     if (params.email && params.email !== patient.email.value) {
-      const existing = await this.repository.findByEmail(patient.organization_id.value, params.email);
+      const existing = await this.repository.findByEmail(params.email);
       if (existing && existing.id.value !== patient.id.value) {
-        throw new PatientAlreadyExists(patient.organization_id.value, params.email);
+        throw new PatientAlreadyExists(params.email);
       }
     }
 

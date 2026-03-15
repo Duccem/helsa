@@ -6,7 +6,6 @@ export const patient_gender = pgEnum("patient_gender", ["MAN", "WOMAN", "OTHER"]
 
 export const patient = pgTable("patient", {
   id: uuid("id").primaryKey().$defaultFn(v7),
-  organization_id: uuid("organization_id").notNull(),
   user_id: uuid("user_id").notNull(),
   email: text("email").notNull(),
   name: text("name").notNull(),

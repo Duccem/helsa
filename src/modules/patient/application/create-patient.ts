@@ -6,7 +6,6 @@ export class CreatePatient {
   constructor(private readonly repository: PatientRepository) {}
 
   async execute(params: {
-    organization_id: string;
     user_id: string;
     email: string;
     name: string;
@@ -14,19 +13,12 @@ export class CreatePatient {
     gender?: PatientGenderValues;
     contact_info?: Array<{ phone?: string; address?: string }>;
   }): Promise<void> {
-    const existing = await this.repository.findByEmail(params.organization_id, params.email);
+    const existing = await this.repository.findByEmail(params.email);
     if (existing) {
-      throw new PatientAlreadyExists(params.organization_id, params.email);
+      throw new PatientAlreadyExists(params.email);
     }
 
-    const patient = Patient.create(
-      params.organization_id,
-      params.user_id,
-      params.email,
-      params.name,
-      params.birth_date,
-      params.gender,
-    );
+    const patient = Patient.create(params.user_id, params.email, params.name, params.birth_date, params.gender);
 
     if (params.contact_info) {
       for (const contactInfo of params.contact_info) {

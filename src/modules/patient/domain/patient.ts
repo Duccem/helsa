@@ -7,7 +7,6 @@ import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { ContactInfo } from "./contact-info";
 
 export class PatientId extends Uuid {}
-export class PatientOrganizationId extends Uuid {}
 export class PatientUserId extends Uuid {}
 export class PatientEmail extends StringValueObject {}
 export class PatientName extends StringValueObject {}
@@ -38,7 +37,6 @@ export class PatientGender extends Enum<PatientGenderValues> {
 export class Patient extends Aggregate {
   constructor(
     public id: PatientId,
-    public organization_id: PatientOrganizationId,
     public user_id: PatientUserId,
     public email: PatientEmail,
     public name: PatientName,
@@ -54,7 +52,6 @@ export class Patient extends Aggregate {
   toPrimitives(): Primitives<Patient> {
     return {
       id: this.id.value,
-      organization_id: this.organization_id.value,
       user_id: this.user_id.value,
       email: this.email.value,
       name: this.name.value,
@@ -69,7 +66,6 @@ export class Patient extends Aggregate {
   static fromPrimitives(primitives: Primitives<Patient>): Patient {
     return new Patient(
       PatientId.fromString(primitives.id),
-      PatientOrganizationId.fromString(primitives.organization_id),
       PatientUserId.fromString(primitives.user_id),
       PatientEmail.fromString(primitives.email),
       PatientName.fromString(primitives.name),
@@ -82,7 +78,6 @@ export class Patient extends Aggregate {
   }
 
   static create(
-    organization_id: string,
     user_id: string,
     email: string,
     name: string,
@@ -91,7 +86,6 @@ export class Patient extends Aggregate {
   ): Patient {
     return new Patient(
       PatientId.generate(),
-      PatientOrganizationId.fromString(organization_id),
       PatientUserId.fromString(user_id),
       PatientEmail.fromString(email),
       PatientName.fromString(name),

@@ -16,4 +16,14 @@ export class DrizzleUserRepository implements UserRepository {
 
     return User.fromPrimitives(data);
   }
+
+  async save(payload: User): Promise<void> {
+    await database
+      .update(user)
+      .set({
+        role: payload.role ? payload.role.value : null,
+      })
+      .where(eq(user.id, payload.id.value));
+  }
 }
+

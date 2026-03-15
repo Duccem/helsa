@@ -17,6 +17,9 @@ export class PolarBillingService implements BillingService {
       externalId: organization.id,
       email: `${organization.name.split(" ")[0]}@email.com`,
       name: organization.name,
+      metadata: {
+        user_id: organization.id,
+      },
     });
 
     return { customerId: customer.id };
@@ -30,6 +33,9 @@ export class PolarBillingService implements BillingService {
     const subscription = await polar.subscriptions.create({
       externalCustomerId: customerId,
       productId: product.productId,
+      metadata: {
+        user_id: customerId,
+      },
     });
     return { subscriptionId: subscription.id };
   }

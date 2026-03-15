@@ -1,7 +1,7 @@
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex font-sans">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary ">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-3 font-sans">
+      <div className="hidden lg:flex lg:col-span-1 relative overflow-hidden bg-primary ">
         <div className="relative z-10 flex flex-col justify-between w-full px-12 py-12">
           <div className="flex items-center">
             <img src="/images/helsa-logo-all-white.png" alt="" className="h-8" />
@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
         </div>
       </div>
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 flex-col">
+      <div className="w-full lg:col-span-2 flex items-center justify-center p-8 flex-col ">
         <div className="w-full  space-y-8">
           <div className=" flex flex-col items-center justify-center gap-2  text-center mb-8">
             <img src="/images/logo.png" alt="" className="h-10 rounded-sm" />
