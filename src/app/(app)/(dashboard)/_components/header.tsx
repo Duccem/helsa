@@ -22,10 +22,6 @@ export const Header = () => {
   return (
     <header className="w-full h-16  flex items-center justify-between ">
       <SidebarTrigger className="" />
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-        <UserButton />
-      </div>
     </header>
   );
 };

@@ -21,19 +21,18 @@ import { BadgeCheck, ChevronsUpDown, Coins, LogOut, Stethoscope } from "lucide-r
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export function SidebarUser() {
+export function SidebarUser({}) {
   const { isMobile } = useSidebar();
   const { data: session, isPending } = authClient.useSession();
-  const { data: role } = authClient.useActiveMemberRole();
   const router = useRouter();
 
   if (isPending || !session) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" className="cursor-not-allowed opacity-50">
+          <SidebarMenuButton size="lg" className="cursor-not-allowed">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <AvatarFallback className="rounded-lg border border-border">CN</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">Loading...</span>
@@ -73,14 +72,14 @@ export function SidebarUser() {
             }
           ></DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-sidebar-primary"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm text-sidebar-primary-foreground">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={session?.user.image ?? ""} alt={session?.user.name} className="object-contain" />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
@@ -92,16 +91,17 @@ export function SidebarUser() {
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className={"rounded-none focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"}>
                 <Link href={"/profile" as any} className="flex items-center w-full gap-2">
                   <BadgeCheck />
                   Account
                 </Link>
               </DropdownMenuItem>
-              {["doctor", "owner"].includes(role?.role!) && (
-                <DropdownMenuItem>
+              {["doctor", "owner"].includes(session.user.role ?? "") && (
+                <DropdownMenuItem
+                  className={"rounded-none focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"}
+                >
                   <Link href={"/profile/professional" as any} className="flex items-center w-full gap-2">
                     <Stethoscope />
                     Doctor Profile
@@ -109,8 +109,10 @@ export function SidebarUser() {
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logOut}>
+            <DropdownMenuItem
+              onClick={logOut}
+              className={"rounded-none focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

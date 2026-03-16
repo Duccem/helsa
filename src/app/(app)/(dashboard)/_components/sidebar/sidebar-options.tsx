@@ -16,7 +16,23 @@ import {
   SidebarMenuSubItem,
 } from "@/modules/shared/presentation/components/ui/sidebar";
 import { authClient } from "@/modules/auth/infrastructure/auth-client";
-import { BookOpen, Building, Calendar, ChevronRight, Coins, Folder, Heart, House, Layers, Users } from "lucide-react";
+import {
+  BookOpen,
+  Briefcase,
+  Building,
+  Calendar,
+  ChartColumnBig,
+  ChevronRight,
+  Coins,
+  Folder,
+  Heart,
+  House,
+  Layers,
+  LayoutDashboard,
+  Stethoscope,
+  Users,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 
 type MenuItem = {
@@ -36,35 +52,11 @@ type MenuGroup = {
 
 type MenuConfig = {
   groups: MenuGroup[];
-  role: "admin" | "teacher" | "student" | "parent";
+  role: "admin" | "doctor" | "patient";
 };
 
-export function SidebarOptions() {
-  const { data, isPending } = authClient.useActiveMemberRole();
-
-  if (isPending || !data) {
-    return (
-      <SidebarGroup>
-        <SidebarGroupLabel>Platform</SidebarGroupLabel>
-        <SidebarMenu>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <SidebarMenuItem key={index}>
-              <SidebarMenuButton size="lg" className="cursor-not-allowed opacity-50">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  ...
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Loading...</span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroup>
-    );
-  }
-
-  const selectedConfig = configs.find((conf) => conf.role === data.role) ?? configs[0];
+export function SidebarOptions({ role }: { role?: string | null }) {
+  const selectedConfig = configs.find((conf) => conf.role === role) ?? configs[0];
   return (
     <>
       {selectedConfig.groups.map((c, i) => (
@@ -130,39 +122,29 @@ const adminMenuConfig: MenuConfig = {
       title: "Management",
       items: [
         {
-          title: "Home",
+          title: "Dashboard",
           url: "/home",
-          icon: House,
+          icon: LayoutDashboard,
         },
         {
-          title: "Academic terms",
-          url: "/terms",
+          title: "Appointments",
+          url: "/appointments",
           icon: Calendar,
         },
         {
-          title: "Subjects",
-          url: "/subjects",
-          icon: Folder,
-        },
-        {
-          title: "Courses",
-          url: "/courses",
-          icon: BookOpen,
-        },
-        {
-          title: "Grades",
-          url: "/grades",
-          icon: Layers,
-        },
-        {
-          title: "Parents",
-          url: "/parents",
-          icon: Heart,
-        },
-        {
-          title: "Students",
-          url: "/students",
+          title: "Patients",
+          url: "/patients",
           icon: Users,
+        },
+        {
+          title: "Doctors",
+          url: "/doctors",
+          icon: Stethoscope,
+        },
+        {
+          title: "Analytics",
+          url: "/courses",
+          icon: ChartColumnBig,
         },
       ],
     },
@@ -170,7 +152,7 @@ const adminMenuConfig: MenuConfig = {
       title: "Configuration",
       items: [
         {
-          title: "Workspace",
+          title: "Hospital",
           url: "/settings/organization",
           icon: Building,
         },
@@ -180,9 +162,9 @@ const adminMenuConfig: MenuConfig = {
           icon: Coins,
         },
         {
-          title: "Team",
+          title: "Staff",
           url: "/settings/team",
-          icon: Users,
+          icon: Briefcase,
         },
       ],
     },
@@ -190,19 +172,55 @@ const adminMenuConfig: MenuConfig = {
 };
 
 const teacherMenuConfig: MenuConfig = {
-  role: "teacher",
-  groups: [],
+  role: "doctor",
+  groups: [
+    {
+      title: "Clinic",
+      items: [
+        {
+          title: "Dashboard",
+          url: "/home",
+          icon: LayoutDashboard,
+        },
+        {
+          title: "Appointments",
+          url: "/appointments",
+          icon: Calendar,
+        },
+        {
+          title: "Patients",
+          url: "/patients",
+          icon: Users,
+        },
+        {
+          title: "Analytics",
+          url: "/courses",
+          icon: ChartColumnBig,
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      items: [
+        {
+          title: "Billing",
+          url: "/settings/billing",
+          icon: Coins,
+        },
+        {
+          title: "Payout",
+          url: "/settings/payout",
+          icon: Wallet,
+        },
+      ],
+    },
+  ],
 };
 
 const parentMenuConfig: MenuConfig = {
-  role: "parent",
+  role: "patient",
   groups: [],
 };
 
-const studentMenuConfig: MenuConfig = {
-  role: "student",
-  groups: [],
-};
-
-const configs = [adminMenuConfig, teacherMenuConfig, parentMenuConfig, studentMenuConfig];
+const configs = [adminMenuConfig, teacherMenuConfig, parentMenuConfig];
 
