@@ -1,5 +1,12 @@
+import type { NextRequest } from "next/server";
+import z from "zod";
 import { ScheduleAppointment } from "@/modules/appointment/application/schedule-appointment";
-import { SearchAppointments } from "@/modules/appointment/application/search-appointments";
+import { SearchAppointmentsList } from "@/modules/appointment/application/search-appointments-list";
+import type {
+  AppointmentModeValues,
+  AppointmentStatusValues,
+  AppointmentTypeValues,
+} from "@/modules/appointment/domain/appointment";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
 import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
@@ -7,8 +14,6 @@ import { authenticate } from "@/modules/shared/infrastructure/http/http-authenti
 import { parseBody, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
 import { routeHandler } from "@/modules/shared/infrastructure/http/route-handler";
-import { NextRequest } from "next/server";
-import z from "zod";
 
 const insertAppointmentSchema = z.object({
   date: z.coerce.date().describe("The date selected for the appointment."),
@@ -68,8 +73,12 @@ const searchAppointmentsSchema = z.object({
     .optional(),
   doctorId: z.uuid().optional(),
   patientId: z.uuid().optional(),
+  mode: z.enum(["ONLINE", "IN_PERSON"]).optional(),
+  type: z.enum(["THERAPY", "INITIAL"]).optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
+  sort: z.enum(["date", "status", "created_at"]).default("date"),
+  order: z.enum(["ASC", "DESC"]).default("ASC"),
   page: z.coerce.number().min(1).default(1),
   pageSize: z.coerce.number().min(1).max(100).default(20),
   organizationId: z.uuid().optional(),
@@ -78,7 +87,7 @@ const searchAppointmentsSchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, searchAppointmentsSchema);
-  const service = new SearchAppointments(new DrizzleAppointmentRepository());
+  const service = new SearchAppointmentsList(new DrizzleAppointmentRepository());
 
   return routeHandler(
     async () => {
@@ -86,9 +95,13 @@ export const GET = async (request: NextRequest) => {
         organization_id: query.organizationId,
         doctor_id: query.doctorId,
         patient_id: query.patientId,
-        status: query.state as any,
+        status: query.state as AppointmentStatusValues | undefined,
+        mode: query.mode as AppointmentModeValues | undefined,
+        type: query.type as AppointmentTypeValues | undefined,
         date_from: query.startDate,
         date_to: query.endDate,
+        sort: query.sort,
+        order: query.order,
         page: query.page,
         pageSize: query.pageSize,
       });

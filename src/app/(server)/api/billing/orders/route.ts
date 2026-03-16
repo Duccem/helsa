@@ -1,6 +1,6 @@
 import { GetOrderList } from "@/modules/billing/application/get-order-list";
 import { PolarBillingService } from "@/modules/billing/infrastructure/polar-billing-service";
-import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
+import { authenticate, authenticateOrg } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
 import { routeHandler } from "@/modules/shared/infrastructure/http/route-handler";
@@ -14,7 +14,8 @@ const paramsSchema = z.object({
 });
 
 export const GET = async (req: NextRequest) => {
-  const { organization } = await authenticate();
+  await authenticate();
+  const organization = await authenticateOrg();
   const { page } = parseQuery(req, paramsSchema);
 
   return routeHandler(

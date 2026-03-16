@@ -1,3 +1,5 @@
+import type { NextRequest } from "next/server";
+import z from "zod";
 import { GetAppointmentDetails } from "@/modules/appointment/application/get-appointment-details";
 import { UpdateAppointmentStatus } from "@/modules/appointment/application/update-status";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
@@ -7,8 +9,6 @@ import { authenticate } from "@/modules/shared/infrastructure/http/http-authenti
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
 import { routeHandler } from "@/modules/shared/infrastructure/http/route-handler";
-import { NextRequest } from "next/server";
-import z from "zod";
 
 const paramsSchema = z.object({
   id: z.uuid(),
@@ -23,7 +23,7 @@ export const GET = async (_: NextRequest, ctx: RouteContext<"/api/appointment/[i
     async () => {
       const data = await service.execute(id);
 
-      return HttpNextResponse.json(data);
+      return HttpNextResponse.json(data.toPrimitives());
     },
     (error: AppointmentNotFound | NotAuthorized) => {
       switch (true) {
