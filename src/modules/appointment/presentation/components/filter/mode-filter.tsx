@@ -8,37 +8,30 @@ type Props = {
   selected?: string;
   onChangeAction: (selected: string) => void;
   headless?: boolean;
-  states: any[];
+  modes: any[];
 };
 
-const stateLabel: Record<string, string> = {
-  SCHEDULED: "Agendada",
-  CONFIRMED: "Confirmada",
-  PAYED: "Pagada",
-  READY: "Lista",
-  STARTED: "Iniciada",
-  CANCELLED: "Cancelada",
-  MISSED_BY_PATIENT: "No asistió doctor",
-  MISSED_BY_THERAPIST: "No asistió paciente",
-  FINISHED: "Finalizada",
+const modeLabel: Record<string, string> = {
+  ONLINE: "Online",
+  IN_PERSON: "Presencial",
 };
 
-export function transformState(state: string) {
+export function transformMode(mode: string) {
   return {
-    id: state,
-    label: stateLabel[state],
+    id: mode,
+    label: modeLabel[mode],
   };
 }
 
-export const StateFilter = ({ selected, onChangeAction, headless, states }: Props) => {
-  const selectedValue = selected ? transformState(selected) : undefined;
+export const ModeFilter = ({ selected, onChangeAction, headless, modes }: Props) => {
+  const selectedValue = selected ? transformMode(selected) : undefined;
   return (
     <ComboboxDropdown
       headless={headless}
-      placeholder="Selecciona una estado"
-      searchPlaceholder="Busca una estado"
+      placeholder="Selecciona un modo"
+      searchPlaceholder="Busca un modo"
       selectedItem={selectedValue}
-      items={states.map(transformState)}
+      items={modes.map(transformMode)}
       onSelect={(item) => {
         onChangeAction(item.id);
       }}

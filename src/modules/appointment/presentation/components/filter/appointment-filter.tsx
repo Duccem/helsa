@@ -1,6 +1,10 @@
 "use client";
 
-import { AppointmentStatusValues } from "@/modules/appointment/domain/appointment";
+import {
+  AppointmentModeValues,
+  AppointmentStatusValues,
+  AppointmentTypeValues,
+} from "@/modules/appointment/domain/appointment";
 import { Calendar } from "@/modules/shared/presentation/components/ui/calendar";
 import {
   DropdownMenu,
@@ -12,17 +16,22 @@ import {
   DropdownMenuTrigger,
 } from "@/modules/shared/presentation/components/ui/dropdown-menu";
 import { formatISO } from "date-fns";
-import { CalendarDays, ListFilter, Route } from "lucide-react";
+import { CalendarDays, ClipboardPlus, ListFilter, Presentation, SquareStack } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { StateFilter } from "./state-filter";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
+import { ModeFilter } from "./mode-filter";
+import { TypeFilter } from "./type-filter";
 
 export const AppointmentsFilter = () => {
   const states = [...Object.values(AppointmentStatusValues)];
+  const modes = [...Object.values(AppointmentModeValues)];
+  const types = [...Object.values(AppointmentTypeValues)];
   const [filters, setFilters] = useQueryStates(
     {
-      types: parseAsArrayOf(parseAsString),
+      type: parseAsArrayOf(parseAsString),
+      mode: parseAsArrayOf(parseAsString),
       start: parseAsString,
       end: parseAsString,
       state: parseAsArrayOf(parseAsString),
@@ -35,7 +44,7 @@ export const AppointmentsFilter = () => {
 
   return (
     <DropdownMenu>
-      <div className="flex  md:items-center w-full flex-col md:flex-row gap-2">
+      <div className="flex  md:items-center flex-col md:flex-row gap-2">
         <DropdownMenuTrigger
           render={
             <Button onClick={() => setIsOpen((prev) => !prev)} variant={"secondary"}>
@@ -77,7 +86,7 @@ export const AppointmentsFilter = () => {
         </DropdownMenuSub>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="">
-            <Route className="size-4 mr-2" />
+            <SquareStack className="size-4 mr-2" />
             <span>Estado de la cita</span>
           </DropdownMenuSubTrigger>
 
@@ -96,30 +105,48 @@ export const AppointmentsFilter = () => {
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
-        {/* <DropdownMenuSub>
+        <DropdownMenuSub>
           <DropdownMenuSubTrigger className="">
-            <SquareStack className="size-4 mr-2" />
-            <span>Tipo de cita</span>
+            <Presentation className="size-4 mr-2" />
+            <span>Modalidad de la cita</span>
           </DropdownMenuSubTrigger>
 
           <DropdownMenuPortal>
-            <DropdownMenuSubContent sideOffset={14} alignOffset={-4} className="p-0 w-[250px] h-[270px] ">
-              <SelectType
+            <DropdownMenuSubContent sideOffset={14} alignOffset={-4} className="p-0 w-[250px]">
+              <ModeFilter
                 headless
-                types={types}
-                onChange={(selected) => {
+                modes={modes}
+                selected={filters.mode ? filters.mode[0] : undefined}
+                onChangeAction={(selected) => {
                   setFilters({
-                    types: filters?.types?.includes(selected.name)
-                      ? filters.types.filter((s) => s !== selected.name).length > 0
-                        ? filters.types.filter((s) => s !== selected.name)
-                        : null
-                      : [...(filters.types ?? []), selected.name],
+                    mode: filters?.mode?.includes(selected) ? null : [selected],
                   });
                 }}
               />
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
-        </DropdownMenuSub> */}
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="">
+            <ClipboardPlus className="size-4 mr-2" />
+            <span>Tipo de la cita</span>
+          </DropdownMenuSubTrigger>
+
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent sideOffset={14} alignOffset={-4} className="p-0 w-[250px]">
+              <TypeFilter
+                headless
+                types={types}
+                selected={filters.type ? filters.type[0] : undefined}
+                onChangeAction={(selected) => {
+                  setFilters({
+                    type: filters?.type?.includes(selected) ? null : [selected],
+                  });
+                }}
+              />
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   );
