@@ -11,9 +11,12 @@ import { createAuthMiddleware } from "better-auth/api";
 import { OrganizationCreation } from "../application/organization-creation";
 import { InngestEventBus } from "@/modules/shared/infrastructure/event-bus/inngest-event-bus";
 import { acAdmin, adminRoles } from "./roles-admin";
+import { UserRegistration } from "../application/user-registration";
 
 const notifier = new ResendAuthNotifier();
-const organizationCreationService = new OrganizationCreation(notifier, new InngestEventBus());
+const eventBus = new InngestEventBus();
+const organizationCreationService = new OrganizationCreation(notifier, eventBus);
+const userRegistrationService = new UserRegistration(notifier, eventBus);
 
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
@@ -50,7 +53,11 @@ export const auth = betterAuth({
       if (ctx.path.startsWith("/sign-up")) {
         const newSession = ctx.context.newSession;
         if (newSession) {
-          await notifier.notifyWelcomeEmail(newSession.user.email, newSession.user.name);
+          await userRegistrationService.execute({
+            id: newSession.user.id,
+            name: newSession.user.name,
+            email: newSession.user.email,
+          });
         }
       }
     }),

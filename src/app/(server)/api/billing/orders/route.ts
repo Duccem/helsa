@@ -14,13 +14,18 @@ const paramsSchema = z.object({
 });
 
 export const GET = async (req: NextRequest) => {
-  await authenticate();
-  const organization = await authenticateOrg();
+  const { session } = await authenticate();
+  let id = session.user.id;
+
+  if (session.user.role == "admin") {
+    const organization = await authenticateOrg();
+    id = organization.id;
+  }
   const { page } = parseQuery(req, paramsSchema);
 
   return routeHandler(
     async () => {
-      const orders = await service.execute(organization.id, page);
+      const orders = await service.execute(id, page);
 
       return HttpNextResponse.json(orders);
     },

@@ -9,12 +9,17 @@ import { NextRequest } from "next/server";
 const service = new GetSubscriptionStatus(new PolarBillingService());
 
 export const GET = async (_req: NextRequest) => {
-  await authenticate();
-  const organization = await authenticateOrg();
+  const { session } = await authenticate();
+  let id = session.user.id;
+
+  if (session.user.role == "admin") {
+    const organization = await authenticateOrg();
+    id = organization.id;
+  }
 
   return routeHandler(
     async () => {
-      const status = await service.execute(organization);
+      const status = await service.execute({ id });
 
       return HttpNextResponse.json(status);
     },

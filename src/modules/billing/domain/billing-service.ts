@@ -1,6 +1,7 @@
-export type OrganizationCustomer = {
+export type NewCustomerPayload = {
   id: string;
   name: string;
+  email: string;
 };
 export type Customer = {
   customerId: string;
@@ -29,7 +30,7 @@ export type OrderInvoice = {
   url: string;
 };
 export interface BillingService {
-  createCustomer(organization: OrganizationCustomer): Promise<Customer>;
+  createCustomer(organization: NewCustomerPayload): Promise<Customer>;
   createSubscription(customerId: string, planId: string): Promise<Subscription>;
   getSubscriptionStatus(externalCustomerId: string): Promise<SubscriptionStatus>;
   getOrders(externalCustomerId: string, page: number): Promise<OrdersResponse>;

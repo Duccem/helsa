@@ -4,7 +4,7 @@ import {
   Order,
   OrderInvoice,
   OrdersResponse,
-  OrganizationCustomer,
+  NewCustomerPayload,
   Subscription,
   SubscriptionStatus,
 } from "../domain/billing-service";
@@ -12,14 +12,11 @@ import { polar } from "./polar-client";
 import { medicalProducts } from "./polar-products";
 
 export class PolarBillingService implements BillingService {
-  async createCustomer(organization: OrganizationCustomer): Promise<Customer> {
+  async createCustomer(payload: NewCustomerPayload): Promise<Customer> {
     const customer = await polar.customers.create({
-      externalId: organization.id,
-      email: `${organization.name.split(" ")[0]}@email.com`,
-      name: organization.name,
-      metadata: {
-        user_id: organization.id,
-      },
+      externalId: payload.id,
+      email: payload.email,
+      name: payload.name,
     });
 
     return { customerId: customer.id };
