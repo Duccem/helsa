@@ -8,7 +8,7 @@ import { NextRequest } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   try {
-    const { organization, session } = await authenticate();
+    const { session } = await authenticate();
 
     const { messages, chat_id } = await req.json();
 
@@ -16,7 +16,6 @@ export const POST = async (req: NextRequest) => {
       agent: helsa,
       uiMessages: messages,
       options: {
-        organization_id: organization.id,
         user_id: session.user.id,
       },
       onFinish: async ({ messages }) => {

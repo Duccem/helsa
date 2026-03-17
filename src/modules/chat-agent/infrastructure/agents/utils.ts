@@ -24,7 +24,6 @@ export async function saveChat(chat_id: string, user_id: string, messages: any[]
 }
 
 export const agentContextSchema = z.object({
-  organization_id: z.uuid(),
   user_id: z.uuid(),
 });
 
