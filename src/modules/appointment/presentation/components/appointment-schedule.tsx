@@ -9,7 +9,7 @@ import {
   CalendarProvider,
   CalendarYearPicker,
   useCalendarMonth,
-} from "@/components/kibo-ui/calendar";
+} from "@/modules/shared/presentation/components/kibo-ui/calendar";
 import { Card, CardContent } from "@/modules/shared/presentation/components/ui/card";
 import { faker } from "@faker-js/faker";
 import { parseAsString, useQueryStates } from "nuqs";
