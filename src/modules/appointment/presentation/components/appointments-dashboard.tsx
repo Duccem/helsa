@@ -24,6 +24,7 @@ import { parseAsInteger, parseAsString, useQueryState, useQueryStates } from "nu
 import { Primitives } from "@/modules/shared/domain/primitives";
 import { Appointment } from "../../domain/appointment";
 import { ServerTableLoading } from "@/modules/shared/presentation/components/ui/server-table";
+import { AppointmentsSchedule } from "./appointment-schedule";
 
 const VIEW_OPTIONS = ["table", "calendar", "timeline"] as const;
 
@@ -87,7 +88,7 @@ export function AppointmentsDashboard() {
     params.set("order", order);
 
     return params.toString();
-  }, [end, mode, order, sort, start, state, type, page, pageSize]);
+  }, [end, mode, order, sort, start, state, type, page, pageSize, activeView]);
 
   const { data, isPending, isError } = useQuery({
     queryKey: ["appointments", sharedQueryString],
@@ -136,11 +137,7 @@ export function AppointmentsDashboard() {
       </TabsContent>
 
       <TabsContent value="calendar" className="space-y-4">
-        <AppointmentsCalendar items={data.data} />
-      </TabsContent>
-
-      <TabsContent value="timeline" className="space-y-4">
-        <AppointmentsTimeline items={data.data} />
+        <AppointmentsSchedule />
       </TabsContent>
     </Tabs>
   );

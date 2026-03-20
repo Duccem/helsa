@@ -12,6 +12,8 @@
   },
   "iconLibrary": "lucide",
   "rtl": false,
+  "menuColor": "default",
+  "menuAccent": "subtle",
   "aliases": {
     "components": "@/modules/shared/presentation/components",
     "utils": "@/modules/shared/presentation/lib/utils",
@@ -19,7 +21,7 @@
     "lib": "@/modules/shared/presentation/lib",
     "hooks": "@/modules/shared/presentation/hooks"
   },
-  "menuColor": "default",
-  "menuAccent": "subtle",
-  "registries": {}
+  "registries": {
+    "@kibo-ui": "https://www.kibo-ui.com/r/{name}.json"
+  }
 }

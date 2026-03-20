@@ -5,7 +5,7 @@ import {
   AppointmentTypeValues,
 } from "@/modules/appointment/domain/appointment";
 import { parseISO, format } from "date-fns";
-import { parseAsString, useQueryStates } from "nuqs";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { formatDateRange } from "little-date";
 import { transformState } from "./state-filter";
 import { transformType } from "./type-filter";
@@ -28,9 +28,7 @@ interface AppointmentFilterListProps {
 }
 
 export const AppointmentsFilterList = () => {
-  const states = [...Object.values(AppointmentStatusValues)];
-  const modes = [...Object.values(AppointmentModeValues)];
-  const types = [...Object.values(AppointmentTypeValues)];
+  const [activeView, setActiveView] = useQueryState("view", parseAsString.withDefault("table"));
   const [filters, setFilter] = useQueryStates({
     state: parseAsString.withDefault(""),
     type: parseAsString.withDefault(""),
@@ -111,11 +109,12 @@ export const AppointmentsFilterList = () => {
             );
           })}
       </ul>
-      {Object.entries(filters).filter(([key, value]) => value && key !== "end").length > 0 && (
-        <Button variant={"secondary"} onClick={clearAllFilters}>
-          <X className="size-4 text-[#878787]" />
-        </Button>
-      )}
+      {activeView === "table" &&
+        Object.entries(filters).filter(([key, value]) => value && key !== "end").length > 0 && (
+          <Button variant={"secondary"} onClick={clearAllFilters}>
+            <X className="size-4 text-[#878787]" />
+          </Button>
+        )}
     </div>
   );
 };
