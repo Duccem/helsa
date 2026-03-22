@@ -2,8 +2,8 @@ import { requireAuth } from "@/modules/auth/infrastructure/guards/require-auth";
 import { requireOrganizations } from "@/modules/auth/infrastructure/guards/require-organization";
 
 export default async function HomePage() {
-  await requireAuth();
-  await requireOrganizations();
+  const session = await requireAuth();
+  await requireOrganizations(session.user.role ?? undefined);
   return (
     <div className="flex flex-col gap-6 w-2/3">
       <div className="space-y-2 text-center">

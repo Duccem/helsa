@@ -18,6 +18,7 @@ import { Button } from "@/modules/shared/presentation/components/ui/button";
 import Link from "next/link";
 import { Pagination } from "@/modules/shared/domain/query";
 import { Card, CardContent, CardFooter } from "@/modules/shared/presentation/components/ui/card";
+import { cn } from "@/modules/shared/presentation/lib/utils";
 
 function toStatusLabel(status: AppointmentStatusValues) {
   return status.toLowerCase().replaceAll("_", " ");
@@ -48,6 +49,25 @@ function toStatusVariant(status: AppointmentStatusValues): "default" | "secondar
   }
 }
 
+function toStatusClassName(status: AppointmentStatusValues): string {
+  switch (status) {
+    case "FINISHED":
+      return "bg-emerald-500/20 text-emerald-500 border-emerald-500/50";
+    case "CANCELLED":
+    case "MISSED_BY_PATIENT":
+    case "MISSED_BY_THERAPIST":
+      return "bg-red-500/20 text-red-500 border-red-500/50";
+    case "READY":
+    case "STARTED":
+    case "PAYED":
+      return "bg-amber-500/20 text-amber-500 border-amber-500/50";
+    case "SCHEDULED":
+      return "bg-blue-500/20 text-blue-500 border-blue-500/50";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
 const columns: Array<ColumnDef<Primitives<Appointment>>> = [
   {
     accessorKey: "date",
@@ -61,12 +81,12 @@ const columns: Array<ColumnDef<Primitives<Appointment>>> = [
   {
     accessorKey: "patient_name",
     header: "Patient",
-    cell: ({ row }) => row.original.patient_id,
+    cell: ({ row }) => (row.original as any).patient_name,
   },
   {
     accessorKey: "doctor_name",
     header: "Doctor",
-    cell: ({ row }) => row.original.doctor_id,
+    cell: ({ row }) => (row.original as any).doctor_name,
   },
   {
     accessorKey: "status",
@@ -76,18 +96,25 @@ const columns: Array<ColumnDef<Primitives<Appointment>>> = [
       </SortableHeader>
     ),
     cell: ({ row }) => (
-      <Badge variant={toStatusVariant(row.original.status)}>{toStatusLabel(row.original.status)}</Badge>
+      <Badge variant={"outline"} className={toStatusClassName(row.original.status)}>
+        {toStatusLabel(row.original.status)}
+      </Badge>
     ),
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => toTypeLabel(row.original.type),
   },
   {
     accessorKey: "mode",
     header: "Mode",
-    cell: ({ row }) => toModeLabel(row.original.mode),
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className={cn({
+          "bg-blue-500/20 text-blue-500 border-blue-500/50": row.original.mode === "ONLINE",
+          "bg-green-500/20 text-green-500 border-green-500/50": row.original.mode === "IN_PERSON",
+        })}
+      >
+        {toModeLabel(row.original.mode)}
+      </Badge>
+    ),
   },
   {
     accessorKey: "actions",

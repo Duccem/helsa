@@ -1,12 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { Clock3Icon, UserRoundIcon } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
-import { Button } from "@/modules/shared/presentation/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/modules/shared/presentation/components/ui/card";
+import { Clock3Icon } from "lucide-react";
+import { useMemo } from "react";
+import { Card, CardContent } from "@/modules/shared/presentation/components/ui/card";
 import {
   Empty,
   EmptyDescription,
@@ -14,12 +11,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/modules/shared/presentation/components/ui/empty";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/shared/presentation/components/ui/tabs";
-import { AppointmentsFilter } from "./filter/appointment-filter";
+import { Tabs, TabsContent } from "@/modules/shared/presentation/components/ui/tabs";
 import { AppointmentsTable } from "./appointments-table";
-import { AppointmentsCalendar } from "./appointments-calendar";
 import { PaginatedResult } from "@/modules/shared/domain/query";
-import { AppointmentsTimeline } from "./appointments-timeline";
 import { parseAsInteger, parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { Primitives } from "@/modules/shared/domain/primitives";
 import { Appointment } from "../../domain/appointment";
@@ -90,13 +84,14 @@ export function AppointmentsDashboard() {
     return params.toString();
   }, [end, mode, order, sort, start, state, type, page, pageSize, activeView]);
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isFetching, isError } = useQuery({
     queryKey: ["appointments", sharedQueryString],
     initialData: { data: [], pagination: { page: 1, pageSize: 20, total: 0, nextPage: null, prevPage: null } },
     queryFn: async () => await fetchAppointments(sharedQueryString),
+    refetchOnWindowFocus: false,
   });
 
-  if (isPending) {
+  if (isFetching) {
     return (
       <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ViewOption)} className="w-full">
         <TabsContent value="table" className="space-y-4">

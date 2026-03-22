@@ -70,3 +70,17 @@ export const appointment_relations = relations(appointment, ({ many, one }) => (
   }),
 }));
 
+export const appointment_note_relations = relations(appointment_note, ({ one }) => ({
+  appointment: one(appointment, {
+    fields: [appointment_note.appointment_id],
+    references: [appointment.id],
+  }),
+}));
+
+export const appointment_rating_relations = relations(appointment_rating, ({ one }) => ({
+  appointment: one(appointment, {
+    fields: [appointment_rating.appointment_id],
+    references: [appointment.id],
+  }),
+}));
+

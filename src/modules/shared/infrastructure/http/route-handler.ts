@@ -10,12 +10,15 @@ export async function routeHandler<T extends DomainError>(
     return await fn();
   } catch (error: unknown) {
     if (error instanceof DomainError) {
+      console.error("Domain error:", error.toPrimitives());
       const response = onError(error as T);
 
       if (response) {
         return response;
       }
     }
+
+    console.error("Unexpected error:", error);
 
     return HttpNextResponse.internalServerError();
   }

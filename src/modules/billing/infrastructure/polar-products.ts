@@ -89,3 +89,46 @@ export const patientProducts = [
   },
 ];
 
+export const clinicProducts = [
+  {
+    productId: "d1c9e5b8-3f2a-4e5b-9c1a-7f8e9d6a4b2c",
+    id: "free",
+    name: "Free Plan",
+    description: "Para clínicas pequeñas que quieren probar la plataforma sin compromiso.",
+    price: "Free",
+    benefits: [
+      "Usuarios activos 10",
+      "Video llamada no incluida",
+      "Historial medico basico",
+      "Helsa AI assistant - no incluido",
+    ],
+  },
+  {
+    productId: "a2b3c4d5-e6f7-8901-2345-6789abcdef01",
+    id: "basic",
+    name: "Clinic Plan",
+    description: "Para clínicas medianas que buscan mejorar la gestión de pacientes y citas.",
+    price: "$99/month",
+    benefits: [
+      "Usuarios activos 100",
+      "Video llamada 50 hrs/mes",
+      "Historial medico con analisis avanzado",
+      "Helsa AI assistant - incluido (modelos básicos)",
+    ],
+  },
+  {
+    productId: "12345678-90ab-cdef-1234-567890abcdef",
+    id: "complete",
+    name: "Hospital Plan",
+    description: "Para hospitales y grandes redes médicas que necesitan una solución integral.",
+    price: "$299/month",
+    benefits: [
+      "Usuarios activos ilimitados",
+      "Video llamada ilimitada",
+      "Transcripcion y grabación de video llamadas",
+      "Historial medico completo con analisis avanzado",
+      "Helsa AI assistant - incluido (modelos avanzados)",
+    ],
+  },
+];
+

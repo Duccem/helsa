@@ -4,6 +4,8 @@ import { File } from "@/modules/shared/domain/value-objects/file";
 import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { InvalidRole } from "./invalid-role";
+import { UserRoleSetAsDoctorEvent, UserRoleSetAsPatientEvent } from "./user-role-set-as";
+import { Aggregate } from "@/modules/shared/domain/aggregate";
 
 export class UserId extends Uuid {}
 export class UserName extends StringValueObject {}
@@ -23,7 +25,7 @@ export class UserRole extends StringValueObject {
 export class UserBanned extends BooleanValueObject {}
 export class UserBanReason extends StringValueObject {}
 export class UserBanExpires extends Timestamp {}
-export class User {
+export class User extends Aggregate {
   constructor(
     public id: UserId,
     public name: UserName,
@@ -36,7 +38,9 @@ export class User {
     public banned: UserBanned | null = null,
     public banReason: UserBanReason | null = null,
     public banExpires: UserBanExpires | null = null,
-  ) {}
+  ) {
+    super();
+  }
 
   toPrimitives(): Primitives<User> {
     return {
@@ -72,6 +76,14 @@ export class User {
 
   changeRole(newRole: string) {
     this.role = UserRole.fromString(newRole);
+
+    const event =
+      newRole === "patient"
+        ? UserRoleSetAsPatientEvent.create(this.id.value)
+        : UserRoleSetAsDoctorEvent.create(this.id.value);
+
+    this.record(event);
+
     this.updatedAt = UserUpdatedAt.now();
   }
 }

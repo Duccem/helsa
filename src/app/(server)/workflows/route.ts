@@ -6,6 +6,9 @@ import {
   sendForgottenMedicationsReminders,
 } from "./prescription/forgotten-medications-reminders";
 import { rescheduleReminders } from "./prescription/reschedule-reminders";
+import { initUserBilling } from "./billing/init-user-billing";
+import { createPatient } from "./patient/create-patient";
+import { createDoctor } from "./doctor/create-doctor";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -15,6 +18,9 @@ export const { GET, POST, PUT } = serve({
     forgottenMedicationsReminders,
     sendForgottenMedicationsReminders,
     rescheduleReminders,
+    initUserBilling,
+    createPatient,
+    createDoctor,
   ],
 });
 

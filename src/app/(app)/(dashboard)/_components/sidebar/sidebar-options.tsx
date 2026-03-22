@@ -15,7 +15,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/modules/shared/presentation/components/ui/sidebar";
-import { authClient } from "@/modules/auth/infrastructure/auth-client";
 import {
   BookOpen,
   Briefcase,
@@ -25,9 +24,6 @@ import {
   ChevronRight,
   Coins,
   Folder,
-  Heart,
-  House,
-  Layers,
   LayoutDashboard,
   Stethoscope,
   Users,
@@ -219,7 +215,48 @@ const teacherMenuConfig: MenuConfig = {
 
 const parentMenuConfig: MenuConfig = {
   role: "patient",
-  groups: [],
+  groups: [
+    {
+      title: "My Health",
+      items: [
+        {
+          title: "Dashboard",
+          url: "/home",
+          icon: LayoutDashboard,
+        },
+        {
+          title: "Appointments",
+          url: "/appointments",
+          icon: Calendar,
+        },
+        {
+          title: "Doctors",
+          url: "/doctors",
+          icon: Stethoscope,
+        },
+        {
+          title: "Medical Records",
+          url: "/medical-records",
+          icon: Folder,
+        },
+        {
+          title: "Prescriptions",
+          url: "/prescriptions",
+          icon: BookOpen,
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      items: [
+        {
+          title: "Billing",
+          url: "/settings/billing",
+          icon: Coins,
+        },
+      ],
+    },
+  ],
 };
 
 const configs = [adminMenuConfig, teacherMenuConfig, parentMenuConfig];
