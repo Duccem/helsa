@@ -82,3 +82,24 @@ export const specialty_relations = relations(specialty, ({ many }) => ({
   doctors: many(doctor),
 }));
 
+export const price_relations = relations(price, ({ one }) => ({
+  doctor: one(doctor, {
+    fields: [price.doctor_id],
+    references: [doctor.id],
+  }),
+}));
+
+export const office_address_relations = relations(office_address, ({ one }) => ({
+  doctor: one(doctor, {
+    fields: [office_address.doctor_id],
+    references: [doctor.id],
+  }),
+}));
+
+export const education_relations = relations(education, ({ one }) => ({
+  doctor: one(doctor, {
+    fields: [education.doctor_id],
+    references: [doctor.id],
+  }),
+}));
+
