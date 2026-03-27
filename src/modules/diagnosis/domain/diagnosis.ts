@@ -89,7 +89,7 @@ export class Diagnosis extends Aggregate {
     public created_at: DiagnosisCreatedAt,
     public updated_at: DiagnosisUpdatedAt,
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<Diagnosis> {

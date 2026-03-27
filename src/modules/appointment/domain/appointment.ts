@@ -33,7 +33,7 @@ export class Appointment extends Aggregate {
     public rating?: AppointmentRating,
     public notes?: AppointmentNote[],
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<Appointment> {

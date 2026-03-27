@@ -50,16 +50,16 @@ export class Chat extends Aggregate {
     public date: ChatDate,
     public status: ChatStatus,
   ) {
-    super();
+    super(id);
   }
   toPrimitives(): Primitives<Chat> {
     return {
-      id: this.id.getValue(),
-      title: this.title.getValue(),
-      user_id: this.user_id.getValue(),
+      id: this.id.value,
+      title: this.title.value,
+      user_id: this.user_id.value,
       messages: this.messages.map((message) => message.toPrimitives()),
-      date: this.date.getValue(),
-      status: this.status.getValue(),
+      date: this.date.value,
+      status: this.status.value,
     };
   }
 

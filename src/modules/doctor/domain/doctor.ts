@@ -34,7 +34,7 @@ export class Doctor extends Aggregate {
     public office_addresses?: OfficeAddress[],
     public education?: Education[],
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<Doctor> {

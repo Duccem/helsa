@@ -39,7 +39,7 @@ export class User extends Aggregate {
     public banReason: UserBanReason | null = null,
     public banExpires: UserBanExpires | null = null,
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<User> {

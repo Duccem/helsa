@@ -46,7 +46,7 @@ export class Patient extends Aggregate {
     public updated_at: PatientUpdatedAt,
     public contact_info?: ContactInfo[],
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<Patient> {
