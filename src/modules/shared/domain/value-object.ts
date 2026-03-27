@@ -16,10 +16,6 @@ export abstract class ValueObject<T> {
     return false;
   }
 
-  getValue(): T {
-    return this.value;
-  }
-
   toString(): string {
     return String(this.value);
   }

@@ -3,9 +3,8 @@ import { Primitives } from "@/modules/shared/domain/primitives";
 import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { MedicationAddedDomainEvent } from "./medication-added-domain-event";
-import { MedicationNotFound, MedicationReminderNotFound } from "./medication-not-found";
+import { MedicationNotFound } from "./medication-not-found";
 import { Medication, MedicationAlternativeDrug, MedicationStateValues } from "./medication";
-import { MedicationReminder } from "./medication-reminder";
 import { StringValueObject } from "@/modules/shared/domain/value-object";
 
 export class PrescriptionId extends Uuid {}
@@ -25,7 +24,7 @@ export class Prescription extends Aggregate {
     public updated_at: PrescriptionUpdatedAt,
     public medications?: Medication[],
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<Prescription> {

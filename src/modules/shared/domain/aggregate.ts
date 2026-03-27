@@ -1,10 +1,8 @@
+import { DomainEntity } from "./domain-entity";
 import { DomainEvent } from "./domain-event";
-import { Primitives } from "./primitives";
 
-export abstract class Aggregate {
+export abstract class Aggregate extends DomainEntity {
   private events: DomainEvent[] = [];
-
-  abstract toPrimitives(): Primitives<Aggregate>;
 
   pullDomainEvents(): DomainEvent[] {
     const events = this.events;

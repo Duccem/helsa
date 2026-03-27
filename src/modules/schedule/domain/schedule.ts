@@ -33,8 +33,8 @@ export class ScheduleMaxAppointmentsPerDay extends NumberValueObject {
 
 export class Schedule extends Aggregate {
   constructor(
-    public readonly id: ScheduleId,
-    public readonly doctor_id: ScheduleDoctorId,
+    public id: ScheduleId,
+    public doctor_id: ScheduleDoctorId,
     public appointment_duration: ScheduleAppointmentDuration,
     public max_appointments_per_day: ScheduleMaxAppointmentsPerDay,
     public next_availability_generation: NextAvailabilityGeneration,
@@ -42,7 +42,7 @@ export class Schedule extends Aggregate {
     public updated_at: ScheduleUpdatedAt,
     public days?: ScheduleDay[],
   ) {
-    super();
+    super(id);
   }
 
   toPrimitives(): Primitives<Schedule> {
