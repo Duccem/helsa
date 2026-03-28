@@ -88,18 +88,26 @@ export const AcceptInvitationFlow = ({ invitationId, isAuthenticated }: AcceptIn
             this invitation.
           </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Button asChild className="w-full">
-              <Link href={`/sign-in?callbackURL=${encodeURIComponent(callbackURL)}`}>
-                <LogIn className="h-4 w-4" />
-                Sign In
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="w-full">
-              <Link href={`/sign-up?callbackURL=${encodeURIComponent(callbackURL)}`}>
-                <UserPlus className="h-4 w-4" />
-                Sign Up
-              </Link>
-            </Button>
+            <Button
+              render={
+                <Link href={`/sign-in?callbackURL=${encodeURIComponent(callbackURL)}`}>
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Link>
+              }
+              className="w-full"
+            />
+
+            <Button
+              render={
+                <Link href={`/sign-up?callbackURL=${encodeURIComponent(callbackURL)}`}>
+                  <UserPlus className="h-4 w-4" />
+                  Sign Up
+                </Link>
+              }
+              variant="outline"
+              className="w-full"
+            />
           </div>
         </CardContent>
       </Card>
@@ -151,3 +159,4 @@ export const AcceptInvitationFlow = ({ invitationId, isAuthenticated }: AcceptIn
     </Card>
   );
 };
+
