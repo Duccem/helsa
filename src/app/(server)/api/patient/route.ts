@@ -31,7 +31,7 @@ const createPatientSchema = z.object({
 });
 
 export const POST = async (request: NextRequest) => {
-  const { organization, session } = await authenticate();
+  const { session } = await authenticate();
   const body = await parseBody(request, createPatientSchema);
   const service = new CreatePatient(new DrizzlePatientRepository());
 
