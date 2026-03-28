@@ -1,6 +1,7 @@
 import { PaginatedQuery, PaginatedResult } from "@/modules/shared/domain/query";
 import { Doctor, DoctorId, DoctorUserId } from "./doctor";
 import { Specialty, SpecialtyId } from "./specialty";
+import { DoctorPatient } from "./doctor-patient";
 
 export type DoctorSearchCriteria = PaginatedQuery & {
   specialty_id?: string;
@@ -14,6 +15,7 @@ export interface DoctorRepository {
   find(id: DoctorId): Promise<Doctor | null>;
   findByUserId(userId: DoctorUserId): Promise<Doctor | null>;
   search(criteria: DoctorSearchCriteria): Promise<PaginatedResult<Doctor>>;
+  getDoctorPatients(doctorId: DoctorId): Promise<DoctorPatient[]>;
 }
 
 export interface SpecialtyRepository {

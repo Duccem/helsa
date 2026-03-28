@@ -9,10 +9,12 @@ import { rescheduleReminders } from "./prescription/reschedule-reminders";
 import { initUserBilling } from "./billing/init-user-billing";
 import { createPatient } from "./patient/create-patient";
 import { createDoctor } from "./doctor/create-doctor";
+import { generateAvailability } from "./schedule/generate-availability";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
+    generateAvailability,
     nextMedicationsReminders,
     sendNextMedicationsReminders,
     forgottenMedicationsReminders,

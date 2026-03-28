@@ -6,7 +6,7 @@ import { addDays } from "date-fns";
 
 export const generateAvailability = inngest.createFunction(
   { id: "generate-availability", name: "Generate Availability" },
-  { cron: "0 3 * * 1" },
+  { cron: "TZ=America/Caracas 0 3 * * 1" },
   async ({ step }) => {
     const schedules = await step.run("get-schedules-that-need-availability", async () => {
       const service = new SearchSchedule(new DrizzleScheduleRepository());

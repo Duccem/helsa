@@ -4,10 +4,7 @@
     "**/.svn": true,
     "**/.hg": true,
     "**/.DS_Store": true,
-    "**/Thumbs.db": true,
-    "**/node_modules": true,
-    "**/dist": true,
-    "**/.next": true
+    "**/Thumbs.db": true
   },
   "cSpell.words": ["Acad", "codelytv"],
   "prettier.printWidth": 120

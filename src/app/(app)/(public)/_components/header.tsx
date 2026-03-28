@@ -20,6 +20,7 @@ import {
   SheetFooter,
 } from "@/modules/shared/presentation/components/ui/sheet";
 import { useTheme } from "next-themes";
+import { authClient } from "@/modules/auth/infrastructure/auth-client";
 
 const NAV_ITEMS: Array<{ href: string; label: string }> = [
   { href: "#how-it-works", label: "How it works" },
@@ -31,6 +32,7 @@ const NAV_ITEMS: Array<{ href: string; label: string }> = [
 export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { data } = authClient.useSession();
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
@@ -99,14 +101,25 @@ export default function Header() {
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
           </Button>
-          <Link href={"/#cta" as any}>
-            <Button size="lg" className="rounded-3xl group cursor-pointer">
-              Try it free
-              <span className="inline-flex w-0 ml-0 overflow-hidden transition-all duration-200 group-hover:w-4 group-hover:ml-1">
-                <ArrowRight className="opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
-              </span>
-            </Button>
-          </Link>
+          {data ? (
+            <Link href={"/home" as any}>
+              <Button size="lg" className="rounded-3xl group cursor-pointer">
+                Dashboard
+                <span className="inline-flex w-0 ml-0 overflow-hidden transition-all duration-200 group-hover:w-4 group-hover:ml-1">
+                  <ArrowRight className="opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
+                </span>
+              </Button>
+            </Link>
+          ) : (
+            <Link href={"/#cta" as any}>
+              <Button size="lg" className="rounded-3xl group cursor-pointer">
+                Try it free
+                <span className="inline-flex w-0 ml-0 overflow-hidden transition-all duration-200 group-hover:w-4 group-hover:ml-1">
+                  <ArrowRight className="opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
+                </span>
+              </Button>
+            </Link>
+          )}
 
           {/* Mobile Sheet Trigger */}
           <div className="md:hidden">

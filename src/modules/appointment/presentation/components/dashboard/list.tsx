@@ -1,0 +1,188 @@
+"use client";
+
+import { Badge } from "@/modules/shared/presentation/components/ui/badge";
+import { Button } from "@/modules/shared/presentation/components/ui/button";
+import { Card, CardContent } from "@/modules/shared/presentation/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/modules/shared/presentation/components/ui/dropdown-menu";
+import { ScrollArea } from "@/modules/shared/presentation/components/ui/scroll-area";
+import { cn } from "@/modules/shared/presentation/lib/utils";
+import { MapPin, MoreHorizontal, User, Video } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+const allAppointments = [
+  {
+    id: "1",
+    patientName: "John Doe",
+    date: "2024-06-01T10:00:00Z",
+    status: "SCHEDULED",
+    reason: "Consulta general",
+    time: "10:00 AM",
+    mode: "ONLINE",
+    type: "Consulta",
+  },
+  {
+    id: "2",
+    patientName: "Jane Smith",
+    date: "2024-06-02T14:30:00Z",
+    status: "CONFIRMED",
+    reason: "Terapia física",
+    time: "12:00 PM",
+    mode: "IN_PERSON",
+    type: "Terapia",
+  },
+  {
+    id: "3",
+    patientName: "Bob Johnson",
+    date: "2024-06-03T09:00:00Z",
+    status: "CANCELLED",
+    reason: "Consulta de seguimiento",
+    time: "13:00 PM",
+    mode: "ONLINE",
+    type: "Consulta",
+  },
+  {
+    id: "4",
+    patientName: "Alice Williams",
+    date: "2024-06-04T16:00:00Z",
+    status: "FINISHED",
+    reason: "Evaluación inicial",
+    time: "08:00 AM",
+    mode: "IN_PERSON",
+    type: "Evaluación",
+  },
+  {
+    id: "5",
+    patientName: "Michael Brown",
+    date: "2024-06-05T11:30:00Z",
+    status: "STARTED",
+    reason: "Terapia ocupacional",
+    time: "09:30 AM",
+    mode: "ONLINE",
+    type: "Terapia",
+  },
+];
+
+const mappingStatus = {
+  SCHEDULED: "Agendada",
+  CONFIRMED: "Confirmada",
+  PAYED: "Pagada",
+  READY: "Lista",
+  STARTED: "En curso",
+  CANCELLED: "Cancelada",
+  MISSED_BY_PATIENT: "Retrasada por paciente",
+  MISSED_BY_THERAPIST: "Retrasada por terapeuta",
+  FINISHED: "Completada",
+};
+
+export const AppointmentList = () => {
+  return (
+    <ScrollArea className={"h-[500px] pr-6 pb-2"}>
+      <div className="flex flex-col gap-4">
+        {allAppointments.map((appointment, index) => (
+          <AppointmentListItem key={appointment.id} appointment={appointment} index={index} />
+        ))}
+      </div>
+    </ScrollArea>
+  );
+};
+
+export const AppointmentListItem = ({
+  appointment,
+  index,
+}: {
+  appointment: (typeof allAppointments)[0];
+  index: number;
+}) => {
+  const router = useRouter();
+  return (
+    <Card
+      key={appointment.id}
+      className={cn(" transition-all hover:bg-accent/60  animate-fade-in border", {
+        "bg-primary hover:bg-primary/60": appointment.status === "STARTED",
+      })}
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          {/* Time Block */}
+          <div className="flex-shrink-0 text-center min-w-[70px]">
+            <p className="text-sm font-bold">{appointment.time}</p>
+          </div>
+
+          {/* Divider */}
+          <div className="w-px self-stretch bg-border" />
+
+          {/* Content */}
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div
+                  className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-primary/10", {
+                    "bg-indigo-500": appointment.status === "STARTED",
+                  })}
+                >
+                  <User
+                    className={cn("h-4 w-4 text-primary", {
+                      "text-white": appointment.status === "STARTED",
+                    })}
+                  />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{appointment.patientName}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={cn({
+                    "border-green-500/50 text-green-500": appointment.status === "CONFIRMED",
+                    "border-yellow-500/50 text-yellow-500": appointment.status === "STARTED",
+                    "border-red-500/50 text-red-500": appointment.status === "CANCELLED",
+                    "border-gray-500/50 text-gray-500": appointment.status === "SCHEDULED",
+                    "border-blue-500/50 text-blue-500": appointment.status === "FINISHED",
+                  })}
+                >
+                  {mappingStatus[appointment.status as keyof typeof mappingStatus]}
+                </Badge>
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => router.push(`/appointments/${appointment.id}`)}>
+                      View Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>Reschedule</DropdownMenuItem>
+                    <DropdownMenuItem>Start Consultation</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">Cancel</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-xs">
+              <span className="flex items-center gap-1">
+                {appointment.mode === "ONLINE" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
+                {appointment.mode === "ONLINE" ? "Video Call" : "In Person"}
+              </span>
+              <span>•</span>
+              <span>{appointment.type}</span>
+              <span>•</span>
+              <span>{appointment.reason}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+

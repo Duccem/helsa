@@ -42,8 +42,6 @@ const getAvailabilitiesQuerySchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   state: z.enum(["AVAILABLE", "TAKEN"]).optional(),
-  page: z.coerce.number().min(1).default(1),
-  pageSize: z.coerce.number().min(1).max(100).default(20),
 });
 
 export const GET = async (request: NextRequest, ctx: RouteContext<"/api/schedule/[doctorId]/availability">) => {
@@ -54,23 +52,10 @@ export const GET = async (request: NextRequest, ctx: RouteContext<"/api/schedule
 
   return routeHandler(
     async () => {
-      const slots = await service.execute(doctorId, query.startDate, query.endDate);
-      const filtered = query.state
-        ? slots.filter((slot) => slot.state.value === (query.state as AvailabilitySlotStateValues))
-        : slots;
-
-      const offset = (query.page - 1) * query.pageSize;
-      const paged = filtered.slice(offset, offset + query.pageSize);
+      const slots = await service.execute(doctorId, query.startDate, query.endDate, query.state);
 
       return HttpNextResponse.json({
-        data: paged,
-        pagination: {
-          page: query.page,
-          pageSize: query.pageSize,
-          total: filtered.length,
-          nextPage: offset + query.pageSize < filtered.length ? query.page + 1 : null,
-          prevPage: query.page > 1 ? query.page - 1 : null,
-        },
+        slots,
       });
     },
     (error: InvalidArgument) => {

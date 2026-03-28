@@ -1,10 +1,14 @@
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 import { database } from "@/modules/shared/infrastructure/database/client";
-import { and, count, eq, gte, ilike, lte } from "drizzle-orm";
+import { and, count, eq, gte, ilike, inArray, lte } from "drizzle-orm";
 import { Doctor, DoctorId, DoctorUserId } from "../../domain/doctor";
 import { DoctorRepository, DoctorSearchCriteria, SpecialtyRepository } from "../../domain/doctor-repository";
 import { Specialty, SpecialtyId } from "../../domain/specialty";
 import { doctor, education, office_address, price, specialty } from "./doctor.schema";
+import { appointment } from "@/modules/appointment/infrastructure/persistence/appointment.schema";
+import { patient } from "@/modules/patient/infrastructure/persistence/patient.schema";
+import { user } from "@/modules/auth/infrastructure/persistence/auth.schema";
+import { DoctorPatient } from "../../domain/doctor-patient";
 
 export class DrizzleDoctorRepository implements DoctorRepository {
   async save(data: Doctor): Promise<void> {
@@ -130,15 +134,16 @@ export class DrizzleDoctorRepository implements DoctorRepository {
     );
 
     const [items, total] = await Promise.all([
-      database
-        .select({
-          doctor,
-        })
-        .from(doctor)
-        .leftJoin(price, eq(price.doctor_id, doctor.id))
-        .where(query)
-        .limit(criteria.pageSize)
-        .offset((criteria.page - 1) * criteria.pageSize),
+      database.query.doctor.findMany({
+        where: query,
+        with: {
+          prices: true,
+          office_addresses: true,
+          education: true,
+        },
+        limit: criteria.pageSize,
+        offset: (criteria.page - 1) * criteria.pageSize,
+      }),
       database
         .select({ count: count(doctor.id) })
         .from(doctor)
@@ -146,46 +151,45 @@ export class DrizzleDoctorRepository implements DoctorRepository {
         .where(query),
     ]);
 
-    const doctorsById = new Map<string, (typeof items)[number]["doctor"]>();
-    for (const item of items) {
-      if (!doctorsById.has(item.doctor.id)) {
-        doctorsById.set(item.doctor.id, item.doctor);
-      }
-    }
+    const pagination = buildPagination(total[0].count, criteria.page, criteria.pageSize);
 
-    const data = await Promise.all(
-      [...doctorsById.values()].map(async (doctorData) => {
-        const fullDoctor = await database.query.doctor.findFirst({
-          where: eq(doctor.id, doctorData.id),
-          with: {
-            prices: true,
-            office_addresses: true,
-            education: true,
-          },
-        });
-
-        if (!fullDoctor) {
-          return null;
-        }
-
-        return Doctor.fromPrimitives({
-          ...fullDoctor,
-          bio: fullDoctor.bio ?? undefined,
-          next_availability_generation: fullDoctor.next_availability_generation ?? undefined,
-          prices: fullDoctor.prices,
-          office_addresses: fullDoctor.office_addresses,
-        });
+    const data = items.map((item) =>
+      Doctor.fromPrimitives({
+        ...item,
+        bio: item.bio ?? undefined,
+        next_availability_generation: item.next_availability_generation ?? undefined,
+        prices: item.prices,
+        office_addresses: item.office_addresses,
       }),
     );
 
-    const sanitizedData = data.filter((item): item is Doctor => item !== null);
-
-    const pagination = buildPagination(total[0].count, criteria.page, criteria.pageSize);
-
     return {
-      data: sanitizedData,
+      data,
       pagination,
     };
+  }
+
+  async getDoctorPatients(doctorId: DoctorId): Promise<DoctorPatient[]> {
+    const appointments = await database
+      .selectDistinct({ patient_id: appointment.patient_id })
+      .from(appointment)
+      .where(eq(appointment.doctor_id, doctorId.value));
+    const patients = await database
+      .select({ id: patient.id, name: patient.name, email: patient.email })
+      .from(patient)
+      .where(
+        inArray(
+          patient.id,
+          appointments.map((a) => a.patient_id),
+        ),
+      );
+    return patients.map((p) =>
+      DoctorPatient.fromPrimitives({
+        id: p.id,
+        name: p.name,
+        email: p.email,
+      }),
+    );
   }
 }
 

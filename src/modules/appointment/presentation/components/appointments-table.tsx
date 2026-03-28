@@ -76,7 +76,7 @@ const columns: Array<ColumnDef<Primitives<Appointment>>> = [
         Date
       </SortableHeader>
     ),
-    cell: ({ row }) => format(new Date(row.original.date), "MMM d, yyyy HH:mm"),
+    cell: ({ row }) => format(new Date(row.original.date), "MMM d, yyyy"),
   },
   {
     accessorKey: "patient_name",

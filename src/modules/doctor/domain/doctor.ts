@@ -6,6 +6,7 @@ import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { Education } from "./education";
 import { OfficeAddress } from "./office-address";
 import { Price } from "./price";
+import { DoctorPatient } from "./doctor-patient";
 
 export class DoctorId extends Uuid {}
 export class DoctorUserId extends Uuid {}
@@ -33,6 +34,7 @@ export class Doctor extends Aggregate {
     public prices?: Price[],
     public office_addresses?: OfficeAddress[],
     public education?: Education[],
+    public patients?: DoctorPatient[],
   ) {
     super(id);
   }

@@ -15,13 +15,13 @@ export class DrizzleScheduleRepository implements ScheduleRepository {
       set: primitives,
     });
 
-    await database.transaction(async (tx) => {
-      await tx.delete(schedule_day).where(eq(schedule_day.schedule_id, data.id.value));
+    database.delete(schedule_day).where(eq(schedule_day.schedule_id, data.id.value));
 
-      if (days && days.length > 0) {
-        await tx.insert(schedule_day).values(days);
-      }
-    });
+    if (!days || days.length === 0) {
+      return;
+    }
+
+    database.insert(schedule_day).values(days);
   }
 
   async findByDoctorId(doctorId: ScheduleDoctorId): Promise<Schedule | null> {

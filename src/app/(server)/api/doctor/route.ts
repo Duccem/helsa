@@ -1,9 +1,7 @@
-import { GetDoctorDetails } from "@/modules/doctor/application/get-doctor-details";
 import { RegisterDoctor } from "@/modules/doctor/application/register-doctor";
 import { SearchDoctors } from "@/modules/doctor/application/search-doctors";
 import { DoctorAlreadyExists } from "@/modules/doctor/domain/doctor-already-exists";
 import { DoctorLicenseNotValid } from "@/modules/doctor/domain/doctor-license-not-valid";
-import { DoctorNotFound } from "@/modules/doctor/domain/doctor-not-found";
 import { SpecialtyNotFound } from "@/modules/doctor/domain/specialty-not-found";
 import {
   DrizzleDoctorRepository,

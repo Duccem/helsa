@@ -60,9 +60,7 @@ export class ScheduleDay {
     public readonly day: ScheduleDayValue,
     public readonly start_hour: ScheduleDayStartHour,
     public readonly end_hour: ScheduleDayEndHour,
-  ) {
-    this.validateRange();
-  }
+  ) {}
 
   toPrimitives(): Primitives<ScheduleDay> {
     return {
@@ -92,12 +90,6 @@ export class ScheduleDay {
       ScheduleDayStartHour.fromString(start_hour),
       ScheduleDayEndHour.fromString(end_hour),
     );
-  }
-
-  private validateRange(): void {
-    if (this.start_hour.value >= this.end_hour.value) {
-      throw new InvalidScheduleDayRange(this.day.value, this.start_hour.value, this.end_hour.value);
-    }
   }
 }
 
