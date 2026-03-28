@@ -33,7 +33,7 @@ export class ChatMessage {
   toPrimitives(): Primitives<ChatMessage> {
     return {
       role: this.role.getValue(),
-      content: this.content.getValue(),
+      content: this.content.value,
     };
   }
 
