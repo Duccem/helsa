@@ -4,6 +4,7 @@ import {
 } from "@/modules/appointment/presentation/components/dashboard/filters";
 import { AppointmentList } from "@/modules/appointment/presentation/components/dashboard/list";
 import { AppointmentMetrics } from "@/modules/appointment/presentation/components/dashboard/metrics";
+import { AppointmentsProvider } from "@/modules/appointment/presentation/components/dashboard/provider";
 import { QuickActions } from "@/modules/appointment/presentation/components/dashboard/quick-actions";
 import { AppointmentSummary } from "@/modules/appointment/presentation/components/dashboard/summary";
 import { requireAuth } from "@/modules/auth/infrastructure/guards/require-auth";
@@ -29,18 +30,20 @@ export default async function AppointmentsPage() {
         </Link>
       </div>
       <div className="flex flex-col gap-6 w-full">
-        <AppointmentMetrics />
-        <AppointmentSummary />
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="col-span-1 md:col-span-4 flex flex-col gap-4">
-            <AppointmentFilters />
-            <AppointmentList />
+        <AppointmentsProvider>
+          <AppointmentMetrics />
+          <AppointmentSummary />
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="col-span-1 md:col-span-4 flex flex-col gap-4">
+              <AppointmentFilters />
+              <AppointmentList />
+            </div>
+            <div className="col-span-1 flex flex-col gap-4">
+              <AppointmentFilterCalendar />
+              <QuickActions />
+            </div>
           </div>
-          <div className="col-span-1 flex flex-col gap-4">
-            <AppointmentFilterCalendar />
-            <QuickActions />
-          </div>
-        </div>
+        </AppointmentsProvider>
       </div>
     </div>
   );

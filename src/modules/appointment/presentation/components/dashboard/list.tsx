@@ -13,59 +13,10 @@ import { ScrollArea } from "@/modules/shared/presentation/components/ui/scroll-a
 import { cn } from "@/modules/shared/presentation/lib/utils";
 import { MapPin, MoreHorizontal, User, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-const allAppointments = [
-  {
-    id: "1",
-    patientName: "John Doe",
-    date: "2024-06-01T10:00:00Z",
-    status: "SCHEDULED",
-    reason: "Consulta general",
-    time: "10:00 AM",
-    mode: "ONLINE",
-    type: "Consulta",
-  },
-  {
-    id: "2",
-    patientName: "Jane Smith",
-    date: "2024-06-02T14:30:00Z",
-    status: "CONFIRMED",
-    reason: "Terapia física",
-    time: "12:00 PM",
-    mode: "IN_PERSON",
-    type: "Terapia",
-  },
-  {
-    id: "3",
-    patientName: "Bob Johnson",
-    date: "2024-06-03T09:00:00Z",
-    status: "CANCELLED",
-    reason: "Consulta de seguimiento",
-    time: "13:00 PM",
-    mode: "ONLINE",
-    type: "Consulta",
-  },
-  {
-    id: "4",
-    patientName: "Alice Williams",
-    date: "2024-06-04T16:00:00Z",
-    status: "FINISHED",
-    reason: "Evaluación inicial",
-    time: "08:00 AM",
-    mode: "IN_PERSON",
-    type: "Evaluación",
-  },
-  {
-    id: "5",
-    patientName: "Michael Brown",
-    date: "2024-06-05T11:30:00Z",
-    status: "STARTED",
-    reason: "Terapia ocupacional",
-    time: "09:30 AM",
-    mode: "ONLINE",
-    type: "Terapia",
-  },
-];
+import { useAppointments } from "./provider";
+import { Primitives } from "@/modules/shared/domain/primitives";
+import { Appointment } from "@/modules/appointment/domain/appointment";
+import { format } from "date-fns";
 
 const mappingStatus = {
   SCHEDULED: "Agendada",
@@ -80,10 +31,11 @@ const mappingStatus = {
 };
 
 export const AppointmentList = () => {
+  const { appointments } = useAppointments();
   return (
     <ScrollArea className={"h-[500px] pr-6 pb-2"}>
       <div className="flex flex-col gap-4">
-        {allAppointments.map((appointment, index) => (
+        {appointments.map((appointment, index) => (
           <AppointmentListItem key={appointment.id} appointment={appointment} index={index} />
         ))}
       </div>
@@ -95,7 +47,7 @@ export const AppointmentListItem = ({
   appointment,
   index,
 }: {
-  appointment: (typeof allAppointments)[0];
+  appointment: Primitives<Appointment>;
   index: number;
 }) => {
   const router = useRouter();
@@ -111,7 +63,7 @@ export const AppointmentListItem = ({
         <div className="flex items-start gap-4">
           {/* Time Block */}
           <div className="flex-shrink-0 text-center min-w-[70px]">
-            <p className="text-sm font-bold">{appointment.time}</p>
+            <p className="text-sm font-bold">{format(appointment.date, "hh:mm")}</p>
           </div>
 
           {/* Divider */}
@@ -133,7 +85,7 @@ export const AppointmentListItem = ({
                   />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">{appointment.patientName}</p>
+                  <p className="font-semibold text-sm">{"Name"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -177,7 +129,7 @@ export const AppointmentListItem = ({
               <span>•</span>
               <span>{appointment.type}</span>
               <span>•</span>
-              <span>{appointment.reason}</span>
+              <span>{appointment.motive}</span>
             </div>
           </div>
         </div>
