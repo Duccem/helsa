@@ -9,28 +9,58 @@ import { createContext, useContext } from "react";
 
 type AppointmentsContextType = {
   appointments: Primitives<Appointment>[];
+  dayStats: Primitives<Appointment>[];
   isFetching: boolean;
+  isFetchingStats: boolean;
 };
 
-const AppointmentsContext = createContext<AppointmentsContextType>({ appointments: [], isFetching: false });
+const AppointmentsContext = createContext<AppointmentsContextType>({
+  appointments: [],
+  isFetching: false,
+  dayStats: [],
+  isFetchingStats: false,
+});
 export const AppointmentsProvider = ({ children }: { children: React.ReactNode }) => {
   const [date] = useQueryState("date", parseAsString);
+  const [state] = useQueryState("status", parseAsString);
+  const [type] = useQueryState("type", parseAsString);
   const { data, isFetching } = useQuery<Primitives<Appointment>[]>({
-    queryKey: ["appointments", date],
+    queryKey: ["appointments", date, state, type],
     initialData: [],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const dateFilter = date ? new Date(date) : new Date();
       const date_from = startOfDay(dateFilter);
       const date_to = endOfDay(dateFilter);
-      const response = await fetch(`/api/appointment?startDate=${formatISO(date_from)}&endDate=${formatISO(date_to)}`);
+      const params = new URLSearchParams();
+      if (state && state !== "ALL") params.append("state", state);
+      if (type && type !== "ALL") params.append("type", type);
+      const url = `/api/appointment?startDate=${formatISO(date_from)}&endDate=${formatISO(date_to)}&${params.toString()}`;
+      const response = await fetch(url);
+      const data: PaginatedResult<Primitives<Appointment>> = await response.json();
+      return data.data;
+    },
+  });
+
+  const { data: dayStats, isFetching: isFetchingStats } = useQuery<Primitives<Appointment>[]>({
+    queryKey: ["appointment-stats", date],
+    initialData: [],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const dateFilter = date ? new Date(date) : new Date();
+      const date_from = startOfDay(dateFilter);
+      const date_to = endOfDay(dateFilter);
+      const url = `/api/appointment?startDate=${formatISO(date_from)}&endDate=${formatISO(date_to)}`;
+      const response = await fetch(url);
       const data: PaginatedResult<Primitives<Appointment>> = await response.json();
       return data.data;
     },
   });
 
   return (
-    <AppointmentsContext.Provider value={{ appointments: data, isFetching }}>{children}</AppointmentsContext.Provider>
+    <AppointmentsContext.Provider value={{ appointments: data, isFetching, dayStats, isFetchingStats }}>
+      {children}
+    </AppointmentsContext.Provider>
   );
 };
 

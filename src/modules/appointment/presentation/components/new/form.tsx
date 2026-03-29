@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/modules/shared/presentation/components/ui/dropdown-menu";
 import { Field, FieldGroup, FieldLabel } from "@/modules/shared/presentation/components/ui/field";
+import { Label } from "@/modules/shared/presentation/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/modules/shared/presentation/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -26,11 +28,12 @@ import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { endOfDay, format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarDays, Clock3, Loader2, Users } from "lucide-react";
+import { CalendarDays, Clock3, ListCollapse, Loader2, MapPin, Pin, Users, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import z from "zod";
+import z, { set } from "zod";
+import { useNewAppointment } from "./provider";
 
 const formSchema = z.object({
   patientId: z.uuid(),
@@ -38,7 +41,7 @@ const formSchema = z.object({
   time: z.string(), // ISO time string
   reason: z.string(),
   mode: z.enum(["ONLINE", "IN_PERSON"]),
-  type: z.enum(["THERAPY", "INITIAL"]),
+  type: z.enum(["CONSULTATION", "FOLLOW_UP", "CHECK_UP", "EMERGENCY", "PROCEDURE"]),
 });
 
 const mapPatient = (patient: Primitives<DoctorPatient>) => ({
@@ -46,9 +49,18 @@ const mapPatient = (patient: Primitives<DoctorPatient>) => ({
   label: patient.name,
 });
 
+const appointmentTypes = {
+  CONSULTATION: "Consulta",
+  FOLLOW_UP: "Seguimiento",
+  CHECK_UP: "Chequeo",
+  EMERGENCY: "Emergencia",
+  PROCEDURE: "Procedimiento",
+};
+
 export const NewAppointmentForm = () => {
   const router = useRouter();
-  const [hourOptions, setHourOptions] = useState<{ id: string; label: string }[]>([]);
+  const { setData } = useNewAppointment();
+  const [hourOptions, setHourOptions] = useState<{ id: string; label: string; state: string }[]>([]);
   const { data: doctor, isFetching: isPendingDoctor } = useQuery<Primitives<Doctor> | null>({
     queryKey: ["doctor-profile"],
     initialData: null,
@@ -83,7 +95,7 @@ export const NewAppointmentForm = () => {
       time: "",
       reason: "",
       mode: "IN_PERSON",
-      type: "INITIAL",
+      type: "CONSULTATION",
     },
     validators: {
       onSubmit: formSchema,
@@ -127,7 +139,7 @@ export const NewAppointmentForm = () => {
       const startDate = startOfDay(new Date(form.getFieldValue("date")));
       const endDate = endOfDay(new Date(form.getFieldValue("date")));
       const response = await fetch(
-        `/api/schedule/${doctor?.id}/availability?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&state=AVAILABLE`,
+        `/api/schedule/${doctor?.id}/availability?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch doctor schedule");
@@ -145,13 +157,14 @@ export const NewAppointmentForm = () => {
     const options = availability.map((slot) => ({
       id: slot.hour,
       label: slot.hour,
+      state: slot.state,
     }));
     setHourOptions(options);
   }, [availability]);
 
   return (
     <form
-      className="w-1/2 flex flex-col gap-4"
+      className="flex flex-col gap-4 col-span-1 md:col-span-2"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
@@ -163,17 +176,21 @@ export const NewAppointmentForm = () => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid} className="bg-card p-4 rounded-2xl">
-                <FieldLabel htmlFor={field.name}>Paciente</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <div className="bg-indigo-500 rounded-lg p-2">
+                    <Users className="size-4 text-foreground" />
+                  </div>
+                  <FieldLabel htmlFor={field.name}>Paciente</FieldLabel>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
                       <Button variant={"secondary"} className={"justify-start"} disabled={isPendingPatients}>
-                        <Users className="size-4 " />
                         {isPendingPatients
                           ? "Loading patients..."
                           : field.state.value
                             ? mapPatient(patients?.find((p) => p.id === field.state.value)!).label
-                            : "Select a patient"}
+                            : "Buscar paciente"}
                       </Button>
                     }
                   />
@@ -188,6 +205,10 @@ export const NewAppointmentForm = () => {
                       items={patients.map(mapPatient)}
                       onSelect={(item) => {
                         field.handleChange(item.id);
+                        setData((prev) => ({
+                          ...prev,
+                          patient: { name: item.label, email: patients?.find((p) => p.id === item.id)?.email || "" },
+                        }));
                       }}
                       renderListItem={({ item, isChecked }) => {
                         return (
@@ -204,12 +225,18 @@ export const NewAppointmentForm = () => {
           }}
         </form.Field>
       </FieldGroup>
-      <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+      <FieldGroup className="bg-card p-4 rounded-2xl">
+        <div className="flex items-center gap-2">
+          <div className="bg-indigo-500 rounded-lg p-2">
+            <CalendarDays className="size-4 text-foreground" />
+          </div>
+          <FieldLabel>Fecha y hora</FieldLabel>
+        </div>
         <form.Field name="date">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
-              <Field data-invalid={isInvalid} className="bg-card p-4 rounded-2xl">
+              <Field data-invalid={isInvalid} className="">
                 <FieldLabel htmlFor={field.name}>Fecha</FieldLabel>
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -222,10 +249,10 @@ export const NewAppointmentForm = () => {
                       </Button>
                     }
                   />
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className={"w-[300px]"}>
                     <Calendar
-                      className="w-full"
                       mode="single"
+                      className="w-full"
                       disabled={{
                         before: new Date(),
                       }}
@@ -233,6 +260,7 @@ export const NewAppointmentForm = () => {
                       onSelect={(date) => {
                         if (!date) return;
                         field.handleChange(date.toISOString());
+                        setData((prev) => ({ ...prev, date }));
                         refetch();
                       }}
                     />
@@ -246,111 +274,157 @@ export const NewAppointmentForm = () => {
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
-              <Field data-invalid={isInvalid} className="bg-card p-4 rounded-2xl">
+              <Field data-invalid={isInvalid} className="">
                 <FieldLabel htmlFor={field.name}>Hora</FieldLabel>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        variant={"secondary"}
-                        className={"justify-start"}
-                        disabled={isPendingPatients || isFetchingAvailabilities || hourOptions.length === 0}
-                      >
-                        <Clock3 className="size-4 " />
-                        {field.state.value || "Select an hour"}
-                      </Button>
-                    }
-                  />
-                  <DropdownMenuContent>
-                    <ComboboxDropdown
-                      headless={true}
-                      placeholder="Selecciona una hora"
-                      searchPlaceholder="Busca una hora"
-                      selectedItem={hourOptions.find((option) => option.id === field.state.value)}
-                      items={hourOptions}
-                      onSelect={(item) => {
-                        field.handleChange(item.id);
-                      }}
-                    />
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="grid grid-cols-5 gap-2">
+                  {isFetchingAvailabilities ? (
+                    <div>
+                      <Loader2 className="animate-spin" />
+                    </div>
+                  ) : (
+                    <>
+                      {hourOptions.length == 0 ? (
+                        <div>
+                          <Button variant={"outline"} className="justify-start cursor-not-allowed" disabled>
+                            <Clock3 className="size-4 " />
+                            No hay horas disponibles
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          {hourOptions.map((option) => (
+                            <Button
+                              key={option.id}
+                              variant={field.state.value === option.id ? "default" : "outline"}
+                              className="justify-start"
+                              onClick={() => {
+                                field.handleChange(option.id);
+                                setData((prev) => ({ ...prev, time: option.label }));
+                              }}
+                              disabled={option.state !== "AVAILABLE"}
+                            >
+                              <Clock3 className="size-4 " />
+                              {option.label}
+                            </Button>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
               </Field>
             );
           }}
         </form.Field>
-        <form.Field name="mode">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="bg-card p-4 rounded-2xl">
-                <FieldLabel htmlFor={field.name}>Modalidad</FieldLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.handleChange(value ?? "");
-                  }}
-                  value={field.state.value}
-                >
-                  <SelectTrigger>
-                    {field.state.value ? (field.state.value === "ONLINE" ? "Online" : "Presencial") : "Select a mode"}
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={"ONLINE"}>Online</SelectItem>
-                    <SelectItem value={"IN_PERSON"}>Presencial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-            );
-          }}
-        </form.Field>
-        <form.Field name="type">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="bg-card p-4 rounded-2xl">
-                <FieldLabel htmlFor={field.name}>Tipo</FieldLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.handleChange(value ?? "");
-                  }}
-                  value={field.state.value}
-                >
-                  <SelectTrigger>
-                    {field.state.value ? (field.state.value === "THERAPY" ? "Terapia" : "Inicial") : "Select a mode"}
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={"THERAPY"}>Terapia</SelectItem>
-                    <SelectItem value={"INITIAL"}>Inicial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-            );
-          }}
-        </form.Field>
+        <div>
+          <p className="text-xs text-muted-foreground">
+            Las horas en gris no están disponibles para agendar. Si necesitas agendar en una hora no disponible, por
+            favor contacta a tu paciente para coordinar un horario alternativo.
+          </p>
+        </div>
       </FieldGroup>
-      <FieldGroup>
+
+      <FieldGroup className="bg-card p-4 rounded-2xl">
+        <div className="flex items-center gap-2">
+          <div className="bg-indigo-500 rounded-lg p-2">
+            <ListCollapse className="size-4 text-foreground" />
+          </div>
+          <FieldLabel>Detalles</FieldLabel>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form.Field name="type">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Tipo</FieldLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.handleChange(value ?? "");
+                      setData((prev) => ({ ...prev, type: appointmentTypes[value as keyof typeof appointmentTypes] }));
+                    }}
+                    value={field.state.value}
+                    defaultValue={field.state.value}
+                  >
+                    <SelectTrigger>
+                      {field.state.value
+                        ? appointmentTypes[field.state.value as keyof typeof appointmentTypes]
+                        : "Select a mode"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(appointmentTypes).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              );
+            }}
+          </form.Field>
+          <form.Field name="mode">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid} className="space-y-2">
+                  <FieldLabel htmlFor={field.name}>Modalidad</FieldLabel>
+                  <RadioGroup
+                    defaultValue={field.state.value}
+                    value={field.state.value}
+                    className="w-fit flex items-center gap-5"
+                    onValueChange={(value) => {
+                      field.handleChange(value);
+                      setData((prev) => ({ ...prev, mode: value }));
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="IN_PERSON" id="r2" />
+                      <MapPin className="size-3" />
+                      <Label htmlFor="r2">Presencial</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="ONLINE" id="r3" />
+                      <Video className="size-3" />
+                      <Label htmlFor="r3">Online</Label>
+                    </div>
+                  </RadioGroup>
+                </Field>
+              );
+            }}
+          </form.Field>
+        </div>
         <form.Field name="reason">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
             return (
-              <Field data-invalid={isInvalid} className="bg-card p-4 rounded-2xl">
+              <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Motivo de la consulta</FieldLabel>
                 <Textarea
-                  placeholder="Motivo de la consulta"
+                  placeholder="e.g Dolor de cabeza persistente desde hace 3 días"
                   value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={(e) => {
+                    field.handleChange(e.target.value);
+                    setData((prev) => ({ ...prev, motive: e.target.value }));
+                  }}
                 ></Textarea>
               </Field>
             );
           }}
         </form.Field>
       </FieldGroup>
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(disabled) => (
-          <Button type="submit" disabled={disabled} className={"cursor-pointer"}>
-            {disabled ? <Loader2 className="animate-spin" /> : "Schedule Appointment"}
-          </Button>
-        )}
-      </form.Subscribe>
+      <div className="flex justify-end">
+        <Button type="reset" variant={"outline"} onClick={() => router.back()} className={"mr-2"}>
+          Cancelar
+        </Button>
+        <form.Subscribe selector={(state) => state.isSubmitting}>
+          {(disabled) => (
+            <Button type="submit" disabled={disabled} className={"cursor-pointer"}>
+              {disabled ? <Loader2 className="animate-spin" /> : "Agendar"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </div>
     </form>
   );
 };

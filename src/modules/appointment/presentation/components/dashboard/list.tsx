@@ -65,6 +65,14 @@ const calculateAge = (dateOfBirth: Date) => {
   return age;
 };
 
+const appointmentTypes = {
+  CONSULTATION: "Consulta",
+  FOLLOW_UP: "Seguimiento",
+  CHECK_UP: "Chequeo",
+  EMERGENCY: "Emergencia",
+  PROCEDURE: "Procedimiento",
+};
+
 export const AppointmentListItem = ({
   appointment,
   index,
@@ -150,10 +158,10 @@ export const AppointmentListItem = ({
             <div className="flex items-center gap-4 text-xs">
               <span className="flex items-center gap-1">
                 {appointment.mode === "ONLINE" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-                {appointment.mode === "ONLINE" ? "Video Call" : "In Person"}
+                {appointment.mode === "ONLINE" ? "Online" : "Presencial"}
               </span>
               <span>•</span>
-              <span>{appointment.type}</span>
+              <span>{appointmentTypes[appointment.type as keyof typeof appointmentTypes]}</span>
               <span>•</span>
               <span>{appointment.motive}</span>
             </div>

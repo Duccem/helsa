@@ -81,7 +81,7 @@ const searchAppointmentsSchema = z.object({
   doctorId: z.uuid().optional(),
   patientId: z.uuid().optional(),
   mode: z.enum(["ONLINE", "IN_PERSON"]).optional(),
-  type: z.enum(["THERAPY", "INITIAL"]).optional(),
+  type: z.enum(["CONSULTATION", "FOLLOW_UP", "CHECK_UP", "EMERGENCY", "PROCEDURE"]).optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
   sort: z.enum(["date", "status", "created_at"]).default("date"),

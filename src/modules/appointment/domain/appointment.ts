@@ -81,7 +81,7 @@ export class Appointment extends Aggregate {
     doctor_id: string,
     date: Date,
     motive: string,
-    type: string = AppointmentTypeValues.INITIAL,
+    type: string = AppointmentTypeValues.CONSULTATION,
     mode: string = AppointmentModeValues.ONLINE,
     organization_id: string | null = null,
   ): Appointment {
@@ -132,8 +132,11 @@ export class Appointment extends Aggregate {
 }
 
 export enum AppointmentTypeValues {
-  INITIAL = "INITIAL",
-  THERAPY = "THERAPY",
+  CONSULTATION = "CONSULTATION",
+  FOLLOW_UP = "FOLLOW_UP",
+  CHECK_UP = "CHECK_UP",
+  EMERGENCY = "EMERGENCY",
+  PROCEDURE = "PROCEDURE",
 }
 
 export class AppointmentType extends Enum<AppointmentTypeValues> {

@@ -2,7 +2,15 @@ import { relations } from "drizzle-orm";
 import { integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { v7 } from "uuid";
 
-export const appointment_type = pgEnum("appointment_type", ["INITIAL", "THERAPY"]);
+export const appointment_type = pgEnum("appointment_type", [
+  "INITIAL",
+  "THERAPY",
+  "CONSULTATION",
+  "FOLLOW_UP",
+  "CHECK_UP",
+  "EMERGENCY",
+  "PROCEDURE",
+]);
 export const appointment_mode = pgEnum("appointment_mode", ["ONLINE", "IN_PERSON"]);
 export const appointment_status = pgEnum("appointment_status", [
   "SCHEDULED",
@@ -23,7 +31,7 @@ export const appointment = pgTable("appointment", {
   doctor_id: uuid("doctor_id").notNull(),
   date: timestamp("date").notNull(),
   motive: text("motive").notNull(),
-  type: appointment_type("type").default("INITIAL").notNull(),
+  type: appointment_type("type").default("CONSULTATION").notNull(),
   mode: appointment_mode("mode").default("ONLINE").notNull(),
   status: appointment_status("status").default("SCHEDULED").notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),

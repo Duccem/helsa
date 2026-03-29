@@ -26,6 +26,14 @@ const mappingStatus = {
   FINISHED: "Completada",
 };
 
+const appointmentTypes = {
+  CONSULTATION: "Consulta",
+  FOLLOW_UP: "Seguimiento",
+  CHECK_UP: "Chequeo",
+  EMERGENCY: "Emergencia",
+  PROCEDURE: "Procedimiento",
+};
+
 export const AppointmentFilters = () => {
   const [status, setStatus] = useQueryState("status", parseAsString.withDefault("ALL"));
   const [type, setType] = useQueryState("type", parseAsString.withDefault("ALL"));
@@ -37,39 +45,34 @@ export const AppointmentFilters = () => {
             <Search className="absolute size-4 left-2 top-2" />
             <Input className="w-full pl-8" placeholder="Busca por paciente o motivo" />
           </div>
-          {status && (
-            <Select onValueChange={(value) => setStatus(value)} defaultValue={status}>
-              <SelectTrigger className={"w-[200px]"}>
-                <Filter />
-                {mappingStatus[status as keyof typeof mappingStatus] || "Todos los estados"}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={"ALL"}>Todos los estados</SelectItem>
-                <SelectItem value={"SCHEDULE"}>Agendada</SelectItem>
-                <SelectItem value={"CONFIRMED"}>Confirmada</SelectItem>
-                <SelectItem value={"PAYED"}>Pagada</SelectItem>
-                <SelectItem value={"READY"}>Lista</SelectItem>
-                <SelectItem value={"STARTED"}>En curso</SelectItem>
-                <SelectItem value={"CANCELLED"}>Cancelada</SelectItem>
-                <SelectItem value={"MISSED_BY_PATIENT"}>Retrasada</SelectItem>
-                <SelectItem value={"MISSED_BY_THERAPIST"}>Retrasada</SelectItem>
-                <SelectItem value={"FINISHED"}>Completada</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-          {type && (
-            <Select onValueChange={(value) => setType(value)} defaultValue={type}>
-              <SelectTrigger className={"w-[200px]"}>
-                <Filter />
-                {type === "ALL" ? "Todos los tipos" : type === "INITIAL" ? "Inicial" : "Terapia"}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={"ALL"}>Todos los tipos</SelectItem>
-                <SelectItem value={"INITIAL"}>Inicial</SelectItem>
-                <SelectItem value={"THERAPY"}>Terapia</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+          <Select onValueChange={(value) => setStatus(value)} defaultValue={status} value={status}>
+            <SelectTrigger className={"w-[200px]"}>
+              <Filter />
+              {mappingStatus[status as keyof typeof mappingStatus] || "Todos los estados"}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={"ALL"}>Todos los estados</SelectItem>
+              {Object.entries(mappingStatus).map(([key, label]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select onValueChange={(value) => setType(value)} defaultValue={type} value={type}>
+            <SelectTrigger className={"w-[200px]"}>
+              <Filter />
+              {type === "ALL" ? "Todos los tipos" : type === "INITIAL" ? "Inicial" : "Terapia"}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={"ALL"}>Todos los tipos</SelectItem>
+              {Object.entries(appointmentTypes).map(([key, label]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
     </Card>

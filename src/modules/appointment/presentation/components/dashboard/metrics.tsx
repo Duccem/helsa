@@ -5,13 +5,13 @@ import { Ban, CalendarDays, CheckCircle, Loader2, Target } from "lucide-react";
 import { useAppointments } from "./provider";
 
 export const AppointmentMetrics = () => {
-  const { appointments, isFetching } = useAppointments();
-  const total = appointments.length;
-  const completed = appointments.filter((a) => a.status === "FINISHED").length;
-  const pending = appointments.filter((a) => a.status === "READY").length;
-  const cancelled = appointments.filter((a) => a.status === "CANCELLED").length;
+  const { dayStats, isFetchingStats } = useAppointments();
+  const total = dayStats.length;
+  const completed = dayStats.filter((a) => a.status === "FINISHED").length;
+  const pending = dayStats.filter((a) => a.status === "READY").length;
+  const cancelled = dayStats.filter((a) => a.status === "CANCELLED").length;
 
-  if (isFetching) {
+  if (isFetchingStats) {
     return <AppointmentMetricsSkeleton />;
   }
 
