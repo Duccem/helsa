@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { motion, type Variants, useReducedMotion } from "framer-motion";
 import { BarChart3, MessageSquare, Sparkles, Target } from "lucide-react";
 const aiFeatures = [
@@ -42,11 +42,7 @@ export default function AICompanion() {
                 transition={{ duration: 0.6 }}
                 className="relative rounded-3xl overflow-hidden shadow-2xl"
               >
-                <img
-                  src={'/images/ai-companion.jpg'}
-                  alt="AI Companion"
-                  className="w-full h-auto object-cover"
-                />
+                <img src={"/images/ai-companion.jpg"} alt="AI Companion" className="w-full h-auto object-cover" />
               </motion.div>
 
               {/* Floating message bubbles */}
@@ -59,7 +55,8 @@ export default function AICompanion() {
               >
                 <div className="text-sm text-muted-foreground mb-2">AI Operations Assistant</div>
                 <div className="text-foreground">
-                  "3 cardiology follow-ups lack labs. Cash flow forecast up 12% after automations. Suggested actions ready."
+                  "3 cardiology follow-ups lack labs. Cash flow forecast up 12% after automations. Suggested actions
+                  ready."
                 </div>
               </motion.div>
             </div>
@@ -72,7 +69,7 @@ export default function AICompanion() {
             transition={{ duration: 0.6 }}
             className="order-1 lg:order-2"
           >
-            <div className="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
+            <div className="inline-flex items-center space-x-2 bg-indigo-500/50 px-4 py-2 rounded-full mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium text-primary">AI clinic copilot</span>
             </div>
@@ -82,7 +79,8 @@ export default function AICompanion() {
             </h2>
 
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Helsa AI analyzes charts, agendas, and collections in real time to recommend the next best action. Physicians receive diagnostic cues while operations teams get instant insight on caseloads and cash flow.
+              Helsa AI analyzes charts, agendas, and collections in real time to recommend the next best action.
+              Physicians receive diagnostic cues while operations teams get instant insight on caseloads and cash flow.
             </p>
 
             <div className="space-y-6">
@@ -95,7 +93,7 @@ export default function AICompanion() {
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   className="flex items-start space-x-4"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-lg bg-indigo-500/50 flex items-center justify-center shrink-0">
                     <feature.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -109,5 +107,5 @@ export default function AICompanion() {
         </div>
       </div>
     </section>
-  )
+  );
 }

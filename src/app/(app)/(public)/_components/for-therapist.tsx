@@ -86,7 +86,7 @@ const ForTherapists = () => {
                   transition={{ duration: 0.4, delay: index * 0.1 }}
                   className="flex items-start space-x-4"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 rounded-lg bg-indigo-500/50 flex items-center justify-center shrink-0">
                     <feature.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>

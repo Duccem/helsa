@@ -174,12 +174,12 @@ const teacherMenuConfig: MenuConfig = {
       title: "Clinic",
       items: [
         {
-          title: "Dashboard",
+          title: "Inicio",
           url: "/home",
           icon: LayoutDashboard,
         },
         {
-          title: "Appointments",
+          title: "Itinerario",
           url: "/appointments",
           icon: Calendar,
         },

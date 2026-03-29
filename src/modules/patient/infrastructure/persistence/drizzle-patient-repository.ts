@@ -1,7 +1,7 @@
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 import { database } from "@/modules/shared/infrastructure/database/client";
 import { and, count, eq, ilike, or } from "drizzle-orm";
-import { Patient, PatientGenderValues, PatientId } from "../../domain/patient";
+import { Patient, PatientGenderValues, PatientId, PatientUserId } from "../../domain/patient";
 import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-repository";
 import { contact_info, patient } from "./patient.schema";
 
@@ -76,6 +76,21 @@ export class DrizzlePatientRepository implements PatientRepository {
         phone: contact.phone ?? undefined,
         address: contact.address ?? undefined,
       })),
+    });
+  }
+
+  async findByUserId(userId: PatientUserId): Promise<Patient | null> {
+    const item = await database.query.patient.findFirst({
+      where: eq(patient.user_id, userId.value),
+    });
+
+    if (!item) {
+      return null;
+    }
+
+    return Patient.fromPrimitives({
+      ...item,
+      gender: item.gender as PatientGenderValues,
     });
   }
 

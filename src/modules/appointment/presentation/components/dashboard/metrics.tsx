@@ -1,15 +1,20 @@
 "use client";
 
 import { Card, CardContent } from "@/modules/shared/presentation/components/ui/card";
-import { Ban, CalendarDays, CheckCircle, Target } from "lucide-react";
+import { Ban, CalendarDays, CheckCircle, Loader2, Target } from "lucide-react";
 import { useAppointments } from "./provider";
 
 export const AppointmentMetrics = () => {
-  const { appointments } = useAppointments();
+  const { appointments, isFetching } = useAppointments();
   const total = appointments.length;
   const completed = appointments.filter((a) => a.status === "FINISHED").length;
   const pending = appointments.filter((a) => a.status === "READY").length;
   const cancelled = appointments.filter((a) => a.status === "CANCELLED").length;
+
+  if (isFetching) {
+    return <AppointmentMetricsSkeleton />;
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
       <Card className="max-sm:rounded-b-none md:rounded-r-none">
@@ -60,6 +65,65 @@ export const AppointmentMetrics = () => {
             </div>
             <div className="flex flex-col items-end">
               <Ban className="size-4 text-rose-500" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export const AppointmentMetricsSkeleton = () => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
+      <Card className="animate-pulse max-sm:rounded-b-none md:rounded-r-none">
+        <CardContent>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+              <p className="text-2xl font-bold">&nbsp;</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <Loader2 className="size-5 animate-spin text-primary" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="animate-pulse  md:rounded-none">
+        <CardContent>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+              <p className="text-2xl font-bold">&nbsp;</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <Loader2 className="size-5 animate-spin text-primary" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="animate-pulse  md:rounded-none">
+        <CardContent>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+              <p className="text-2xl font-bold">&nbsp;</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <Loader2 className="size-5 animate-spin text-primary" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="animate-pulse max-sm:rounded-t-none md:rounded-l-none">
+        <CardContent>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
+              <p className="text-2xl font-bold">&nbsp;</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <Loader2 className="size-5 animate-spin text-primary" />
             </div>
           </div>
         </CardContent>

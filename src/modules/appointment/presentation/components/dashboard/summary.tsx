@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react";
 
 export const AppointmentSummary = () => {
   return (
-    <Card className="bg-primary/30">
+    <Card className="bg-primary border-none">
       <CardContent className="flex items-center gap-4 p-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/50">
           <Sparkles className="h-5 w-5 " />

@@ -11,12 +11,13 @@ import {
 } from "@/modules/shared/presentation/components/ui/dropdown-menu";
 import { ScrollArea } from "@/modules/shared/presentation/components/ui/scroll-area";
 import { cn } from "@/modules/shared/presentation/lib/utils";
-import { MapPin, MoreHorizontal, User, Video } from "lucide-react";
+import { MapPin, MoreHorizontal, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppointments } from "./provider";
 import { Primitives } from "@/modules/shared/domain/primitives";
 import { Appointment } from "@/modules/appointment/domain/appointment";
 import { format } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/presentation/components/ui/avatar";
 
 const mappingStatus = {
   SCHEDULED: "Agendada",
@@ -31,9 +32,18 @@ const mappingStatus = {
 };
 
 export const AppointmentList = () => {
-  const { appointments } = useAppointments();
+  const { appointments, isFetching } = useAppointments();
+  if (isFetching) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, index) => (
+          <AppointmentListItemSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
   return (
-    <ScrollArea className={"h-[500px] pr-6 pb-2"}>
+    <ScrollArea className={"h-[500px]  pb-2"}>
       <div className="flex flex-col gap-4">
         {appointments.map((appointment, index) => (
           <AppointmentListItem key={appointment.id} appointment={appointment} index={index} />
@@ -41,6 +51,18 @@ export const AppointmentList = () => {
       </div>
     </ScrollArea>
   );
+};
+
+const calculateAge = (dateOfBirth: Date) => {
+  const today = new Date();
+  let age = today.getFullYear() - dateOfBirth.getFullYear();
+  const monthDifference = today.getMonth() - dateOfBirth.getMonth();
+
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dateOfBirth.getDate())) {
+    age--;
+  }
+
+  return age;
 };
 
 export const AppointmentListItem = ({
@@ -54,7 +76,7 @@ export const AppointmentListItem = ({
   return (
     <Card
       key={appointment.id}
-      className={cn(" transition-all hover:bg-accent/60  animate-fade-in border", {
+      className={cn(" transition-all hover:bg-accent/60 border-none  animate-fade-in border", {
         "bg-primary hover:bg-primary/60": appointment.status === "STARTED",
       })}
       style={{ animationDelay: `${index * 50}ms` }}
@@ -73,25 +95,29 @@ export const AppointmentListItem = ({
           <div className="flex-1 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div
-                  className={cn("flex h-8 w-8 items-center justify-center rounded-full bg-primary/10", {
-                    "bg-indigo-500": appointment.status === "STARTED",
-                  })}
-                >
-                  <User
-                    className={cn("h-4 w-4 text-primary", {
-                      "text-white": appointment.status === "STARTED",
-                    })}
+                <Avatar>
+                  <AvatarImage
+                    src={appointment.patient?.photo_url ?? ""}
+                    alt={appointment.patient?.name ?? ""}
+                    className="grayscale"
                   />
-                </div>
+                  <AvatarFallback className={"bg-primary"}>
+                    {appointment.patient?.name ? appointment.patient.name.at(0)?.toUpperCase() : "?"}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <p className="font-semibold text-sm">{"Name"}</p>
+                  <p className="font-semibold text-sm">{appointment.patient?.name ?? ""}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {appointment.patient?.birth_date
+                      ? `${calculateAge(new Date(appointment.patient.birth_date))} años`
+                      : ""}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Badge
                   variant="outline"
-                  className={cn({
+                  className={cn(" rounded-full ", {
                     "border-green-500/50 text-green-500": appointment.status === "CONFIRMED",
                     "border-yellow-500/50 text-yellow-500": appointment.status === "STARTED",
                     "border-red-500/50 text-red-500": appointment.status === "CANCELLED",
@@ -130,6 +156,55 @@ export const AppointmentListItem = ({
               <span>{appointment.type}</span>
               <span>•</span>
               <span>{appointment.motive}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export const AppointmentListItemSkeleton = () => {
+  return (
+    <Card className="animate-pulse border-none">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          {/* Time Block */}
+          <div className="flex-shrink-0 text-center min-w-[70px]">
+            <div className="h-4 w-12 bg-muted rounded" />
+          </div>
+
+          {/* Divider */}
+          <div className="w-px self-stretch bg-border" />
+
+          {/* Content */}
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarFallback className={"bg-primary"}>?</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="h-4 w-20 bg-muted rounded mb-1" />
+                  <div className="h-3 w-12 bg-muted rounded" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="rounded-full border-gray-500/50 text-gray-500">
+                  Loading
+                </Badge>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-xs">
+              <div className="h-3 w-16 bg-muted rounded" />
+              <span>•</span>
+              <div className="h-3 w-10 bg-muted rounded" />
+              <span>•</span>
+              <div className="h-3 w-24 bg-muted rounded" />
             </div>
           </div>
         </div>

@@ -10,10 +10,17 @@ import type {
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
 import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
-import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
+import { authenticate, authenticateOrg } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
 import { routeHandler } from "@/modules/shared/infrastructure/http/route-handler";
+import { SearchAppointments } from "@/modules/appointment/application/search-appointments";
+import { GetDoctorDetails } from "@/modules/doctor/application/get-doctor-details";
+import { DrizzleDoctorRepository } from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
+import { GetDoctorProfile } from "@/modules/doctor/application/get-doctor-profile";
+import { GetPatientDetails } from "@/modules/patient/application/get-patient-details";
+import { GetPatientProfile } from "@/modules/patient/application/get-patient-profile";
+import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
 
 const insertAppointmentSchema = z.object({
   date: z.coerce.date().describe("The date selected for the appointment."),
@@ -85,16 +92,37 @@ const searchAppointmentsSchema = z.object({
 });
 
 export const GET = async (request: NextRequest) => {
-  await authenticate();
+  const { session } = await authenticate();
   const query = parseQuery(request, searchAppointmentsSchema);
-  const service = new SearchAppointmentsList(new DrizzleAppointmentRepository());
+  const service = new SearchAppointments(new DrizzleAppointmentRepository());
 
   return routeHandler(
     async () => {
+      let doctorId = query.doctorId;
+      let patientId = query.patientId;
+      let orgId = query.organizationId;
+
+      if (session.user.role === "doctor") {
+        const doctorService = new GetDoctorProfile(new DrizzleDoctorRepository());
+        const doctorProfile = await doctorService.execute(session.user.id);
+        doctorId = doctorProfile.id;
+      }
+
+      if (session.user.role === "patient") {
+        const patientService = new GetPatientProfile(new DrizzlePatientRepository());
+        const patientProfile = await patientService.execute(session.user.id);
+        patientId = patientProfile.id;
+      }
+
+      if (session.user.role === "admin") {
+        const org = await authenticateOrg();
+        orgId = org.id;
+      }
+
       const result = await service.execute({
-        organization_id: query.organizationId,
-        doctor_id: query.doctorId,
-        patient_id: query.patientId,
+        organization_id: orgId,
+        doctor_id: doctorId,
+        patient_id: patientId,
         status: query.state as AppointmentStatusValues | undefined,
         mode: query.mode as AppointmentModeValues | undefined,
         type: query.type as AppointmentTypeValues | undefined,

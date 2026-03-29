@@ -36,7 +36,7 @@ const MobileApp = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center space-x-2 bg-indigo-500/50 px-4 py-2 rounded-full mb-6">
             <Smartphone className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">Mobile ops</span>
           </div>

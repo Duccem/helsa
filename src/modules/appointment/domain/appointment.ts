@@ -7,6 +7,7 @@ import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { AppointmentRating } from "./appointment-rating";
 import { AppointmentNote } from "./appointment-note";
 import { AppointmentAlreadyHasRating } from "./appointment-already-has-rating";
+import { AppointmentPatient } from "./appointment-patient";
 
 export class AppointmentId extends Uuid {}
 export class AppointmentOrganizationId extends Uuid {}
@@ -32,6 +33,7 @@ export class Appointment extends Aggregate {
     public updated_at: AppointmentUpdatedAt,
     public rating?: AppointmentRating,
     public notes?: AppointmentNote[],
+    public patient?: AppointmentPatient,
   ) {
     super(id);
   }
@@ -51,6 +53,7 @@ export class Appointment extends Aggregate {
       updated_at: this.updated_at.value,
       rating: this.rating ? this.rating.toPrimitives() : undefined,
       notes: this.notes ? this.notes.map((note) => note.toPrimitives()) : undefined,
+      patient: this.patient ? this.patient.toPrimitives() : undefined,
     };
   }
 
@@ -69,6 +72,7 @@ export class Appointment extends Aggregate {
       AppointmentUpdatedAt.fromDate(primitives.updated_at),
       primitives.rating ? AppointmentRating.fromPrimitives(primitives.rating) : undefined,
       primitives.notes ? primitives.notes.map((note) => AppointmentNote.fromPrimitives(note)) : undefined,
+      primitives.patient ? AppointmentPatient.fromPrimitives(primitives.patient) : undefined,
     );
   }
 

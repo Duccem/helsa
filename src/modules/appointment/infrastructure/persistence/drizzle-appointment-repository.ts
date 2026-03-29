@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, lte, getTableColumns } from "drizzle-orm";
 import { user } from "@/modules/auth/infrastructure/persistence/auth.schema";
 import { doctor } from "@/modules/doctor/infrastructure/persistence/doctor.schema";
 import { patient } from "@/modules/patient/infrastructure/persistence/patient.schema";
@@ -117,12 +117,24 @@ export class DrizzleAppointmentRepository implements AppointmentRepository {
   async search(criteria: AppointmentSearchCriteria): Promise<PaginatedResult<Appointment>> {
     const query = this.buildQuery(criteria);
     const [items, total] = await Promise.all([
-      database.query.appointment.findMany({
-        where: query,
-        limit: criteria.pageSize,
-        offset: (criteria.page - 1) * criteria.pageSize,
-        orderBy: this.buildOrderBy(criteria),
-      }),
+      database
+        .select({
+          ...getTableColumns(appointment),
+          patient: {
+            id: patient.id,
+            name: patient.name,
+            email: patient.email,
+            photo_url: user.image,
+            birth_date: patient.birth_date,
+          },
+        })
+        .from(appointment)
+        .leftJoin(patient, eq(appointment.patient_id, patient.id))
+        .leftJoin(user, eq(patient.user_id, user.id))
+        .where(query)
+        .orderBy(this.buildOrderBy(criteria))
+        .limit(criteria.pageSize)
+        .offset((criteria.page - 1) * criteria.pageSize),
       database
         .select({ count: count(appointment.id) })
         .from(appointment)
@@ -135,6 +147,15 @@ export class DrizzleAppointmentRepository implements AppointmentRepository {
         mode: item.mode as AppointmentModeValues,
         status: item.status as AppointmentStatusValues,
         type: item.type as AppointmentTypeValues,
+        patient: item.patient
+          ? {
+              id: item.patient.id ?? "",
+              name: item.patient.name ?? "",
+              email: item.patient.email ?? "",
+              photo_url: item.patient.photo_url ?? undefined,
+              birth_date: item.patient.birth_date ?? new Date(),
+            }
+          : undefined,
       }),
     );
     const pagination = buildPagination(total[0].count, criteria.page, criteria.pageSize);

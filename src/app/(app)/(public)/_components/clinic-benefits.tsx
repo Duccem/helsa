@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { motion } from "framer-motion";
 import { Building2, CalendarClock, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 
@@ -42,18 +42,18 @@ export default function ClinicBenefits() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center space-x-2 bg-indigo-500/50 px-4 py-2 rounded-full mb-6">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">Clinic benefits | Coming soon</span>
           </div>
-          <h2 className="text-4xl lg:text-5xl font-bold mb-4">
-            Built for medical centers ready to scale
-          </h2>
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4">Built for medical centers ready to scale</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Helsa connects administrative and clinical teams so every day blends operational efficiency, financial insight, and real-time AI support.
+            Helsa connects administrative and clinical teams so every day blends operational efficiency, financial
+            insight, and real-time AI support.
           </p>
           <p className="text-sm text-muted-foreground max-w-2xl mx-auto mt-4">
-            We&apos;re finalizing the launch now—join the waitlist to be notified when Helsa is available for your facilities.
+            We&apos;re finalizing the launch now—join the waitlist to be notified when Helsa is available for your
+            facilities.
           </p>
         </motion.div>
 
@@ -67,7 +67,7 @@ export default function ClinicBenefits() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="border border-border rounded-2xl p-6 bg-card"
             >
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-lg bg-indigo-500/50 flex items-center justify-center mb-4">
                 <benefit.icon className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-2xl font-semibold mb-2">{benefit.title}</h3>
@@ -94,3 +94,4 @@ export default function ClinicBenefits() {
     </section>
   );
 }
+
