@@ -21,18 +21,6 @@ const registerDoctorSchema = z.object({
   licenseNumber: z.string().min(1),
   experience: z.coerce.number().min(0),
   bio: z.string().optional(),
-  prices: z.array(z.coerce.number().positive()).optional(),
-  officeAddresses: z
-    .array(
-      z.object({
-        address: z.string().min(1),
-        location: z.object({
-          latitude: z.coerce.number(),
-          longitude: z.coerce.number(),
-        }),
-      }),
-    )
-    .optional(),
 });
 
 export const POST = async (request: NextRequest) => {
@@ -52,8 +40,6 @@ export const POST = async (request: NextRequest) => {
         license_number: body.licenseNumber,
         experience: body.experience,
         bio: body.bio,
-        prices: body.prices,
-        office_addresses: body.officeAddresses,
       });
 
       return HttpNextResponse.created();

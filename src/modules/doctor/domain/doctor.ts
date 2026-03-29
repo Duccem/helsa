@@ -107,11 +107,11 @@ export class Doctor extends Aggregate {
     this.updated_at = DoctorUpdatedAt.now();
   }
 
-  addPrice(amount: number): void {
+  addPrice(amount: number, mode: string): void {
     if (!this.prices) {
       this.prices = [];
     }
-    this.prices.push(Price.create(this.id.value, amount));
+    this.prices.push(Price.create(this.id.value, amount, mode));
     this.updated_at = DoctorUpdatedAt.now();
   }
 

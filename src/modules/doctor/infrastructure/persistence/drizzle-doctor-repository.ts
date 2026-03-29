@@ -7,7 +7,6 @@ import { Specialty, SpecialtyId } from "../../domain/specialty";
 import { doctor, education, office_address, price, specialty } from "./doctor.schema";
 import { appointment } from "@/modules/appointment/infrastructure/persistence/appointment.schema";
 import { patient } from "@/modules/patient/infrastructure/persistence/patient.schema";
-import { user } from "@/modules/auth/infrastructure/persistence/auth.schema";
 import { DoctorPatient } from "../../domain/doctor-patient";
 
 export class DrizzleDoctorRepository implements DoctorRepository {
@@ -25,38 +24,38 @@ export class DrizzleDoctorRepository implements DoctorRepository {
     });
 
     if (doctorPrices) {
-      await database.transaction(async (tx) => {
-        for (const doctorPrice of doctorPrices) {
-          await tx
-            .insert(price)
-            .values(doctorPrice)
-            .onConflictDoUpdate({
-              target: price.id,
-              set: {
-                amount: doctorPrice.amount,
-                updated_at: doctorPrice.updated_at,
-              },
-            });
-        }
-      });
+      for (const priceData of doctorPrices) {
+        await database
+          .insert(price)
+          .values({
+            doctor_id: priceData.doctor_id,
+            id: priceData.id,
+            amount: priceData.amount,
+            payment_mode: priceData.payment_mode as "PREPAID" | "POSTPAID" | "CREDIT",
+          })
+          .onConflictDoUpdate({
+            target: price.id,
+            set: {
+              amount: priceData.amount,
+            },
+          });
+      }
     }
 
     if (officeAddresses) {
-      await database.transaction(async (tx) => {
-        for (const officeAddress of officeAddresses) {
-          await tx
-            .insert(office_address)
-            .values(officeAddress)
-            .onConflictDoUpdate({
-              target: office_address.id,
-              set: {
-                address: officeAddress.address,
-                location: officeAddress.location,
-                updated_at: officeAddress.updated_at,
-              },
-            });
-        }
-      });
+      for (const officeAddress of officeAddresses) {
+        await database
+          .insert(office_address)
+          .values(officeAddress)
+          .onConflictDoUpdate({
+            target: office_address.id,
+            set: {
+              address: officeAddress.address,
+              location: officeAddress.location,
+              updated_at: officeAddress.updated_at,
+            },
+          });
+      }
     }
 
     if (doctorEducation) {

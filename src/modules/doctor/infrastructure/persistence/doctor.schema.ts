@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, jsonb, pgTable, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { integer, jsonb, pgEnum, pgTable, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { v7 } from "uuid";
 
 export const specialty = pgTable("specialty", {
@@ -26,17 +26,15 @@ export const doctor = pgTable("doctor", {
     .$onUpdate(() => new Date()),
 });
 
+export const price_payment_mode = pgEnum("price_payment_mode", ["PREPAID", "POSTPAID", "CREDIT"]);
+
 export const price = pgTable("price", {
   id: uuid("id").$defaultFn(v7).primaryKey(),
   doctor_id: uuid("therapist_id")
     .notNull()
     .references(() => doctor.id),
   amount: real("amount").notNull().default(10.0),
-  created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at")
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+  payment_mode: price_payment_mode("payment_mode").notNull().default("PREPAID"),
 });
 
 export const office_address = pgTable("office_address", {

@@ -1,4 +1,4 @@
-import { UpdateDoctorPrice } from "@/modules/doctor/application/update-doctor-price";
+import { AddDoctorPrice } from "@/modules/doctor/application/add-doctor-price";
 import { DoctorNotFound } from "@/modules/doctor/domain/doctor-not-found";
 import { DrizzleDoctorRepository } from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
@@ -15,17 +15,18 @@ const paramsSchema = z.object({
 
 const bodySchema = z.object({
   amount: z.coerce.number().positive(),
+  mode: z.enum(["CREDIT", "POSTPAID", "PREPAID"]),
 });
 
 export const POST = async (request: NextRequest, ctx: RouteContext<"/api/doctor/[id]/price">) => {
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new UpdateDoctorPrice(new DrizzleDoctorRepository());
+  const service = new AddDoctorPrice(new DrizzleDoctorRepository());
 
   return routeHandler(
     async () => {
-      await service.execute(id, body.amount);
+      await service.execute(id, body.amount, body.mode);
       return HttpNextResponse.noContent();
     },
     (error: DoctorNotFound | InvalidArgument) => {

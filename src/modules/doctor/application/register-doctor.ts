@@ -20,11 +20,6 @@ export class RegisterDoctor {
     license_number: string;
     experience: number;
     bio?: string;
-    prices?: number[];
-    office_addresses?: Array<{
-      address: string;
-      location: { latitude: number; longitude: number };
-    }>;
   }): Promise<void> {
     const existing = await this.doctorRepository.findByUserId(DoctorUserId.fromString(params.user_id));
     if (existing) {
@@ -48,18 +43,6 @@ export class RegisterDoctor {
       params.experience,
       params.bio,
     );
-
-    if (params.prices) {
-      for (const amount of params.prices) {
-        doctor.addPrice(amount);
-      }
-    }
-
-    if (params.office_addresses) {
-      for (const officeAddress of params.office_addresses) {
-        doctor.addOfficeAddress(officeAddress.address, officeAddress.location);
-      }
-    }
 
     await this.doctorRepository.save(doctor);
   }
