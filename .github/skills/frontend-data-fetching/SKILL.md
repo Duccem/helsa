@@ -18,17 +18,15 @@ import { useQuery } from "@tanstack/react-query";
 
 export const UserProfile = ({ userId }) => {
   const { data, error, isLoading } = useQuery(
-    ["user", userId],
-    async () => {
+    queryKey: ["user", userId],
+    refetchOnWindowFocus: false,
+    initialData: { name: "", email: "" },
+    queryFn: async () => {
       const response = await fetch(`/api/users/${userId}`);
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       return response.json();
-    },
-    {
-      refetchOnWindowFocus: false,
-      initialData: { name: "", email: "" },
     },
   );
 
@@ -51,3 +49,4 @@ export const UserProfile = ({ userId }) => {
 
 - For more complex data fetching scenarios, such as dependent queries or mutations, refer to the @tanstack/react-query documentation for additional hooks and patterns.
 - Always ensure that the data fetching logic is encapsulated within the component and does not leak into other parts of the application, to maintain separation of concerns and improve maintainability.
+
