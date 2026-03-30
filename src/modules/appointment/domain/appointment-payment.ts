@@ -18,14 +18,14 @@ class AppointmentPaymentDate extends Timestamp {}
 export class AppointmentPayment extends DomainEntity {
   constructor(
     id: AppointmentPaymentId,
-    public appointmentId: AppointmentPaymentAppointmentId,
+    public appointment_id: AppointmentPaymentAppointmentId,
     public amount: AppointmentPaymentAmount,
-    public currentPaidAmount: AppointmentPaymentCurrentPaidAmount,
+    public current_paid_amount: AppointmentPaymentCurrentPaidAmount,
     public currency: AppointmentPaymentCurrency,
-    public paymentMode: AppointmentPaymentMode,
-    public paymentMethod: AppointmentPaymentMethod,
-    public paymentStatus: AppointmentPaymentStatus,
-    public paymentDate: AppointmentPaymentDate | null = null,
+    public payment_mode: AppointmentPaymentMode,
+    public payment_method: AppointmentPaymentMethod,
+    public payment_status: AppointmentPaymentStatus,
+    public payment_date: AppointmentPaymentDate | null = null,
   ) {
     super(id);
   }
@@ -33,28 +33,28 @@ export class AppointmentPayment extends DomainEntity {
   toPrimitives(): Primitives<AppointmentPayment> {
     return {
       id: this.id.value,
-      appointmentId: this.appointmentId.value,
+      appointment_id: this.appointment_id.value,
       amount: this.amount.value,
-      currentPaidAmount: this.currentPaidAmount.value,
+      current_paid_amount: this.current_paid_amount.value,
       currency: this.currency.value,
-      paymentMode: this.paymentMode.value,
-      paymentMethod: this.paymentMethod.value,
-      paymentStatus: this.paymentStatus.value,
-      paymentDate: this.paymentDate ? this.paymentDate.value : null,
+      payment_mode: this.payment_mode.value,
+      payment_method: this.payment_method.value,
+      payment_status: this.payment_status.value,
+      payment_date: this.payment_date ? this.payment_date.value : null,
     };
   }
 
   static fromPrimitives(primitives: Primitives<AppointmentPayment>): AppointmentPayment {
     return new AppointmentPayment(
       new AppointmentPaymentId(primitives.id),
-      new AppointmentPaymentAppointmentId(primitives.appointmentId),
+      new AppointmentPaymentAppointmentId(primitives.appointment_id),
       new AppointmentPaymentAmount(primitives.amount),
-      new AppointmentPaymentCurrentPaidAmount(primitives.currentPaidAmount),
+      new AppointmentPaymentCurrentPaidAmount(primitives.current_paid_amount),
       new AppointmentPaymentCurrency(primitives.currency),
-      new AppointmentPaymentMode(primitives.paymentMode),
-      new AppointmentPaymentMethod(primitives.paymentMethod),
-      new AppointmentPaymentStatus(primitives.paymentStatus),
-      primitives.paymentDate ? new AppointmentPaymentDate(primitives.paymentDate) : null,
+      new AppointmentPaymentMode(primitives.payment_mode),
+      new AppointmentPaymentMethod(primitives.payment_method),
+      new AppointmentPaymentStatus(primitives.payment_status),
+      primitives.payment_date ? new AppointmentPaymentDate(primitives.payment_date) : null,
     );
   }
 

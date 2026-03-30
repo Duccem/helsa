@@ -8,6 +8,19 @@ import { AppointmentRating } from "./appointment-rating";
 import { AppointmentNote } from "./appointment-note";
 import { AppointmentAlreadyHasRating } from "./appointment-already-has-rating";
 import { AppointmentPatient } from "./appointment-patient";
+import { AppointmentPayment } from "./appointment-payment";
+import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+
+const hourRegex = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
+
+const normalizeHour = (value: string): string => {
+  if (!hourRegex.test(value)) {
+    throw new InvalidArgument({ argument: "AppointmentHour", value });
+  }
+
+  const [hour, minute, second] = value.split(":");
+  return `${hour}:${minute}:${second ?? "00"}`;
+};
 
 export class AppointmentId extends Uuid {}
 export class AppointmentOrganizationId extends Uuid {}
@@ -17,6 +30,18 @@ export class AppointmentDate extends Timestamp {}
 export class AppointmentMotive extends StringValueObject {}
 export class AppointmentCreatedAt extends Timestamp {}
 export class AppointmentUpdatedAt extends Timestamp {}
+export class AppointmentHour extends StringValueObject {
+  override validate(): void {
+    super.validate();
+    if (!hourRegex.test(this.value)) {
+      throw new InvalidArgument({ argument: this.constructor.name, value: this.value });
+    }
+  }
+
+  static override fromString(value: string): AppointmentHour {
+    return new AppointmentHour(normalizeHour(value));
+  }
+}
 
 export class Appointment extends Aggregate {
   constructor(
@@ -25,6 +50,7 @@ export class Appointment extends Aggregate {
     public patient_id: AppointmentPatientId,
     public doctor_id: AppointmentDoctorId,
     public date: AppointmentDate,
+    public hour: AppointmentHour,
     public motive: AppointmentMotive,
     public type: AppointmentType,
     public mode: AppointmentMode,
@@ -34,6 +60,7 @@ export class Appointment extends Aggregate {
     public rating?: AppointmentRating,
     public notes?: AppointmentNote[],
     public patient?: AppointmentPatient,
+    public payment?: AppointmentPayment,
   ) {
     super(id);
   }
@@ -45,6 +72,7 @@ export class Appointment extends Aggregate {
       patient_id: this.patient_id.value,
       doctor_id: this.doctor_id.value,
       date: this.date.value,
+      hour: this.hour.value,
       motive: this.motive.value,
       type: this.type.value,
       mode: this.mode.value,
@@ -54,6 +82,7 @@ export class Appointment extends Aggregate {
       rating: this.rating ? this.rating.toPrimitives() : undefined,
       notes: this.notes ? this.notes.map((note) => note.toPrimitives()) : undefined,
       patient: this.patient ? this.patient.toPrimitives() : undefined,
+      payment: this.payment ? this.payment.toPrimitives() : undefined,
     };
   }
 
@@ -64,6 +93,7 @@ export class Appointment extends Aggregate {
       AppointmentPatientId.fromString(primitives.patient_id),
       AppointmentDoctorId.fromString(primitives.doctor_id),
       AppointmentDate.fromDate(primitives.date),
+      AppointmentHour.fromString(primitives.hour),
       AppointmentMotive.fromString(primitives.motive),
       AppointmentType.fromString(primitives.type as AppointmentTypeValues),
       AppointmentMode.fromString(primitives.mode as AppointmentModeValues),
@@ -73,6 +103,7 @@ export class Appointment extends Aggregate {
       primitives.rating ? AppointmentRating.fromPrimitives(primitives.rating) : undefined,
       primitives.notes ? primitives.notes.map((note) => AppointmentNote.fromPrimitives(note)) : undefined,
       primitives.patient ? AppointmentPatient.fromPrimitives(primitives.patient) : undefined,
+      primitives.payment ? AppointmentPayment.fromPrimitives(primitives.payment) : undefined,
     );
   }
 
@@ -80,17 +111,20 @@ export class Appointment extends Aggregate {
     patient_id: string,
     doctor_id: string,
     date: Date,
+    hour: string,
     motive: string,
     type: string = AppointmentTypeValues.CONSULTATION,
     mode: string = AppointmentModeValues.ONLINE,
     organization_id: string | null = null,
+    payment?: { amount: number; currency: string; mode: string },
   ): Appointment {
-    return new Appointment(
+    const appointment = new Appointment(
       AppointmentId.generate(),
       organization_id ? AppointmentOrganizationId.fromString(organization_id) : null,
       AppointmentPatientId.fromString(patient_id),
       AppointmentDoctorId.fromString(doctor_id),
       AppointmentDate.fromDate(date),
+      AppointmentHour.fromString(hour),
       AppointmentMotive.fromString(motive),
       AppointmentType.fromString(type),
       AppointmentMode.fromString(mode),
@@ -98,6 +132,17 @@ export class Appointment extends Aggregate {
       AppointmentCreatedAt.now(),
       AppointmentUpdatedAt.now(),
     );
+
+    if (payment) {
+      appointment.payment = AppointmentPayment.create(
+        appointment.id.value,
+        payment.amount,
+        payment.currency,
+        payment.mode,
+      );
+    }
+
+    return appointment;
   }
 
   addRating(score: number): void {
@@ -166,13 +211,8 @@ export class AppointmentMode extends Enum<AppointmentModeValues> {
 
 export enum AppointmentStatusValues {
   SCHEDULED = "SCHEDULED",
-  CONFIRMED = "CONFIRMED",
-  PAYED = "PAYED",
-  READY = "READY",
-  STARTED = "STARTED",
+  IN_PROGRESS = "IN_PROGRESS",
   CANCELLED = "CANCELLED",
-  MISSED_BY_PATIENT = "MISSED_BY_PATIENT",
-  MISSED_BY_THERAPIST = "MISSED_BY_THERAPIST",
   FINISHED = "FINISHED",
 }
 

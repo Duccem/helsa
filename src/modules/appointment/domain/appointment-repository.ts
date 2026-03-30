@@ -16,6 +16,7 @@ export type AppointmentSearchCriteria = PaginatedQuery & {
   doctor_id?: string;
   date_from?: Date;
   date_to?: Date;
+  hour?: string;
   status?: AppointmentStatusValues;
   mode?: AppointmentModeValues;
   type?: AppointmentTypeValues;
@@ -23,26 +24,9 @@ export type AppointmentSearchCriteria = PaginatedQuery & {
   order?: AppointmentSortOrder;
 };
 
-export type AppointmentListItem = {
-  id: string;
-  organization_id: string | null;
-  patient_id: string;
-  patient_name: string | null;
-  doctor_id: string;
-  doctor_name: string | null;
-  date: Date;
-  motive: string;
-  type: AppointmentTypeValues;
-  mode: AppointmentModeValues;
-  status: AppointmentStatusValues;
-  created_at: Date;
-  updated_at: Date;
-};
-
 export interface AppointmentRepository {
   save(appointment: Appointment): Promise<void>;
   find(id: AppointmentId): Promise<Appointment | null>;
   search(criteria: AppointmentSearchCriteria): Promise<PaginatedResult<Appointment>>;
-  searchList(criteria: AppointmentSearchCriteria): Promise<PaginatedResult<AppointmentListItem>>;
 }
 

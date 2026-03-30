@@ -25,10 +25,10 @@ import {
 } from "@/modules/shared/presentation/components/ui/select";
 import { Textarea } from "@/modules/shared/presentation/components/ui/textarea";
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { endOfDay, format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarDays, Clock3, ListCollapse, Loader2, MapPin, Pin, Users, Video } from "lucide-react";
+import { CalendarDays, CircleDollarSign, Clock3, ListCollapse, Loader2, MapPin, Pin, Users, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -42,6 +42,8 @@ const formSchema = z.object({
   reason: z.string(),
   mode: z.enum(["ONLINE", "IN_PERSON"]),
   type: z.enum(["CONSULTATION", "FOLLOW_UP", "CHECK_UP", "EMERGENCY", "PROCEDURE"]),
+  amount: z.number(),
+  payment_mode: z.string(),
 });
 
 const mapPatient = (patient: Primitives<DoctorPatient>) => ({
@@ -88,6 +90,40 @@ export const NewAppointmentForm = () => {
     },
   });
 
+  const { mutateAsync } = useMutation({
+    mutationFn: async (appointmentData: any) => {
+      const response = await fetch("/api/appointment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          doctorId: doctor?.id,
+          patientId: appointmentData.patientId,
+          date: appointmentData.date,
+          hour: appointmentData.time,
+          motive: appointmentData.reason,
+          mode: appointmentData.mode,
+          type: appointmentData.type,
+          amount: appointmentData.amount,
+          payment_mode: appointmentData.payment_mode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al agendar la cita");
+      }
+    },
+    onSuccess: () => {
+      toast.success("Cita agendada exitosamente");
+      router.push("/appointments");
+    },
+    onError: (error) => {
+      console.error("Error al agendar la cita", error);
+      toast.error("Error al agendar la cita. Please try again.");
+    },
+  });
+
   const form = useForm({
     defaultValues: {
       patientId: "",
@@ -96,33 +132,15 @@ export const NewAppointmentForm = () => {
       reason: "",
       mode: "IN_PERSON",
       type: "CONSULTATION",
+      amount: 0,
+      payment_mode: "PREPAID",
     },
     validators: {
       onSubmit: formSchema,
       onBlur: formSchema,
     },
     onSubmit: async ({ value }) => {
-      try {
-        await fetch("/api/appointment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            doctorId: doctor?.id,
-            patientId: value.patientId,
-            date: value.date,
-            time: value.time,
-            motive: value.reason,
-            mode: value.mode,
-            type: value.type,
-          }),
-        });
-        router.push("/appointments");
-      } catch (error) {
-        console.error("Failed to create appointment", error);
-        toast.error("Failed to create appointment. Please try again.");
-      }
+      await mutateAsync(value);
     },
   });
 
@@ -164,7 +182,7 @@ export const NewAppointmentForm = () => {
 
   return (
     <form
-      className="flex flex-col gap-4 col-span-1 md:col-span-2"
+      className="flex flex-col gap-4 col-span-1 md:col-span-2 pb-4"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
@@ -412,6 +430,80 @@ export const NewAppointmentForm = () => {
             );
           }}
         </form.Field>
+      </FieldGroup>
+      <FieldGroup className="bg-card p-4 rounded-2xl">
+        <div className="flex items-center gap-2">
+          <div className="bg-indigo-500 rounded-lg p-2">
+            <CircleDollarSign className="size-4 text-foreground" />
+          </div>
+          <FieldLabel>Tarifa</FieldLabel>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form.Field name="amount">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Monto</FieldLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.handleChange(value ?? 0);
+                      setData((prev) => ({ ...prev, amount: value ? Number(value) : 0 }));
+                    }}
+                    value={field.state.value}
+                    defaultValue={field.state.value}
+                  >
+                    <SelectTrigger>{field.state.value ? `$ ${field.state.value}` : "Escoge una tarifa"}</SelectTrigger>
+                    <SelectContent>
+                      {doctor?.prices?.map((price) => (
+                        <SelectItem key={price.id} value={price.amount}>
+                          $ {price.amount}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              );
+            }}
+          </form.Field>
+          <form.Field name="payment_mode">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Modalidad de pago</FieldLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.handleChange(value ?? "");
+                      setData((prev) => ({ ...prev, payment_mode: value ? value : "" }));
+                    }}
+                    value={field.state.value}
+                    defaultValue={field.state.value}
+                  >
+                    <SelectTrigger>
+                      {field.state.value
+                        ? `${
+                            field.state.value === "PREPAID"
+                              ? "Prepago"
+                              : field.state.value === "POSTPAID"
+                                ? "Pospago"
+                                : field.state.value === "CREDIT"
+                                  ? "Crédito"
+                                  : field.state.value
+                          }`
+                        : "Escoge una tarifa"}
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={"PREPAID"}>Prepago</SelectItem>
+                      <SelectItem value={"POSTPAID"}>Pospago</SelectItem>
+                      <SelectItem value={"CREDIT"}>Crédito</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              );
+            }}
+          </form.Field>
+        </div>
       </FieldGroup>
       <div className="flex justify-end">
         <Button type="reset" variant={"outline"} onClick={() => router.back()} className={"mr-2"}>

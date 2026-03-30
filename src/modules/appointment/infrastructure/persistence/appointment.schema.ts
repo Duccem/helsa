@@ -3,8 +3,6 @@ import { integer, pgEnum, pgTable, text, time, timestamp, uuid } from "drizzle-o
 import { v7 } from "uuid";
 
 export const appointment_type = pgEnum("appointment_type", [
-  "INITIAL",
-  "THERAPY",
   "CONSULTATION",
   "FOLLOW_UP",
   "CHECK_UP",
@@ -12,17 +10,7 @@ export const appointment_type = pgEnum("appointment_type", [
   "PROCEDURE",
 ]);
 export const appointment_mode = pgEnum("appointment_mode", ["ONLINE", "IN_PERSON"]);
-export const appointment_status = pgEnum("appointment_status", [
-  "SCHEDULED",
-  "CONFIRMED",
-  "PAYED",
-  "READY",
-  "STARTED",
-  "CANCELLED",
-  "MISSED_BY_PATIENT",
-  "MISSED_BY_THERAPIST",
-  "FINISHED",
-]);
+export const appointment_status = pgEnum("appointment_status", ["SCHEDULED", "IN_PROGRESS", "CANCELLED", "FINISHED"]);
 export const appointment_payment_mode = pgEnum("appointment_payment_mode", ["PREPAID", "POSTPAID", "CREDIT"]);
 
 export const appointment_payment_method = pgEnum("appointment_payment_method", [

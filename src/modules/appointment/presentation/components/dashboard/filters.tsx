@@ -8,11 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/modules/shared/presentation/components/ui/card";
+import { Field } from "@/modules/shared/presentation/components/ui/field";
 import { Input } from "@/modules/shared/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/modules/shared/presentation/components/ui/select";
 import { formatISO } from "date-fns";
 import { CalendarDays, Filter, Search } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
+import { useState } from "react";
 
 const mappingStatus = {
   SCHEDULED: "Agendada",
@@ -35,15 +37,23 @@ const appointmentTypes = {
 };
 
 export const AppointmentFilters = () => {
+  const [text, setText] = useState("");
   const [status, setStatus] = useQueryState("status", parseAsString.withDefault("ALL"));
   const [type, setType] = useQueryState("type", parseAsString.withDefault("ALL"));
   return (
     <Card>
       <CardContent>
         <div className="flex items-center gap-4">
-          <div className="relative w-full">
+          <div className="relative w-full" suppressHydrationWarning>
             <Search className="absolute size-4 left-2 top-2" />
-            <Input className="w-full pl-8" placeholder="Busca por paciente o motivo" />
+            <Field>
+              <Input
+                className="w-full pl-8"
+                placeholder="Busca por paciente o motivo"
+                value={text}
+                onChange={(v) => setText(v.target.value)}
+              />
+            </Field>
           </div>
           <Select onValueChange={(value) => setStatus(value)} defaultValue={status} value={status}>
             <SelectTrigger className={"w-[200px]"}>

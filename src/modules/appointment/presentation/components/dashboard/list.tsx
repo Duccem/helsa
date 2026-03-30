@@ -11,7 +11,7 @@ import {
 } from "@/modules/shared/presentation/components/ui/dropdown-menu";
 import { ScrollArea } from "@/modules/shared/presentation/components/ui/scroll-area";
 import { cn } from "@/modules/shared/presentation/lib/utils";
-import { MapPin, MoreHorizontal, Video } from "lucide-react";
+import { Clock, MapPin, MoreHorizontal, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppointments } from "./provider";
 import { Primitives } from "@/modules/shared/domain/primitives";
@@ -21,13 +21,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/presentati
 
 const mappingStatus = {
   SCHEDULED: "Agendada",
-  CONFIRMED: "Confirmada",
-  PAYED: "Pagada",
-  READY: "Lista",
-  STARTED: "En curso",
+  IN_PROGRESS: "En curso",
   CANCELLED: "Cancelada",
-  MISSED_BY_PATIENT: "Retrasada por paciente",
-  MISSED_BY_THERAPIST: "Retrasada por terapeuta",
   FINISHED: "Completada",
 };
 
@@ -85,15 +80,16 @@ export const AppointmentListItem = ({
     <Card
       key={appointment.id}
       className={cn(" transition-all hover:bg-accent/60 border-none  animate-fade-in border", {
-        "bg-primary hover:bg-primary/60": appointment.status === "STARTED",
+        "bg-primary hover:bg-primary/60": appointment.status === "IN_PROGRESS",
       })}
       style={{ animationDelay: `${index * 50}ms` }}
     >
       <CardContent className="p-4">
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4">
           {/* Time Block */}
-          <div className="flex-shrink-0 text-center min-w-[70px]">
-            <p className="text-sm font-bold">{format(appointment.date, "hh:mm")}</p>
+          <div className="flex items-center gap-2 min-w-[75px] text-center">
+            <Clock className="size-4" />
+            <p className="text-sm font-bold">{format(new Date(`2000-01-01 ${appointment.hour}`), "p")}</p>
           </div>
 
           {/* Divider */}
@@ -126,10 +122,9 @@ export const AppointmentListItem = ({
                 <Badge
                   variant="outline"
                   className={cn(" rounded-full ", {
-                    "border-green-500/50 text-green-500": appointment.status === "CONFIRMED",
-                    "border-yellow-500/50 text-yellow-500": appointment.status === "STARTED",
+                    "bg-emerald-500/50 text-emerald-500": appointment.status === "IN_PROGRESS",
                     "border-red-500/50 text-red-500": appointment.status === "CANCELLED",
-                    "border-gray-500/50 text-gray-500": appointment.status === "SCHEDULED",
+                    "border-indigo-500/50 text-indigo-500": appointment.status === "SCHEDULED",
                     "border-blue-500/50 text-blue-500": appointment.status === "FINISHED",
                   })}
                 >
@@ -154,16 +149,30 @@ export const AppointmentListItem = ({
                 </DropdownMenu>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1">
-                {appointment.mode === "ONLINE" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-                {appointment.mode === "ONLINE" ? "Online" : "Presencial"}
-              </span>
-              <span>•</span>
-              <span>{appointmentTypes[appointment.type as keyof typeof appointmentTypes]}</span>
-              <span>•</span>
-              <span>{appointment.motive}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-xs">
+                <span className="flex items-center gap-1">
+                  {appointment.mode === "ONLINE" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
+                  {appointment.mode === "ONLINE" ? "Online" : "Presencial"}
+                </span>
+                <span>•</span>
+                <span>{appointmentTypes[appointment.type as keyof typeof appointmentTypes]}</span>
+                <span>•</span>
+                <span>{appointment.motive}</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs">
+                <span className="text-xs font-semibold">$ {appointment.payment?.amount.toFixed(2) ?? "0.00"}</span>
+                <span>-</span>
+                <span className="text-xs font-semibold">
+                  {appointment.payment?.payment_mode === "PREPAID"
+                    ? "Prepagado"
+                    : appointment.payment?.payment_mode === "POSTPAID"
+                      ? "Pospago"
+                      : appointment.payment?.payment_mode === "CREDIT"
+                        ? "Crédito"
+                        : "N/A"}
+                </span>
+              </div>
             </div>
           </div>
         </div>

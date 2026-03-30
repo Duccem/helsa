@@ -12,6 +12,8 @@ type NewAppointmentContextType = {
     motive: string;
     type: string;
     mode: string;
+    amount: number;
+    payment_mode: string;
   };
   setData: Dispatch<SetStateAction<NewAppointmentContextType["data"]>>;
 };
@@ -23,12 +25,14 @@ export const NewAppointmentProvider = ({ children }: { children: React.ReactNode
     date: new Date(),
     time: "",
     motive: "",
-    type: "",
-    mode: "",
+    type: "Consulta",
+    mode: "IN_PERSON",
     patient: {
       name: "",
       email: "",
     },
+    payment_mode: "PREPAID",
+    amount: 0,
   });
   return (
     <NewAppointmentContextProvider.Provider value={{ data: appointmentData, setData: setAppointmentData }}>

@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 import z from "zod";
 import { ScheduleAppointment } from "@/modules/appointment/application/schedule-appointment";
-import { SearchAppointmentsList } from "@/modules/appointment/application/search-appointments-list";
 import type {
   AppointmentModeValues,
   AppointmentStatusValues,
@@ -15,21 +14,25 @@ import { parseBody, parseQuery } from "@/modules/shared/infrastructure/http/http
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
 import { routeHandler } from "@/modules/shared/infrastructure/http/route-handler";
 import { SearchAppointments } from "@/modules/appointment/application/search-appointments";
-import { GetDoctorDetails } from "@/modules/doctor/application/get-doctor-details";
 import { DrizzleDoctorRepository } from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
 import { GetDoctorProfile } from "@/modules/doctor/application/get-doctor-profile";
-import { GetPatientDetails } from "@/modules/patient/application/get-patient-details";
 import { GetPatientProfile } from "@/modules/patient/application/get-patient-profile";
 import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
 
 const insertAppointmentSchema = z.object({
   date: z.coerce.date().describe("The date selected for the appointment."),
+  hour: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, "Invalid time format. Expected HH:mm or HH:mm:ss")
+    .describe("The hour selected for the appointment in 24h format (HH:mm or HH:mm:ss)."),
   patientId: z.uuid().describe("The unique identifier of the patient. given by the system."),
   doctorId: z.uuid().describe("The unique identifier of the doctor selected by the patient."),
   motive: z.string().describe("The reason for the appointment."),
   mode: z.enum(["ONLINE", "IN_PERSON"]),
-  type: z.enum(["THERAPY", "INITIAL"]),
+  type: z.enum(["CONSULTATION", "FOLLOW_UP", "CHECK_UP", "EMERGENCY", "PROCEDURE"]),
   organizationId: z.uuid().optional(),
+  amount: z.coerce.number().min(0).describe("The fee for the appointment."),
+  payment_mode: z.enum(["PREPAID", "POSTPAID", "CREDIT"]).describe("The payment method for the appointment."),
 });
 
 export const POST = async (request: NextRequest) => {
@@ -44,9 +47,12 @@ export const POST = async (request: NextRequest) => {
         body.patientId,
         body.doctorId,
         body.date,
+        body.hour,
         body.motive,
         body.type,
         body.mode,
+        body.amount,
+        body.payment_mode,
       );
 
       return HttpNextResponse.created();
@@ -65,25 +71,17 @@ export const POST = async (request: NextRequest) => {
 };
 
 const searchAppointmentsSchema = z.object({
-  state: z
-    .enum([
-      "SCHEDULED",
-      "CONFIRMED",
-      "PAYED",
-      "READY",
-      "STARTED",
-      "CANCELLED",
-      "MISSED_BY_PATIENT",
-      "MISSED_BY_THERAPIST",
-      "FINISHED",
-    ])
-    .optional(),
+  state: z.enum(["SCHEDULED", "IN_PROGRESS", "CANCELLED", "FINISHED"]).optional(),
   doctorId: z.uuid().optional(),
   patientId: z.uuid().optional(),
   mode: z.enum(["ONLINE", "IN_PERSON"]).optional(),
   type: z.enum(["CONSULTATION", "FOLLOW_UP", "CHECK_UP", "EMERGENCY", "PROCEDURE"]).optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
+  hour: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, "Invalid time format. Expected HH:mm or HH:mm:ss")
+    .optional(),
   sort: z.enum(["date", "status", "created_at"]).default("date"),
   order: z.enum(["ASC", "DESC"]).default("ASC"),
   page: z.coerce.number().min(1).default(1),
@@ -128,6 +126,7 @@ export const GET = async (request: NextRequest) => {
         type: query.type as AppointmentTypeValues | undefined,
         date_from: query.startDate,
         date_to: query.endDate,
+        hour: query.hour,
         sort: query.sort,
         order: query.order,
         page: query.page,
