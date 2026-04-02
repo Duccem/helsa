@@ -95,12 +95,9 @@ function MedicationCard({ medication }: { medication: Primitives<Medication> }) 
 }
 
 export function AppointmentMedications() {
-  const { appointment, isPendingAppointment } = useAppointmentDetail();
-  const { medications, isPendingMedications } = usePatientMedications(appointment?.patient_id ?? undefined);
+  const { medications, isPendingMedications } = useAppointmentDetail();
 
-  const isLoading = isPendingAppointment || isPendingMedications;
-
-  if (isLoading) {
+  if (isPendingMedications) {
     return (
       <div className="flex flex-col gap-3">
         {[1, 2, 3].map((i) => (
