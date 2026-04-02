@@ -65,10 +65,28 @@ export const physical_information = pgTable("physical_information", {
     .$onUpdate(() => new Date()),
 });
 
+export const allergy_severity = pgEnum("allergy_severity", ["LOW", "MODERATE", "HIGH", "CRITICAL"]);
+
+export const allergy = pgTable("allergy", {
+  id: uuid("id").primaryKey().$defaultFn(v7),
+  patient_id: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  name: text("name").notNull(),
+  severity: allergy_severity("severity").notNull().default("LOW"),
+  notes: text("notes"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
 export const patient_relations = relations(patient, ({ many, one }) => ({
   contact_info: many(contact_info),
   vitals: many(vitals),
   physical_information: one(physical_information),
+  allergies: many(allergy),
 }));
 
 export const contact_info_relations = relations(contact_info, ({ one }) => ({
@@ -88,6 +106,13 @@ export const vitals_relations = relations(vitals, ({ one }) => ({
 export const physical_information_relations = relations(physical_information, ({ one }) => ({
   patient: one(patient, {
     fields: [physical_information.patient_id],
+    references: [patient.id],
+  }),
+}));
+
+export const allergy_relations = relations(allergy, ({ one }) => ({
+  patient: one(patient, {
+    fields: [allergy.patient_id],
     references: [patient.id],
   }),
 }));

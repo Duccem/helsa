@@ -4,6 +4,7 @@ import { StringValueObject } from "@/modules/shared/domain/value-object";
 import { Enum } from "@/modules/shared/domain/value-objects/enum";
 import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
+import { Allergy } from "./allergy";
 import { ContactInfo } from "./contact-info";
 import { PhysicalInformation } from "./physical-information";
 import { Vitals } from "./vitals";
@@ -49,6 +50,7 @@ export class Patient extends Aggregate {
     public contact_info?: ContactInfo[],
     public vitals?: Vitals[],
     public physical_information?: PhysicalInformation,
+    public allergies?: Allergy[],
   ) {
     super(id);
   }
@@ -66,6 +68,7 @@ export class Patient extends Aggregate {
       contact_info: this.contact_info?.map((item) => item.toPrimitives()),
       vitals: this.vitals?.map((item) => item.toPrimitives()),
       physical_information: this.physical_information?.toPrimitives(),
+      allergies: this.allergies?.map((item) => item.toPrimitives()),
     };
   }
 
@@ -82,6 +85,7 @@ export class Patient extends Aggregate {
       primitives.contact_info?.map((item) => ContactInfo.fromPrimitives(item)),
       primitives.vitals?.map((item) => Vitals.fromPrimitives(item)),
       primitives.physical_information ? PhysicalInformation.fromPrimitives(primitives.physical_information) : undefined,
+      primitives.allergies?.map((item) => Allergy.fromPrimitives(item)),
     );
   }
 
@@ -133,6 +137,24 @@ export class Patient extends Aggregate {
     }
 
     this.vitals.push(Vitals.create(this.id.value, params));
+    this.updated_at = PatientUpdatedAt.now();
+  }
+
+  addAllergy(params: { name: string; severity?: string; notes?: string }): void {
+    if (!this.allergies) {
+      this.allergies = [];
+    }
+
+    this.allergies.push(Allergy.create(this.id.value, params));
+    this.updated_at = PatientUpdatedAt.now();
+  }
+
+  removeAllergy(allergyId: string): void {
+    if (!this.allergies) {
+      return;
+    }
+
+    this.allergies = this.allergies.filter((a) => a.id.value !== allergyId);
     this.updated_at = PatientUpdatedAt.now();
   }
 

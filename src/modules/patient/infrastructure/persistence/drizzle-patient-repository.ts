@@ -3,7 +3,7 @@ import { database } from "@/modules/shared/infrastructure/database/client";
 import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { Patient, PatientGenderValues, PatientId, PatientUserId } from "../../domain/patient";
 import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-repository";
-import { contact_info, patient, physical_information, vitals } from "./patient.schema";
+import { allergy, contact_info, patient, physical_information, vitals } from "./patient.schema";
 
 export class DrizzlePatientRepository implements PatientRepository {
   async save(data: Patient): Promise<void> {
@@ -11,6 +11,7 @@ export class DrizzlePatientRepository implements PatientRepository {
       contact_info: patientContactInfo,
       vitals: patientVitals,
       physical_information: patientPhysicalInfo,
+      allergies: patientAllergies,
       ...primitives
     } = data.toPrimitives();
 
@@ -70,6 +71,13 @@ export class DrizzlePatientRepository implements PatientRepository {
             },
           });
       }
+
+      if (patientAllergies) {
+        await tx.delete(allergy).where(eq(allergy.patient_id, primitives.id));
+        for (const item of patientAllergies) {
+          await tx.insert(allergy).values(item);
+        }
+      }
     });
   }
 
@@ -83,6 +91,7 @@ export class DrizzlePatientRepository implements PatientRepository {
           limit: 10,
         },
         physical_information: true,
+        allergies: true,
       },
     });
 
@@ -116,6 +125,10 @@ export class DrizzlePatientRepository implements PatientRepository {
             blood_type: item.physical_information.blood_type ?? undefined,
           }
         : undefined,
+      allergies: item.allergies.map((a) => ({
+        ...a,
+        notes: a.notes ?? undefined,
+      })),
     });
   }
 
@@ -126,6 +139,7 @@ export class DrizzlePatientRepository implements PatientRepository {
         contact_info: true,
         vitals: true,
         physical_information: true,
+        allergies: true,
       },
     });
 
@@ -159,6 +173,10 @@ export class DrizzlePatientRepository implements PatientRepository {
             blood_type: item.physical_information.blood_type ?? undefined,
           }
         : undefined,
+      allergies: item.allergies.map((a) => ({
+        ...a,
+        notes: a.notes ?? undefined,
+      })),
     });
   }
 

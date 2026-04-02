@@ -43,6 +43,13 @@
       "when": 1775094391253,
       "tag": "0005_outgoing_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775146657079,
+      "tag": "0006_mature_bedlam",
+      "breakpoints": true
     }
   ]
 }
