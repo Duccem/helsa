@@ -89,6 +89,7 @@ export class DrizzlePatientRepository implements PatientRepository {
 
     return Patient.fromPrimitives({
       ...item,
+      user_id: item.user_id ?? "",
       gender: item.gender as PatientGenderValues,
       contact_info: item.contact_info.map((contact) => ({
         ...contact,
@@ -131,6 +132,7 @@ export class DrizzlePatientRepository implements PatientRepository {
 
     return Patient.fromPrimitives({
       ...item,
+      user_id: item.user_id ?? "",
       gender: item.gender as PatientGenderValues,
       contact_info: item.contact_info.map((contact) => ({
         ...contact,
@@ -168,6 +170,7 @@ export class DrizzlePatientRepository implements PatientRepository {
 
     return Patient.fromPrimitives({
       ...item,
+      user_id: item.user_id ?? "",
       gender: item.gender as PatientGenderValues,
     });
   }
@@ -196,6 +199,7 @@ export class DrizzlePatientRepository implements PatientRepository {
     const data = items.map((item) =>
       Patient.fromPrimitives({
         ...item,
+        user_id: item.user_id ?? "",
         gender: item.gender as PatientGenderValues,
       }),
     );
