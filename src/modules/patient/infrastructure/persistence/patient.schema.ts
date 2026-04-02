@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgEnum, pgTable, timestamp, uuid, text } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, timestamp, uuid, text, real } from "drizzle-orm/pg-core";
 import { v7 } from "uuid";
 
 export const patient_gender = pgEnum("patient_gender", ["MAN", "WOMAN", "OTHER"]);
@@ -25,6 +25,39 @@ export const contact_info = pgTable("contact_info", {
     .references(() => patient.id),
   phone: text("phone"),
   address: text("address"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const vitals = pgTable("vitals", {
+  id: uuid("id").primaryKey().$defaultFn(v7),
+  patient_id: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  blood_pressure: real("blood_pressure").default(0),
+  heart_rate: real("heart_rate").default(0),
+  respiratory_rate: real("respiratory_rate").default(0),
+  oxygen_saturation: real("oxygen_saturation").default(0),
+  temperature: real("temperature").default(0),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const physical_information = pgTable("physical_information", {
+  id: uuid("id").primaryKey().$defaultFn(v7),
+  patient_id: uuid("patient_id")
+    .notNull()
+    .references(() => patient.id),
+  height: real("height").default(0),
+  weight: real("weight").default(0),
+  blood_type: text("blood_type"),
+  body_mass_index: real("body_mass_index").default(0),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at")
     .notNull()

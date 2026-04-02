@@ -77,6 +77,28 @@ export class DiagnosisIncome extends Enum<DiagnosisIncomeValues> {
   }
 }
 
+export enum DiagnosisTypeValues {
+  ALLERGY = "ALLERGY",
+  CHRONIC = "CHRONIC",
+  ACUTE = "ACUTE",
+  FAMILY_HISTORY = "FAMILY_HISTORY",
+  SOCIAL_HISTORY = "SOCIAL_HISTORY",
+}
+
+export class DiagnosisType extends Enum<DiagnosisTypeValues> {
+  constructor(value: DiagnosisTypeValues) {
+    super(value, Object.values(DiagnosisTypeValues));
+  }
+
+  static fromString(value: string): DiagnosisType {
+    return new DiagnosisType(value as DiagnosisTypeValues);
+  }
+
+  static chronic(): DiagnosisType {
+    return new DiagnosisType(DiagnosisTypeValues.CHRONIC);
+  }
+}
+
 export class Diagnosis extends Aggregate {
   constructor(
     public id: DiagnosisId,
@@ -86,6 +108,7 @@ export class Diagnosis extends Aggregate {
     public certainty: DiagnosisCertainty,
     public state: DiagnosisState,
     public income: DiagnosisIncome,
+    public type: DiagnosisType,
     public created_at: DiagnosisCreatedAt,
     public updated_at: DiagnosisUpdatedAt,
   ) {
@@ -101,6 +124,7 @@ export class Diagnosis extends Aggregate {
       certainty: this.certainty.value,
       state: this.state.value,
       income: this.income.value,
+      type: this.type.value,
       created_at: this.created_at.value,
       updated_at: this.updated_at.value,
     };
@@ -115,6 +139,7 @@ export class Diagnosis extends Aggregate {
       DiagnosisCertainty.fromString(primitives.certainty),
       DiagnosisState.fromString(primitives.state),
       DiagnosisIncome.fromString(primitives.income),
+      DiagnosisType.fromString(primitives.type),
       DiagnosisCreatedAt.fromDate(primitives.created_at),
       DiagnosisUpdatedAt.fromDate(primitives.updated_at),
     );
@@ -127,6 +152,7 @@ export class Diagnosis extends Aggregate {
     certainty?: DiagnosisCertaintyValues;
     state?: DiagnosisStateValues;
     income?: DiagnosisIncomeValues;
+    type?: DiagnosisTypeValues;
   }): Diagnosis {
     const diagnosis = new Diagnosis(
       DiagnosisId.generate(),
@@ -136,6 +162,7 @@ export class Diagnosis extends Aggregate {
       DiagnosisCertainty.fromString(params.certainty ?? DiagnosisCertaintyValues.PRESUMPTIVE),
       DiagnosisState.fromString(params.state ?? DiagnosisStateValues.ACTIVE),
       DiagnosisIncome.fromString(params.income ?? DiagnosisIncomeValues.INCOME),
+      DiagnosisType.fromString(params.type ?? DiagnosisTypeValues.CHRONIC),
       DiagnosisCreatedAt.now(),
       DiagnosisUpdatedAt.now(),
     );

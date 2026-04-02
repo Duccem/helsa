@@ -9,6 +9,13 @@ export const diagnosis_certainty = pgEnum("diagnosis_certainty", [
 ]);
 export const diagnosis_state = pgEnum("diagnosis_state", ["ACTIVE", "REMISSION", "CURED", "RECURRENT", "DECEASED"]);
 export const diagnosis_income = pgEnum("diagnosis_income", ["INCOME", "PRINCIPAL", "SECONDARY", "EGRESS"]);
+export const diagnosis_type = pgEnum("diagnosis_type", [
+  "ALLERGY",
+  "CHRONIC",
+  "ACUTE",
+  "FAMILY_HISTORY",
+  "SOCIAL_HISTORY",
+]);
 
 export const diagnosis = pgTable("diagnosis", {
   id: uuid("id").$defaultFn(v7).primaryKey(),
@@ -17,6 +24,7 @@ export const diagnosis = pgTable("diagnosis", {
   certainty: diagnosis_certainty("certainty").default("PRESUMPTIVE").notNull(),
   state: diagnosis_state("state").default("ACTIVE").notNull(),
   income: diagnosis_income("income").default("INCOME").notNull(),
+  type: diagnosis_type("type").default("CHRONIC").notNull(),
   patient_id: uuid("patient_id").notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at")
