@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/modules/shared/prese
 import { cn } from "@/modules/shared/presentation/lib/utils";
 import { Activity, AlertTriangle, Droplets, Heart, Thermometer, Wind } from "lucide-react";
 import { useAppointmentDetail } from "./provider";
+import { Badge } from "@/modules/shared/presentation/components/ui/badge";
 
 // -- Reason for Visit --
 
@@ -143,23 +144,45 @@ export function VitalsGrid() {
   );
 }
 
-// -- Allergies --
+export function AllergiesAlert() {
+  const { patient, isPendingPatient } = useAppointmentDetail();
+  if (isPendingPatient) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Alergias</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">Cargando...</CardContent>
+      </Card>
+    );
+  }
 
-interface AllergiesAlertProps {
-  allergies: string[];
-}
-
-export function AllergiesAlert({ allergies }: AllergiesAlertProps) {
-  if (allergies.length === 0) return null;
+  if (!patient) {
+    return null;
+  }
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-950/20">
-      <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-500" />
-      <div>
-        <p className="text-sm font-medium text-red-600 dark:text-red-400">Allergies</p>
-        <p className="text-sm text-red-600/80 dark:text-red-400/80">{allergies.join(", ")}</p>
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertTriangle className="size-4 text-destructive" />
+          Alergias
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {patient.allergies && patient.allergies.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {patient.allergies.map((allergy, index) => (
+              <Badge key={allergy.id} variant={"outline"} className="text-xs rounded-full border-indigo-500">
+                {allergy.name}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <></>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
