@@ -1,4 +1,5 @@
 import { AddAppointmentNote, AddAppointmentNoteErrors } from "@/modules/appointment/application/add-note";
+import { RemoveAppointmentNote } from "@/modules/appointment/application/remove-note";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
 import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
@@ -17,6 +18,10 @@ const paramsSchema = z.object({
   id: z.uuid(),
 });
 
+const deleteBodySchema = z.object({
+  noteId: z.uuid(),
+});
+
 export const POST = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]/note">) => {
   await authenticate();
   const service = new AddAppointmentNote(new DrizzleAppointmentRepository());
@@ -30,6 +35,31 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/appoint
       return HttpNextResponse.noContent();
     },
     (error: AddAppointmentNoteErrors) => {
+      switch (true) {
+        case error instanceof AppointmentNotFound:
+          return HttpNextResponse.domainError(error, 404);
+        case error instanceof NotAuthorized:
+          return HttpNextResponse.domainError(error, 403);
+        default:
+          return HttpNextResponse.internalServerError();
+      }
+    },
+  );
+};
+
+export const DELETE = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]/note">) => {
+  await authenticate();
+  const { id } = await parseParams(ctx.params, paramsSchema);
+  const { noteId } = await parseBody(request, deleteBodySchema);
+  const service = new RemoveAppointmentNote(new DrizzleAppointmentRepository());
+
+  return routeHandler(
+    async () => {
+      await service.execute(id, noteId);
+
+      return HttpNextResponse.noContent();
+    },
+    (error: AppointmentNotFound | NotAuthorized) => {
       switch (true) {
         case error instanceof AppointmentNotFound:
           return HttpNextResponse.domainError(error, 404);

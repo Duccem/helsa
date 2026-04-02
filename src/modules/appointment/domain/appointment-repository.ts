@@ -6,6 +6,7 @@ import type {
   AppointmentStatusValues,
   AppointmentTypeValues,
 } from "./appointment";
+import { AppointmentNoteId } from "./appointment-note";
 
 export type AppointmentSortBy = "date" | "status" | "created_at";
 export type AppointmentSortOrder = "ASC" | "DESC";
@@ -28,5 +29,6 @@ export interface AppointmentRepository {
   save(appointment: Appointment): Promise<void>;
   find(id: AppointmentId): Promise<Appointment | null>;
   search(criteria: AppointmentSearchCriteria): Promise<PaginatedResult<Appointment>>;
+  removeNote(appointment_id: AppointmentId, note_id: AppointmentNoteId): Promise<void>;
 }
 

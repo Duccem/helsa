@@ -13,6 +13,7 @@ import {
 } from "../../domain/appointment";
 import type { AppointmentRepository, AppointmentSearchCriteria } from "../../domain/appointment-repository";
 import { appointment, appointment_note, appointment_payment, appointment_rating } from "./appointment.schema";
+import { AppointmentNoteId } from "../../domain/appointment-note";
 
 export class DrizzleAppointmentRepository implements AppointmentRepository {
   private buildQuery(criteria: AppointmentSearchCriteria) {
@@ -197,6 +198,12 @@ export class DrizzleAppointmentRepository implements AppointmentRepository {
       data,
       pagination,
     };
+  }
+
+  async removeNote(appointment_id: AppointmentId, note_id: AppointmentNoteId): Promise<void> {
+    await database
+      .delete(appointment_note)
+      .where(and(eq(appointment_note.id, note_id.value), eq(appointment_note.appointment_id, appointment_id.value)));
   }
 }
 

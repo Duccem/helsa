@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/shared/prese
 import { AllergiesAlert, ConditionsSection, ReasonForVisit, VitalsGrid } from "./appointment-overview";
 import { AppointmentMedications } from "./appointment-medications";
 import { AppointmentHistory } from "./appointment-history";
+import { AppointmentNotes } from "./appointment-notes";
 
 export function AppointmentTabs() {
   return (
@@ -29,9 +30,7 @@ export function AppointmentTabs() {
       </TabsContent>
 
       <TabsContent value="notes" className="pt-4">
-        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          Appointment notes will be displayed here.
-        </div>
+        <AppointmentNotes />
       </TabsContent>
     </Tabs>
   );
