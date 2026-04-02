@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/shared/presentation/components/ui/tabs";
 import { AllergiesAlert, ReasonForVisit, VitalsGrid } from "./appointment-overview";
 import { AppointmentMedications } from "./appointment-medications";
+import { AppointmentHistory } from "./appointment-history";
 
 export function AppointmentTabs() {
   return (
@@ -23,9 +24,7 @@ export function AppointmentTabs() {
       </TabsContent>
 
       <TabsContent value="history" className="pt-4">
-        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-          Patient history will be displayed here.
-        </div>
+        <AppointmentHistory />
       </TabsContent>
 
       <TabsContent value="notes" className="pt-4">

@@ -8,6 +8,7 @@ import { createContext, useContext } from "react";
 import {
   useAppointmentDetails,
   useAppointmentPatient,
+  usePatientDoctorHistory,
   usePatientMedications,
 } from "../../hooks/use-appointment-details";
 import { Patient } from "@/modules/patient/domain/patient";
@@ -17,9 +18,11 @@ type AppointmentDetailContextType = {
   appointment: Primitives<Appointment> | null;
   patient: Primitives<Patient> | null;
   medications: Primitives<Medication>[];
+  history: Primitives<Appointment>[];
   isPendingAppointment: boolean;
   isPendingPatient: boolean;
   isPendingMedications: boolean;
+  isPendingHistory: boolean;
 };
 
 const AppointmentDetailContext = createContext<AppointmentDetailContextType | null>(null);
@@ -30,10 +33,24 @@ export const AppointmentDetailProvider = ({ children }: { children: React.ReactN
   const { appointment, isPendingAppointment } = useAppointmentDetails(id);
   const { patient, isPendingPatient } = useAppointmentPatient(appointment?.patient_id ?? undefined);
   const { medications, isPendingMedications } = usePatientMedications(appointment?.patient_id ?? undefined);
+  const { history, isPendingHistory } = usePatientDoctorHistory(
+    appointment?.patient_id ?? undefined,
+    appointment?.doctor_id ?? undefined,
+    appointment?.id ?? undefined,
+  );
 
   return (
     <AppointmentDetailContext.Provider
-      value={{ appointment, isPendingAppointment, patient, isPendingPatient, medications, isPendingMedications }}
+      value={{
+        appointment,
+        isPendingAppointment,
+        patient,
+        isPendingPatient,
+        medications,
+        isPendingMedications,
+        history,
+        isPendingHistory,
+      }}
     >
       {children}
     </AppointmentDetailContext.Provider>

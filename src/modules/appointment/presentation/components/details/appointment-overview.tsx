@@ -5,6 +5,7 @@ import { cn } from "@/modules/shared/presentation/lib/utils";
 import { Activity, AlertTriangle, Droplets, Heart, Thermometer, Wind } from "lucide-react";
 import { useAppointmentDetail } from "./provider";
 import { Badge } from "@/modules/shared/presentation/components/ui/badge";
+import { Button } from "@/modules/shared/presentation/components/ui/button";
 
 // -- Reason for Visit --
 
@@ -99,47 +100,52 @@ export function VitalsGrid() {
   const lastVitals = patient.vitals?.[0];
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-      <VitalCard
-        vital={{
-          label: vitalsConfig.blood_pressure.label,
-          value: lastVitals ? `${lastVitals.blood_pressure} mmHg` : "-",
-          icon: vitalsConfig.blood_pressure.icon,
-          color: "text-red-500",
-        }}
-      />
-      <VitalCard
-        vital={{
-          label: vitalsConfig.heart_rate.label,
-          value: lastVitals ? `${lastVitals.heart_rate} bpm` : "-",
-          icon: vitalsConfig.heart_rate.icon,
-          color: "text-violet-500",
-        }}
-      />
-      <VitalCard
-        vital={{
-          label: vitalsConfig.temperature.label,
-          value: lastVitals ? `${lastVitals.temperature} °C` : "-",
-          icon: vitalsConfig.temperature.icon,
-          color: "text-amber-500",
-        }}
-      />
-      <VitalCard
-        vital={{
-          label: vitalsConfig.oxygen_saturation.label,
-          value: lastVitals ? `${lastVitals.oxygen_saturation} %` : "-",
-          icon: vitalsConfig.oxygen_saturation.icon,
-          color: "text-cyan-500",
-        }}
-      />
-      <VitalCard
-        vital={{
-          label: vitalsConfig.respiratory_rate.label,
-          value: lastVitals ? `${lastVitals.respiratory_rate} /min` : "-",
-          icon: vitalsConfig.respiratory_rate.icon,
-          color: "text-slate-500",
-        }}
-      />
+    <div className="flex flex-col  gap-4">
+      <div className="flex justify-end">
+        <Button>Agregar medicion</Button>
+      </div>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+        <VitalCard
+          vital={{
+            label: vitalsConfig.blood_pressure.label,
+            value: lastVitals ? `${lastVitals.blood_pressure} mmHg` : "-",
+            icon: vitalsConfig.blood_pressure.icon,
+            color: "text-red-500",
+          }}
+        />
+        <VitalCard
+          vital={{
+            label: vitalsConfig.heart_rate.label,
+            value: lastVitals ? `${lastVitals.heart_rate} bpm` : "-",
+            icon: vitalsConfig.heart_rate.icon,
+            color: "text-violet-500",
+          }}
+        />
+        <VitalCard
+          vital={{
+            label: vitalsConfig.temperature.label,
+            value: lastVitals ? `${lastVitals.temperature} °C` : "-",
+            icon: vitalsConfig.temperature.icon,
+            color: "text-amber-500",
+          }}
+        />
+        <VitalCard
+          vital={{
+            label: vitalsConfig.oxygen_saturation.label,
+            value: lastVitals ? `${lastVitals.oxygen_saturation} %` : "-",
+            icon: vitalsConfig.oxygen_saturation.icon,
+            color: "text-cyan-500",
+          }}
+        />
+        <VitalCard
+          vital={{
+            label: vitalsConfig.respiratory_rate.label,
+            value: lastVitals ? `${lastVitals.respiratory_rate} /min` : "-",
+            icon: vitalsConfig.respiratory_rate.icon,
+            color: "text-slate-500",
+          }}
+        />
+      </div>
     </div>
   );
 }
