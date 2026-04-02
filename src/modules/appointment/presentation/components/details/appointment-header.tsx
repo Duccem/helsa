@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useAppointmentDetail } from "./provider";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import Link from "next/link";
 
 const statusLabels = {
   SCHEDULED: "Agendada",
@@ -97,9 +98,10 @@ export function AppointmentHeader() {
             }
           />
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Reschedule</DropdownMenuItem>
-            <DropdownMenuItem>Edit Appointment</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">Cancel Appointment</DropdownMenuItem>
+            <Link href={`/dashboard/appointments/${appointment.id}/reschedule`}>
+              <DropdownMenuItem>Reagendar</DropdownMenuItem>
+            </Link>
+            <DropdownMenuItem className="text-destructive">Cancelar</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
