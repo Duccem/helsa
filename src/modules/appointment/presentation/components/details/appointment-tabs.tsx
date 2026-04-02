@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/modules/shared/presentation/components/ui/tabs";
-import { AllergiesAlert, ReasonForVisit, VitalsGrid } from "./appointment-overview";
+import { AllergiesAlert, ConditionsSection, ReasonForVisit, VitalsGrid } from "./appointment-overview";
 import { AppointmentMedications } from "./appointment-medications";
 import { AppointmentHistory } from "./appointment-history";
 
@@ -17,6 +17,7 @@ export function AppointmentTabs() {
         <ReasonForVisit />
         <VitalsGrid />
         <AllergiesAlert />
+        <ConditionsSection />
       </TabsContent>
 
       <TabsContent value="medications" className="pt-4">

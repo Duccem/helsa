@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/modules/shared/presentation/components/ui/dropdown-menu";
 import { cn } from "@/modules/shared/presentation/lib/utils";
-import { ArrowLeft, Loader2, MoreHorizontal, Printer, Share2 } from "lucide-react";
+import { ArrowLeft, Loader2, MoreHorizontal, Play, Printer, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppointmentDetail } from "./provider";
 import { format } from "date-fns";
@@ -76,6 +76,12 @@ export function AppointmentHeader() {
         </div>
       </div>
       <div className="flex items-center gap-1">
+        {appointment?.status !== "CANCELLED" && appointment?.status !== "FINISHED" && (
+          <Button>
+            <Play />
+            Iniciar Consulta
+          </Button>
+        )}
         <Button variant="ghost" size="icon">
           <Printer className="size-4" />
         </Button>

@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/modules/shared/presentation/components/ui/card";
 import { cn } from "@/modules/shared/presentation/lib/utils";
-import { Activity, AlertTriangle, Droplets, Heart, Thermometer, Wind } from "lucide-react";
+import { Activity, AlertTriangle, Droplets, Heart, Stethoscope, Thermometer, Wind } from "lucide-react";
 import { useAppointmentDetail } from "./provider";
 import { Badge } from "@/modules/shared/presentation/components/ui/badge";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
@@ -187,6 +187,67 @@ export function AllergiesAlert() {
         ) : (
           <></>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+const stateLabels: Record<string, string> = {
+  ACTIVE: "Activo",
+  REMISSION: "Remisión",
+  CURED: "Curado",
+  RECURRENT: "Recurrente",
+  DECEASED: "Fallecido",
+};
+
+const stateColors: Record<string, string> = {
+  ACTIVE: "border-red-500 text-red-600",
+  REMISSION: "border-yellow-500 text-yellow-600",
+  CURED: "border-green-500 text-green-600",
+  RECURRENT: "border-orange-500 text-orange-600",
+  DECEASED: "border-slate-500 text-slate-600",
+};
+
+export function ConditionsSection() {
+  const { diagnoses, isPendingDiagnoses } = useAppointmentDetail();
+
+  if (isPendingDiagnoses) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Condiciones</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">Cargando...</CardContent>
+      </Card>
+    );
+  }
+
+  if (!diagnoses || diagnoses.length === 0) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Stethoscope className="size-4 text-muted-foreground" />
+          Condiciones
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-2">
+          {diagnoses.map((diagnosis) => (
+            <div key={diagnosis.id} className="flex items-start justify-between gap-2">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium">{diagnosis.summary}</span>
+                <span className="text-xs text-muted-foreground">{diagnosis.cie_code}</span>
+              </div>
+              <Badge variant="outline" className={cn("text-xs rounded-full shrink-0", stateColors[diagnosis.state])}>
+                {stateLabels[diagnosis.state] ?? diagnosis.state}
+              </Badge>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

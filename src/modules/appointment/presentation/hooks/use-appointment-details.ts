@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Appointment } from "../../domain/appointment";
 import { Patient } from "@/modules/patient/domain/patient";
 import { Medication } from "@/modules/prescription/domain/medication";
+import { Diagnosis } from "@/modules/diagnosis/domain/diagnosis";
 
 export function useAppointmentDetails(id: string) {
   const { data, isFetching } = useQuery<Primitives<Appointment> | null>({
@@ -85,5 +86,23 @@ export function usePatientDoctorHistory(
   );
 
   return { history, isPendingHistory: isFetching };
+}
+
+export function usePatientDiagnoses(patientId: string | undefined) {
+  const { data, isFetching } = useQuery<{ data: Primitives<Diagnosis>[]; total: number } | null>({
+    queryKey: ["diagnoses", patientId],
+    initialData: null,
+    refetchOnWindowFocus: false,
+    enabled: !!patientId,
+    queryFn: async () => {
+      const response = await fetch(`/api/diagnosis?patientId=${patientId}&pageSize=50`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch diagnoses");
+      }
+      return response.json();
+    },
+  });
+
+  return { diagnoses: data?.data ?? [], isPendingDiagnoses: isFetching };
 }
 

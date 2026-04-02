@@ -52,7 +52,7 @@ export const NewAppointmentSummary = () => {
           <span className="text-muted-foreground">Modalidad</span>
           <span className="font-medium flex items-center gap-1">
             {data.mode === "ONLINE" ? <Video className="h-3 w-3" /> : <MapPin className="h-3 w-3" />}
-            {data.mode === "Online" ? "Online" : "Presencial"}
+            {data.mode === "ONLINE" ? "Online" : "Presencial"}
           </span>
         </div>
       </CardContent>

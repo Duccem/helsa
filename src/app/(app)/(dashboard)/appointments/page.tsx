@@ -9,7 +9,7 @@ import { QuickActions } from "@/modules/appointment/presentation/components/dash
 import { AppointmentSummary } from "@/modules/appointment/presentation/components/dashboard/summary";
 import { requireAuth } from "@/modules/auth/infrastructure/guards/require-auth";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
-import { Plus } from "lucide-react";
+import { CalendarDays, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function AppointmentsPage() {
@@ -22,12 +22,20 @@ export default async function AppointmentsPage() {
           <h1 className="text-2xl font-bold">Citas</h1>
           <p>Hola, {session.user.name}! aquí puedes manejar tus citas de manera cómoda.</p>
         </div>
-        <Link href={"/appointments/new"}>
-          <Button className={"cursor-pointer"}>
-            <Plus />
-            New Appointment
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={"/schedule"}>
+            <Button className={"cursor-pointer"}>
+              <CalendarDays />
+              Horarios
+            </Button>
+          </Link>
+          <Link href={"/appointments/new"}>
+            <Button className={"cursor-pointer"}>
+              <Plus />
+              New Appointment
+            </Button>
+          </Link>
+        </div>
       </div>
       <div className="flex flex-col gap-6 w-full">
         <AppointmentsProvider>
