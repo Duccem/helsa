@@ -4,6 +4,7 @@ import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { Patient, PatientGenderValues, PatientId, PatientUserId } from "../../domain/patient";
 import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-repository";
 import { allergy, contact_info, patient, physical_information, vitals } from "./patient.schema";
+import { AllergySeverityValues } from "../../domain/allergy";
 
 export class DrizzlePatientRepository implements PatientRepository {
   async save(data: Patient): Promise<void> {
@@ -20,65 +21,63 @@ export class DrizzlePatientRepository implements PatientRepository {
       set: primitives,
     });
 
-    await database.transaction(async (tx) => {
-      if (patientContactInfo) {
-        for (const item of patientContactInfo) {
-          await tx
-            .insert(contact_info)
-            .values(item)
-            .onConflictDoUpdate({
-              target: contact_info.id,
-              set: {
-                phone: item.phone,
-                address: item.address,
-                updated_at: item.updated_at,
-              },
-            });
-        }
-      }
-
-      if (patientVitals) {
-        for (const item of patientVitals) {
-          await tx
-            .insert(vitals)
-            .values(item)
-            .onConflictDoUpdate({
-              target: vitals.id,
-              set: {
-                blood_pressure: item.blood_pressure,
-                heart_rate: item.heart_rate,
-                respiratory_rate: item.respiratory_rate,
-                oxygen_saturation: item.oxygen_saturation,
-                temperature: item.temperature,
-                updated_at: item.updated_at,
-              },
-            });
-        }
-      }
-
-      if (patientPhysicalInfo) {
-        await tx
-          .insert(physical_information)
-          .values(patientPhysicalInfo)
+    if (patientContactInfo) {
+      for (const item of patientContactInfo) {
+        await database
+          .insert(contact_info)
+          .values(item)
           .onConflictDoUpdate({
-            target: physical_information.id,
+            target: contact_info.id,
             set: {
-              height: patientPhysicalInfo.height,
-              weight: patientPhysicalInfo.weight,
-              blood_type: patientPhysicalInfo.blood_type,
-              body_mass_index: patientPhysicalInfo.body_mass_index,
-              updated_at: patientPhysicalInfo.updated_at,
+              phone: item.phone,
+              address: item.address,
+              updated_at: item.updated_at,
             },
           });
       }
+    }
 
-      if (patientAllergies) {
-        await tx.delete(allergy).where(eq(allergy.patient_id, primitives.id));
-        for (const item of patientAllergies) {
-          await tx.insert(allergy).values(item);
-        }
+    if (patientVitals) {
+      for (const item of patientVitals) {
+        await database
+          .insert(vitals)
+          .values(item)
+          .onConflictDoUpdate({
+            target: vitals.id,
+            set: {
+              blood_pressure: item.blood_pressure,
+              heart_rate: item.heart_rate,
+              respiratory_rate: item.respiratory_rate,
+              oxygen_saturation: item.oxygen_saturation,
+              temperature: item.temperature,
+              updated_at: item.updated_at,
+            },
+          });
       }
-    });
+    }
+
+    if (patientPhysicalInfo) {
+      await database
+        .insert(physical_information)
+        .values(patientPhysicalInfo)
+        .onConflictDoUpdate({
+          target: physical_information.id,
+          set: {
+            height: patientPhysicalInfo.height,
+            weight: patientPhysicalInfo.weight,
+            blood_type: patientPhysicalInfo.blood_type,
+            body_mass_index: patientPhysicalInfo.body_mass_index,
+            updated_at: patientPhysicalInfo.updated_at,
+          },
+        });
+    }
+
+    if (patientAllergies) {
+      await database.delete(allergy).where(eq(allergy.patient_id, primitives.id));
+      for (const item of patientAllergies) {
+        await database.insert(allergy).values(item);
+      }
+    }
   }
 
   async find(id: PatientId): Promise<Patient | null> {
@@ -127,6 +126,7 @@ export class DrizzlePatientRepository implements PatientRepository {
         : undefined,
       allergies: item.allergies.map((a) => ({
         ...a,
+        severity: (a.severity as AllergySeverityValues) ?? undefined,
         notes: a.notes ?? undefined,
       })),
     });
@@ -175,6 +175,7 @@ export class DrizzlePatientRepository implements PatientRepository {
         : undefined,
       allergies: item.allergies.map((a) => ({
         ...a,
+        severity: (a.severity as AllergySeverityValues) ?? undefined,
         notes: a.notes ?? undefined,
       })),
     });

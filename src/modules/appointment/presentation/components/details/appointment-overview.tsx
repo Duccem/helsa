@@ -6,6 +6,7 @@ import { Activity, AlertTriangle, Droplets, Heart, Stethoscope, Thermometer, Win
 import { useAppointmentDetail } from "./provider";
 import { Badge } from "@/modules/shared/presentation/components/ui/badge";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
+import { AddVitalsModal } from "./vitals-modal";
 
 // -- Reason for Visit --
 
@@ -102,7 +103,7 @@ export function VitalsGrid() {
   return (
     <div className="flex flex-col  gap-4">
       <div className="flex justify-end">
-        <Button>Agregar medicion</Button>
+        <AddVitalsModal />
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         <VitalCard
