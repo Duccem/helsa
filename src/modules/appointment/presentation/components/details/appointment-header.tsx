@@ -9,14 +9,17 @@ import {
   DropdownMenuTrigger,
 } from "@/modules/shared/presentation/components/ui/dropdown-menu";
 import { cn } from "@/modules/shared/presentation/lib/utils";
-import { ArrowLeft, MoreHorizontal, Printer, Share2 } from "lucide-react";
+import { ArrowLeft, Loader2, MoreHorizontal, Printer, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAppointmentDetail } from "./provider";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 const statusLabels = {
-  SCHEDULED: "Scheduled",
-  IN_PROGRESS: "In Progress",
-  CANCELLED: "Cancelled",
-  FINISHED: "Completed",
+  SCHEDULED: "Agendada",
+  IN_PROGRESS: "En Curso",
+  CANCELLED: "Cancelada",
+  FINISHED: "Completada",
 } as const;
 
 const statusStyles = {
@@ -26,50 +29,49 @@ const statusStyles = {
   FINISHED: "bg-emerald-500/20 border-emerald-500/50 text-emerald-500",
 } as const;
 
+const typeLabels: Record<string, string> = {
+  CONSULTATION: "Consulta",
+  FOLLOW_UP: "Seguimiento",
+  CHECK_UP: "Chequeo",
+  EMERGENCY: "Emergencia",
+  PROCEDURE: "Procedimiento",
+};
+
 type AppointmentStatus = keyof typeof statusLabels;
 
-interface AppointmentHeaderProps {
-  patientName: string;
-  status: AppointmentStatus;
-  date: string;
-  startTime: string;
-  endTime: string;
-  type: string;
-}
-
-export function AppointmentHeader({
-  patientName,
-  status,
-  date,
-  startTime,
-  endTime,
-  type,
-}: AppointmentHeaderProps) {
+export function AppointmentHeader() {
   const router = useRouter();
+
+  const { appointment, isPendingAppointment } = useAppointmentDetail();
+
+  if (isPendingAppointment || !appointment) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-start justify-between">
       <div className="flex items-start gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mt-1"
-          onClick={() => router.back()}
-        >
+        <Button variant="ghost" size="icon" className="mt-1" onClick={() => router.back()}>
           <ArrowLeft className="size-4" />
         </Button>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{patientName}</h1>
+            <h1 className="text-2xl font-bold">{appointment?.patient?.name ?? ""}</h1>
             <Badge
               variant="outline"
-              className={cn("rounded-full", statusStyles[status])}
+              className={cn("rounded-full", statusStyles[appointment?.status as AppointmentStatus])}
             >
-              {statusLabels[status]}
+              {statusLabels[appointment?.status as AppointmentStatus]}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            {date} · {startTime} – {endTime} · {type}
+            {format(new Date(appointment?.date ?? new Date()), "MMMM d, yyyy", { locale: es })} ·{" "}
+            {format(new Date(`1970-01-01T${appointment?.hour}`), "hh:mm a", { locale: es })} ·{" "}
+            {typeLabels[appointment?.type ?? ""] ?? appointment?.type}
           </p>
         </div>
       </div>
@@ -91,12 +93,11 @@ export function AppointmentHeader({
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Reschedule</DropdownMenuItem>
             <DropdownMenuItem>Edit Appointment</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive">
-              Cancel Appointment
-            </DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive">Cancel Appointment</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 import { database } from "@/modules/shared/infrastructure/database/client";
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or } from "drizzle-orm";
 import { Patient, PatientGenderValues, PatientId, PatientUserId } from "../../domain/patient";
 import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-repository";
 import { contact_info, patient, physical_information, vitals } from "./patient.schema";
@@ -78,7 +78,10 @@ export class DrizzlePatientRepository implements PatientRepository {
       where: eq(patient.id, id.value),
       with: {
         contact_info: true,
-        vitals: true,
+        vitals: {
+          orderBy: [desc(vitals.created_at)],
+          limit: 10,
+        },
         physical_information: true,
       },
     });

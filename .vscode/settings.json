@@ -10,7 +10,7 @@
     "**/build": true,
     "**/.next": true
   },
-  "cSpell.words": ["Acad", "codelytv"],
+  "cSpell.words": ["Acad", "codelytv", "Informacion"],
   "prettier.printWidth": 120
 }
 

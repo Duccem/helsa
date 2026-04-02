@@ -81,9 +81,7 @@ export class Patient extends Aggregate {
       PatientUpdatedAt.fromDate(primitives.updated_at),
       primitives.contact_info?.map((item) => ContactInfo.fromPrimitives(item)),
       primitives.vitals?.map((item) => Vitals.fromPrimitives(item)),
-      primitives.physical_information
-        ? PhysicalInformation.fromPrimitives(primitives.physical_information)
-        : undefined,
+      primitives.physical_information ? PhysicalInformation.fromPrimitives(primitives.physical_information) : undefined,
     );
   }
 

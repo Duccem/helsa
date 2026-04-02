@@ -10,14 +10,9 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Calendar, Clock, Droplets, FileText, Mail, MapPin, Phone, Sparkles, Stethoscope } from "lucide-react";
 import Link from "next/link";
+import { useAppointmentDetail } from "./provider";
 
-// -- Patient Information --
-
-interface PatientInfoProps {
-  patientId: string;
-}
-
-export function PatientInfoCard({ patientId }: PatientInfoProps) {
+export function PatientInfoCard() {
   const calculateAge = (birth: Date) => {
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
@@ -28,36 +23,25 @@ export function PatientInfoCard({ patientId }: PatientInfoProps) {
     return age;
   };
 
-  const { data, isPending } = useQuery<Primitives<Patient> | null>({
-    queryKey: ["patient", "123"],
-    initialData: null,
-    refetchOnWindowFocus: false,
-    queryFn: async () => {
-      const response = await fetch(`/api/patient/${patientId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch patient data");
-      }
-      return response.json();
-    },
-  });
-  if (isPending) {
+  const { patient, isPendingPatient } = useAppointmentDetail();
+  if (isPendingPatient) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
+          <CardTitle>Informacion del paciente</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center">Loading...</CardContent>
+        <CardContent className="flex items-center justify-center">Cargando...</CardContent>
       </Card>
     );
   }
 
-  if (!data) {
+  if (!patient) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Patient Information</CardTitle>
+          <CardTitle>Informacion del paciente</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center">No patient data found.</CardContent>
+        <CardContent className="flex items-center justify-center">Informacion del paciente no encontrada.</CardContent>
       </Card>
     );
   }
@@ -65,19 +49,21 @@ export function PatientInfoCard({ patientId }: PatientInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Patient Information</CardTitle>
+        <CardTitle>Informacion del paciente</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <Avatar size="lg">
             <AvatarFallback className="bg-primary text-primary-foreground">
-              {data.name.charAt(0).toUpperCase()}
+              {patient.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-semibold">{data.name}</p>
+            <p className="text-sm font-semibold">{patient.name}</p>
             <p className="text-xs text-muted-foreground">
-              {calculateAge(new Date(data.birth_date))} yrs · DOB: {format(new Date(data.birth_date), "MM/dd/yyyy")}
+              {patient.gender === "MAN" ? "Hombre" : patient.gender == "WOMAN" ? "Mujer" : "Otro"} ·
+              {calculateAge(new Date(patient.birth_date))} años · Nacimiento:{" "}
+              {format(new Date(patient.birth_date), "MM/dd/yyyy")}
             </p>
           </div>
         </div>
@@ -87,21 +73,21 @@ export function PatientInfoCard({ patientId }: PatientInfoProps) {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-sm">
             <Phone className="size-4 text-muted-foreground" />
-            <span>{data.contact_info?.[0]?.phone ?? "-"}</span>
+            <span>{patient.contact_info?.[0]?.phone ?? "-"}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Mail className="size-4 text-muted-foreground" />
-            <span>{data.email}</span>
+            <span>{patient.email}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Droplets className="size-4 text-muted-foreground" />
-            <span>Blood Type: {data.physical_information?.blood_type}</span>
+            <span>Tipo de sangre: {patient.physical_information?.blood_type}</span>
           </div>
         </div>
 
-        <Link href={`/patients/${data.id}`}>
+        <Link href={`/patients/${patient.id}`}>
           <Button variant="outline" className="w-full">
-            View Full Patient Record
+            Ver perfil del paciente
           </Button>
         </Link>
       </CardContent>
@@ -109,49 +95,77 @@ export function PatientInfoCard({ patientId }: PatientInfoProps) {
   );
 }
 
-// -- Appointment Details --
+const modeLabels: Record<string, string> = {
+  ONLINE: "Online",
+  IN_PERSON: "Presencial",
+};
 
-interface AppointmentDetailsCardProps {
-  date: string;
-  time: string;
-  mode: string;
-  type: string;
-}
+const typeLabels: Record<string, string> = {
+  CONSULTATION: "Consulta",
+  FOLLOW_UP: "Seguimiento",
+  CHECK_UP: "Chequeo",
+  EMERGENCY: "Emergencia",
+  PROCEDURE: "Procedimiento",
+};
 
-export function AppointmentDetailsCard({ date, time, mode, type }: AppointmentDetailsCardProps) {
+export function AppointmentDetailsCard() {
+  const { appointment, isPendingAppointment } = useAppointmentDetail();
+
+  if (isPendingAppointment) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Detalles de la cita</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">Loading...</CardContent>
+      </Card>
+    );
+  }
+
+  if (!appointment) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Detalles de la cita</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">No appointment data found.</CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Appointment Details</CardTitle>
+        <CardTitle>Detalles de la cita</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="size-4" />
-            <span>Date</span>
+            <span>Fecha</span>
           </div>
-          <span className="font-medium">{date}</span>
+          <span className="font-medium">{format(new Date(appointment?.date ?? new Date()), "MMMM d, yyyy")}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Clock className="size-4" />
-            <span>Time</span>
+            <span>Hora</span>
           </div>
-          <span className="font-medium">{time}</span>
+          <span className="font-medium">{format(new Date(`1970-01-01T${appointment?.hour}`), "hh:mm a")}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="size-4" />
-            <span>Mode</span>
+            <span>Modalidad</span>
           </div>
-          <span className="font-medium">{mode}</span>
+          <span className="font-medium">{modeLabels[appointment?.mode ?? ""]}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Stethoscope className="size-4" />
-            <span>Type</span>
+            <span>Tipo</span>
           </div>
-          <span className="font-medium">{type}</span>
+          <span className="font-medium">{typeLabels[appointment?.type ?? ""]}</span>
         </div>
       </CardContent>
     </Card>
