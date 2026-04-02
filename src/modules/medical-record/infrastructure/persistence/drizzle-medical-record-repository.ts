@@ -4,6 +4,7 @@ import { MedicalRecordRepository, MedicalRecordSearchCriteria } from "../../doma
 import { Primitives } from "@/modules/shared/domain/primitives";
 import { medical_record } from "./medical-record.schema";
 import { and, count, eq, gte, like, lte, or } from "drizzle-orm";
+import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 
 export class DrizzleMedicalRecordRepository extends MedicalRecordRepository {
   private buildCriteria(criteria: MedicalRecordSearchCriteria) {
@@ -26,12 +27,22 @@ export class DrizzleMedicalRecordRepository extends MedicalRecordRepository {
     return MedicalRecord.fromPrimitives(item as Primitives<MedicalRecord>);
   }
 
-  async search(criteria: MedicalRecordSearchCriteria): Promise<MedicalRecord[]> {
+  async search(criteria: MedicalRecordSearchCriteria): Promise<PaginatedResult<MedicalRecord>> {
     const whereClause = this.buildCriteria(criteria);
-    const items = await database.query.medical_record.findMany({
-      where: whereClause,
-    });
-    return items.map((item) => MedicalRecord.fromPrimitives(item as Primitives<MedicalRecord>));
+
+    const [items, total] = await Promise.all([
+      database.query.medical_record.findMany({
+        where: whereClause,
+      }),
+      database
+        .select({ count: count(medical_record.id) })
+        .from(medical_record)
+        .where(this.buildCriteria(criteria)),
+    ]);
+    return {
+      data: items.map((item) => MedicalRecord.fromPrimitives(item as Primitives<MedicalRecord>)),
+      pagination: buildPagination(total[0].count, criteria.page || 1, criteria.pageSize || 10),
+    };
   }
 
   async create(record: MedicalRecord): Promise<void> {
@@ -44,14 +55,6 @@ export class DrizzleMedicalRecordRepository extends MedicalRecordRepository {
 
   async delete(id: MedicalRecordId): Promise<void> {
     await database.delete(medical_record).where(eq(medical_record.id, id.value));
-  }
-
-  async count(criteria: MedicalRecordSearchCriteria): Promise<number> {
-    const response = await database
-      .select({ count: count(medical_record.id) })
-      .from(medical_record)
-      .where(this.buildCriteria(criteria));
-    return response[0]?.count || 0;
   }
 }
 

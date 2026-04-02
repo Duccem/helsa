@@ -5,6 +5,8 @@ import { Enum } from "@/modules/shared/domain/value-objects/enum";
 import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { ContactInfo } from "./contact-info";
+import { PhysicalInformation } from "./physical-information";
+import { Vitals } from "./vitals";
 
 export class PatientId extends Uuid {}
 export class PatientUserId extends Uuid {}
@@ -45,6 +47,8 @@ export class Patient extends Aggregate {
     public created_at: PatientCreatedAt,
     public updated_at: PatientUpdatedAt,
     public contact_info?: ContactInfo[],
+    public vitals?: Vitals[],
+    public physical_information?: PhysicalInformation,
   ) {
     super(id);
   }
@@ -60,6 +64,8 @@ export class Patient extends Aggregate {
       created_at: this.created_at.value,
       updated_at: this.updated_at.value,
       contact_info: this.contact_info?.map((item) => item.toPrimitives()),
+      vitals: this.vitals?.map((item) => item.toPrimitives()),
+      physical_information: this.physical_information?.toPrimitives(),
     };
   }
 
@@ -74,6 +80,10 @@ export class Patient extends Aggregate {
       PatientCreatedAt.fromDate(primitives.created_at),
       PatientUpdatedAt.fromDate(primitives.updated_at),
       primitives.contact_info?.map((item) => ContactInfo.fromPrimitives(item)),
+      primitives.vitals?.map((item) => Vitals.fromPrimitives(item)),
+      primitives.physical_information
+        ? PhysicalInformation.fromPrimitives(primitives.physical_information)
+        : undefined,
     );
   }
 
@@ -110,6 +120,31 @@ export class Patient extends Aggregate {
     }
 
     this.contact_info.push(ContactInfo.create(this.id.value, params));
+    this.updated_at = PatientUpdatedAt.now();
+  }
+
+  addVitals(params: {
+    blood_pressure?: number;
+    heart_rate?: number;
+    respiratory_rate?: number;
+    oxygen_saturation?: number;
+    temperature?: number;
+  }): void {
+    if (!this.vitals) {
+      this.vitals = [];
+    }
+
+    this.vitals.push(Vitals.create(this.id.value, params));
+    this.updated_at = PatientUpdatedAt.now();
+  }
+
+  setPhysicalInformation(params: {
+    height?: number;
+    weight?: number;
+    blood_type?: string;
+    body_mass_index?: number;
+  }): void {
+    this.physical_information = PhysicalInformation.create(this.id.value, params);
     this.updated_at = PatientUpdatedAt.now();
   }
 }

@@ -3,19 +3,24 @@ import { database } from "@/modules/shared/infrastructure/database/client";
 import { and, count, eq, ilike, or } from "drizzle-orm";
 import { Patient, PatientGenderValues, PatientId, PatientUserId } from "../../domain/patient";
 import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-repository";
-import { contact_info, patient } from "./patient.schema";
+import { contact_info, patient, physical_information, vitals } from "./patient.schema";
 
 export class DrizzlePatientRepository implements PatientRepository {
   async save(data: Patient): Promise<void> {
-    const { contact_info: patientContactInfo, ...primitives } = data.toPrimitives();
+    const {
+      contact_info: patientContactInfo,
+      vitals: patientVitals,
+      physical_information: patientPhysicalInfo,
+      ...primitives
+    } = data.toPrimitives();
 
     await database.insert(patient).values(primitives).onConflictDoUpdate({
       target: patient.id,
       set: primitives,
     });
 
-    if (patientContactInfo) {
-      await database.transaction(async (tx) => {
+    await database.transaction(async (tx) => {
+      if (patientContactInfo) {
         for (const item of patientContactInfo) {
           await tx
             .insert(contact_info)
@@ -29,8 +34,43 @@ export class DrizzlePatientRepository implements PatientRepository {
               },
             });
         }
-      });
-    }
+      }
+
+      if (patientVitals) {
+        for (const item of patientVitals) {
+          await tx
+            .insert(vitals)
+            .values(item)
+            .onConflictDoUpdate({
+              target: vitals.id,
+              set: {
+                blood_pressure: item.blood_pressure,
+                heart_rate: item.heart_rate,
+                respiratory_rate: item.respiratory_rate,
+                oxygen_saturation: item.oxygen_saturation,
+                temperature: item.temperature,
+                updated_at: item.updated_at,
+              },
+            });
+        }
+      }
+
+      if (patientPhysicalInfo) {
+        await tx
+          .insert(physical_information)
+          .values(patientPhysicalInfo)
+          .onConflictDoUpdate({
+            target: physical_information.id,
+            set: {
+              height: patientPhysicalInfo.height,
+              weight: patientPhysicalInfo.weight,
+              blood_type: patientPhysicalInfo.blood_type,
+              body_mass_index: patientPhysicalInfo.body_mass_index,
+              updated_at: patientPhysicalInfo.updated_at,
+            },
+          });
+      }
+    });
   }
 
   async find(id: PatientId): Promise<Patient | null> {
@@ -38,6 +78,8 @@ export class DrizzlePatientRepository implements PatientRepository {
       where: eq(patient.id, id.value),
       with: {
         contact_info: true,
+        vitals: true,
+        physical_information: true,
       },
     });
 
@@ -53,6 +95,23 @@ export class DrizzlePatientRepository implements PatientRepository {
         phone: contact.phone ?? undefined,
         address: contact.address ?? undefined,
       })),
+      vitals: item.vitals.map((v) => ({
+        ...v,
+        blood_pressure: v.blood_pressure ?? 0,
+        heart_rate: v.heart_rate ?? 0,
+        respiratory_rate: v.respiratory_rate ?? 0,
+        oxygen_saturation: v.oxygen_saturation ?? 0,
+        temperature: v.temperature ?? 0,
+      })),
+      physical_information: item.physical_information
+        ? {
+            ...item.physical_information,
+            height: item.physical_information.height ?? 0,
+            weight: item.physical_information.weight ?? 0,
+            body_mass_index: item.physical_information.body_mass_index ?? 0,
+            blood_type: item.physical_information.blood_type ?? undefined,
+          }
+        : undefined,
     });
   }
 
@@ -61,6 +120,8 @@ export class DrizzlePatientRepository implements PatientRepository {
       where: eq(patient.email, email),
       with: {
         contact_info: true,
+        vitals: true,
+        physical_information: true,
       },
     });
 
@@ -76,6 +137,23 @@ export class DrizzlePatientRepository implements PatientRepository {
         phone: contact.phone ?? undefined,
         address: contact.address ?? undefined,
       })),
+      vitals: item.vitals.map((v) => ({
+        ...v,
+        blood_pressure: v.blood_pressure ?? 0,
+        heart_rate: v.heart_rate ?? 0,
+        respiratory_rate: v.respiratory_rate ?? 0,
+        oxygen_saturation: v.oxygen_saturation ?? 0,
+        temperature: v.temperature ?? 0,
+      })),
+      physical_information: item.physical_information
+        ? {
+            ...item.physical_information,
+            height: item.physical_information.height ?? 0,
+            weight: item.physical_information.weight ?? 0,
+            body_mass_index: item.physical_information.body_mass_index ?? 0,
+            blood_type: item.physical_information.blood_type ?? undefined,
+          }
+        : undefined,
     });
   }
 
