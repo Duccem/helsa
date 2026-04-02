@@ -65,13 +65,29 @@ export const physical_information = pgTable("physical_information", {
     .$onUpdate(() => new Date()),
 });
 
-export const patient_relations = relations(patient, ({ many }) => ({
+export const patient_relations = relations(patient, ({ many, one }) => ({
   contact_info: many(contact_info),
+  vitals: many(vitals),
+  physical_information: one(physical_information),
 }));
 
 export const contact_info_relations = relations(contact_info, ({ one }) => ({
   patient: one(patient, {
     fields: [contact_info.patient_id],
+    references: [patient.id],
+  }),
+}));
+
+export const vitals_relations = relations(vitals, ({ one }) => ({
+  patient: one(patient, {
+    fields: [vitals.patient_id],
+    references: [patient.id],
+  }),
+}));
+
+export const physical_information_relations = relations(physical_information, ({ one }) => ({
+  patient: one(patient, {
+    fields: [physical_information.patient_id],
     references: [patient.id],
   }),
 }));
