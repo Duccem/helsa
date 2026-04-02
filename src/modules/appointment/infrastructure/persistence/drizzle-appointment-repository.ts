@@ -117,6 +117,15 @@ export class DrizzleAppointmentRepository implements AppointmentRepository {
       },
     });
 
+    const patientData = await database.query.patient.findFirst({
+      where: eq(patient.id, item?.patient_id ?? ""),
+      with: {
+        contact_info: true,
+        physical_information: true,
+        vitals: true,
+      },
+    });
+
     if (!item) {
       return null;
     }
@@ -126,6 +135,13 @@ export class DrizzleAppointmentRepository implements AppointmentRepository {
       mode: item.mode as AppointmentModeValues,
       status: item.status as AppointmentStatusValues,
       type: item.type as AppointmentTypeValues,
+      patient: {
+        id: patientData?.id ?? "",
+        name: patientData?.name ?? "",
+        email: patientData?.email ?? "",
+        photo_url: "http://placehold.it/200x200",
+        birth_date: patientData?.birth_date ?? new Date(),
+      },
     });
   }
 

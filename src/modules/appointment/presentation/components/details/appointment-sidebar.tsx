@@ -1,53 +1,67 @@
 "use client";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/modules/shared/presentation/components/ui/avatar";
+import { Patient } from "@/modules/patient/domain/patient";
+import { Primitives } from "@/modules/shared/domain/primitives";
+import { Avatar, AvatarFallback, AvatarImage } from "@/modules/shared/presentation/components/ui/avatar";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/modules/shared/presentation/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/modules/shared/presentation/components/ui/card";
 import { Separator } from "@/modules/shared/presentation/components/ui/separator";
-import {
-  Calendar,
-  Clock,
-  Droplets,
-  FileText,
-  Mail,
-  MapPin,
-  Phone,
-  Sparkles,
-  Stethoscope,
-} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Calendar, Clock, Droplets, FileText, Mail, MapPin, Phone, Sparkles, Stethoscope } from "lucide-react";
+import Link from "next/link";
 
 // -- Patient Information --
 
 interface PatientInfoProps {
-  name: string;
-  gender: string;
-  age: number;
-  dateOfBirth: string;
-  phone: string;
-  email: string;
-  bloodType: string;
-  photoUrl?: string;
+  patientId: string;
 }
 
-export function PatientInfoCard({
-  name,
-  gender,
-  age,
-  dateOfBirth,
-  phone,
-  email,
-  bloodType,
-  photoUrl,
-}: PatientInfoProps) {
+export function PatientInfoCard({ patientId }: PatientInfoProps) {
+  const calculateAge = (birth: Date) => {
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const { data, isPending } = useQuery<Primitives<Patient> | null>({
+    queryKey: ["patient", "123"],
+    initialData: null,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await fetch(`/api/patient/${patientId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch patient data");
+      }
+      return response.json();
+    },
+  });
+  if (isPending) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Patient Information</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">Loading...</CardContent>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Patient Information</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center">No patient data found.</CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -56,15 +70,14 @@ export function PatientInfoCard({
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <Avatar size="lg">
-            <AvatarImage src={photoUrl} alt={name} />
             <AvatarFallback className="bg-primary text-primary-foreground">
-              {name.charAt(0).toUpperCase()}
+              {data.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-semibold">{name}</p>
+            <p className="text-sm font-semibold">{data.name}</p>
             <p className="text-xs text-muted-foreground">
-              {gender} · {age} yrs · DOB: {dateOfBirth}
+              {calculateAge(new Date(data.birth_date))} yrs · DOB: {format(new Date(data.birth_date), "MM/dd/yyyy")}
             </p>
           </div>
         </div>
@@ -74,21 +87,23 @@ export function PatientInfoCard({
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 text-sm">
             <Phone className="size-4 text-muted-foreground" />
-            <span>{phone}</span>
+            <span>{data.contact_info?.[0]?.phone ?? "-"}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Mail className="size-4 text-muted-foreground" />
-            <span>{email}</span>
+            <span>{data.email}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Droplets className="size-4 text-muted-foreground" />
-            <span>Blood Type: {bloodType}</span>
+            <span>Blood Type: {data.physical_information?.blood_type}</span>
           </div>
         </div>
 
-        <Button variant="outline" className="w-full">
-          View Full Patient Record
-        </Button>
+        <Link href={`/patients/${data.id}`}>
+          <Button variant="outline" className="w-full">
+            View Full Patient Record
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -103,12 +118,7 @@ interface AppointmentDetailsCardProps {
   type: string;
 }
 
-export function AppointmentDetailsCard({
-  date,
-  time,
-  mode,
-  type,
-}: AppointmentDetailsCardProps) {
+export function AppointmentDetailsCard({ date, time, mode, type }: AppointmentDetailsCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -169,11 +179,7 @@ export function AiActionsCard({ actions }: AiActionsCardProps) {
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {actions.map((action) => (
-          <Button
-            key={action.label}
-            variant="outline"
-            className="w-full justify-start gap-2"
-          >
+          <Button key={action.label} variant="outline" className="w-full justify-start gap-2">
             <Sparkles className="size-3 text-purple-500" />
             {action.label}
           </Button>
@@ -182,3 +188,4 @@ export function AiActionsCard({ actions }: AiActionsCardProps) {
     </Card>
   );
 }
+
