@@ -8,7 +8,7 @@ export const AppointmentMetrics = () => {
   const { dayStats, isFetchingStats } = useAppointments();
   const total = dayStats.length;
   const completed = dayStats.filter((a) => a.status === "FINISHED").length;
-  const pending = dayStats.filter((a) => a.status === "READY").length;
+  const pending = dayStats.filter((a) => a.status === "SCHEDULED").length;
   const cancelled = dayStats.filter((a) => a.status === "CANCELLED").length;
 
   if (isFetchingStats) {

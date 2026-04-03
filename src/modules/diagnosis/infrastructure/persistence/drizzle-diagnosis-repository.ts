@@ -7,6 +7,7 @@ import {
   DiagnosisId,
   DiagnosisIncomeValues,
   DiagnosisStateValues,
+  DiagnosisTypeValues,
 } from "../../domain/diagnosis";
 import { DiagnosisRepository, DiagnosisSearchCriteria } from "../../domain/diagnosis-repository";
 import { Pathology } from "../../domain/pathology";
@@ -33,6 +34,7 @@ export class DrizzleDiagnosisRepository implements DiagnosisRepository {
 
     return Diagnosis.fromPrimitives({
       ...item,
+      type: item.type as DiagnosisTypeValues,
       certainty: item.certainty as DiagnosisCertaintyValues,
       state: item.state as DiagnosisStateValues,
       income: item.income as DiagnosisIncomeValues,
@@ -66,6 +68,7 @@ export class DrizzleDiagnosisRepository implements DiagnosisRepository {
     const data = items.map((item) =>
       Diagnosis.fromPrimitives({
         ...item,
+        type: item.type as DiagnosisTypeValues,
         certainty: item.certainty as DiagnosisCertaintyValues,
         state: item.state as DiagnosisStateValues,
         income: item.income as DiagnosisIncomeValues,
