@@ -7,4 +7,5 @@ export * from "@/modules/prescription/infrastructure/persistence/prescription.sc
 export * from "@/modules/schedule/infrastructure/persistence/schedule.schema";
 export * from "@/modules/chat-agent/infrastructure/persistence/chat.schema";
 export * from "@/modules/medical-record/infrastructure/persistence/medical-record.schema";
+export * from "@/modules/video-call/infrastructure/persistence/video-call.schema";
 

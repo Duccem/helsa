@@ -72,8 +72,12 @@ export const prescription_relations = relations(prescription, ({ many }) => ({
   medications: many(medication),
 }));
 
-export const medication_relations = relations(medication, ({ many }) => ({
+export const medication_relations = relations(medication, ({ many, one }) => ({
   reminders: many(medication_reminder),
+  prescription: one(prescription, {
+    fields: [medication.prescription_id],
+    references: [prescription.id],
+  }),
 }));
 
 export const medication_reminder_relations = relations(medication_reminder, ({ one }) => ({

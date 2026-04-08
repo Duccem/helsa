@@ -9,6 +9,7 @@ import { AppointmentNote } from "./appointment-note";
 import { AppointmentAlreadyHasRating } from "./appointment-already-has-rating";
 import { AppointmentPatient } from "./appointment-patient";
 import { AppointmentPayment } from "./appointment-payment";
+import { AppointmentScheduledDomainEvent } from "./appointment-scheduled-domain-event";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
 
 const hourRegex = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
@@ -141,6 +142,21 @@ export class Appointment extends Aggregate {
         payment.mode,
       );
     }
+
+    appointment.record(
+      new AppointmentScheduledDomainEvent(appointment.id.value, {
+        appointment_id: appointment.id.value,
+        organization_id: appointment.organization_id ? appointment.organization_id.value : null,
+        patient_id: appointment.patient_id.value,
+        doctor_id: appointment.doctor_id.value,
+        date: appointment.date.value,
+        hour: appointment.hour.value,
+        motive: appointment.motive.value,
+        type: appointment.type.value,
+        mode: appointment.mode.value,
+        status: appointment.status.value,
+      }),
+    );
 
     return appointment;
   }
