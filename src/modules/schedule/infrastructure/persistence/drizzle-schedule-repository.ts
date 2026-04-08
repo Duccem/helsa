@@ -6,7 +6,7 @@ import { ScheduleRepository, SearchSchedulesCriteria } from "../../domain/schedu
 import { availability_slot, schedule, schedule_day } from "./schedule.schema";
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
 
-export class DrizzleScheduleRepository implements ScheduleRepository {
+export class DrizzleScheduleRepository extends ScheduleRepository {
   async save(data: Schedule): Promise<void> {
     const { days, ...primitives } = data.toPrimitives();
 

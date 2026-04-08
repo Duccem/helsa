@@ -1,4 +1,4 @@
-export interface DoctorLicenseValidationService {
-  isValid(licenseNumber: string): Promise<boolean>;
+export abstract class DoctorLicenseValidationService {
+  abstract isValid(licenseNumber: string): Promise<boolean>;
 }
 

@@ -13,7 +13,7 @@ import { DiagnosisRepository, DiagnosisSearchCriteria } from "../../domain/diagn
 import { Pathology } from "../../domain/pathology";
 import { diagnosis } from "./diagnosis.schema";
 
-export class DrizzleDiagnosisRepository implements DiagnosisRepository {
+export class DrizzleDiagnosisRepository extends DiagnosisRepository {
   async save(data: Diagnosis): Promise<void> {
     const primitives = data.toPrimitives();
 

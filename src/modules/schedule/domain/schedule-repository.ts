@@ -8,18 +8,18 @@ export type SearchSchedulesCriteria = PaginatedQuery & {
   max_appointments_per_day?: number;
 };
 
-export interface ScheduleRepository {
-  save(schedule: Schedule): Promise<void>;
-  findByDoctorId(doctorId: ScheduleDoctorId): Promise<Schedule | null>;
-  searchSchedules(criteria: SearchSchedulesCriteria): Promise<PaginatedResult<Schedule>>;
-  saveAvailabilities(slots: AvailabilitySlot[]): Promise<void>;
-  deleteAvailabilitiesByDoctorIdAndRange(
+export abstract class ScheduleRepository {
+  abstract save(schedule: Schedule): Promise<void>;
+  abstract findByDoctorId(doctorId: ScheduleDoctorId): Promise<Schedule | null>;
+  abstract searchSchedules(criteria: SearchSchedulesCriteria): Promise<PaginatedResult<Schedule>>;
+  abstract saveAvailabilities(slots: AvailabilitySlot[]): Promise<void>;
+  abstract deleteAvailabilitiesByDoctorIdAndRange(
     doctorId: ScheduleDoctorId,
     date_from: Date,
     date_to: Date,
     state?: "TAKEN" | "AVAILABLE",
   ): Promise<void>;
-  findAvailabilitiesByDoctorId(
+  abstract findAvailabilitiesByDoctorId(
     doctorId: ScheduleDoctorId,
     date_from?: Date,
     date_to?: Date,

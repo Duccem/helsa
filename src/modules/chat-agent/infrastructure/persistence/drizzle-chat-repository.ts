@@ -4,7 +4,7 @@ import { ChatRepository } from "../../domain/chat-repository";
 import { chat } from "./chat.schema";
 import { eq } from "drizzle-orm";
 
-export class DrizzleChatRepository implements ChatRepository {
+export class DrizzleChatRepository extends ChatRepository {
   async saveChat(payload: Chat): Promise<void> {
     const primitives = payload.toPrimitives();
     const existingChat = await database.query.chat.findFirst({

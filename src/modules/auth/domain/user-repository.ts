@@ -1,7 +1,7 @@
 import { User, UserId } from "./user";
 
-export interface UserRepository {
-  get(user_id: UserId): Promise<User | null>;
-  save(user: User): Promise<void>;
+export abstract class UserRepository {
+  abstract get(user_id: UserId): Promise<User | null>;
+  abstract save(user: User): Promise<void>;
 }
 

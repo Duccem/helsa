@@ -7,11 +7,11 @@ export type PatientSearchCriteria = PaginatedQuery & {
   gender?: PatientGenderValues;
 };
 
-export interface PatientRepository {
-  save(patient: Patient): Promise<void>;
-  find(id: PatientId): Promise<Patient | null>;
-  findByEmail(email: string): Promise<Patient | null>;
-  findByUserId(userId: PatientUserId): Promise<Patient | null>;
-  search(criteria: PatientSearchCriteria): Promise<PaginatedResult<Patient>>;
+export abstract class PatientRepository {
+  abstract save(patient: Patient): Promise<void>;
+  abstract find(id: PatientId): Promise<Patient | null>;
+  abstract findByEmail(email: string): Promise<Patient | null>;
+  abstract findByUserId(userId: PatientUserId): Promise<Patient | null>;
+  abstract search(criteria: PatientSearchCriteria): Promise<PaginatedResult<Patient>>;
 }
 

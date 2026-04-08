@@ -22,13 +22,13 @@ export type ReminderSearchCriteria = PaginatedQuery & {
   end_date?: Date;
 };
 
-export interface PrescriptionRepository {
-  save(prescription: Prescription): Promise<void>;
-  find(id: PrescriptionId): Promise<Prescription | null>;
-  search(criteria: PrescriptionSearchCriteria): Promise<PaginatedResult<Prescription>>;
-  searchMedications(criteria: MedicationSearchCriteria): Promise<PaginatedResult<Medication>>;
-  findMedication(id: MedicationId): Promise<Medication | null>;
-  listRemindersForPrescription(prescription_id: PrescriptionId): Promise<MedicationReminder[]>;
-  searchReminders(query: ReminderSearchCriteria): Promise<PaginatedResult<MedicationReminder>>;
+export abstract class PrescriptionRepository {
+  abstract save(prescription: Prescription): Promise<void>;
+  abstract find(id: PrescriptionId): Promise<Prescription | null>;
+  abstract search(criteria: PrescriptionSearchCriteria): Promise<PaginatedResult<Prescription>>;
+  abstract searchMedications(criteria: MedicationSearchCriteria): Promise<PaginatedResult<Medication>>;
+  abstract findMedication(id: MedicationId): Promise<Medication | null>;
+  abstract listRemindersForPrescription(prescription_id: PrescriptionId): Promise<MedicationReminder[]>;
+  abstract searchReminders(query: ReminderSearchCriteria): Promise<PaginatedResult<MedicationReminder>>;
 }
 

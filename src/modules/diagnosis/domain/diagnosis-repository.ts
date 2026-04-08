@@ -17,10 +17,10 @@ export type DiagnosisSearchCriteria = PaginatedQuery & {
   income?: DiagnosisIncomeValues;
 };
 
-export interface DiagnosisRepository {
-  save(diagnosis: Diagnosis): Promise<void>;
-  find(id: DiagnosisId): Promise<Diagnosis | null>;
-  search(criteria: DiagnosisSearchCriteria): Promise<PaginatedResult<Diagnosis>>;
-  listPathologies(query?: string): Promise<Pathology[]>;
+export abstract class DiagnosisRepository {
+  abstract save(diagnosis: Diagnosis): Promise<void>;
+  abstract find(id: DiagnosisId): Promise<Diagnosis | null>;
+  abstract search(criteria: DiagnosisSearchCriteria): Promise<PaginatedResult<Diagnosis>>;
+  abstract listPathologies(query?: string): Promise<Pathology[]>;
 }
 

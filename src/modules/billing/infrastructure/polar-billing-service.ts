@@ -11,7 +11,7 @@ import {
 import { polar } from "./polar-client";
 import { medicalProducts } from "./polar-products";
 
-export class PolarBillingService implements BillingService {
+export class PolarBillingService extends BillingService {
   async createCustomer(payload: NewCustomerPayload): Promise<Customer> {
     const customer = await polar.customers.create({
       externalId: payload.id,

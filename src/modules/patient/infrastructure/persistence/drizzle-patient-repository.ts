@@ -6,7 +6,7 @@ import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-r
 import { allergy, contact_info, patient, physical_information, vitals } from "./patient.schema";
 import { AllergySeverityValues } from "../../domain/allergy";
 
-export class DrizzlePatientRepository implements PatientRepository {
+export class DrizzlePatientRepository extends PatientRepository {
   async save(data: Patient): Promise<void> {
     const {
       contact_info: patientContactInfo,

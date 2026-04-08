@@ -29,12 +29,12 @@ export type OrdersResponse = {
 export type OrderInvoice = {
   url: string;
 };
-export interface BillingService {
-  createCustomer(organization: NewCustomerPayload): Promise<Customer>;
-  createSubscription(customerId: string, planId: string): Promise<Subscription>;
-  getSubscriptionStatus(externalCustomerId: string): Promise<SubscriptionStatus>;
-  getOrders(externalCustomerId: string, page: number): Promise<OrdersResponse>;
-  getOrder(orderId: string): Promise<Order>;
-  getInvoice(orderId: string): Promise<OrderInvoice>;
+export abstract class BillingService {
+  abstract createCustomer(organization: NewCustomerPayload): Promise<Customer>;
+  abstract createSubscription(customerId: string, planId: string): Promise<Subscription>;
+  abstract getSubscriptionStatus(externalCustomerId: string): Promise<SubscriptionStatus>;
+  abstract getOrders(externalCustomerId: string, page: number): Promise<OrdersResponse>;
+  abstract getOrder(orderId: string): Promise<Order>;
+  abstract getInvoice(orderId: string): Promise<OrderInvoice>;
 }
 

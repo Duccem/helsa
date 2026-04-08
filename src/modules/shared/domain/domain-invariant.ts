@@ -1,6 +1,4 @@
-export interface Predicate<T> {
-  (candidate: T): boolean;
-}
+export type Predicate<T> = (candidate: T) => boolean;
 export class DomainInvariant<T> {
   constructor(
     public readonly message: string,

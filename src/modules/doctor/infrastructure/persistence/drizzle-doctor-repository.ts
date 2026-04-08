@@ -9,7 +9,7 @@ import { appointment } from "@/modules/appointment/infrastructure/persistence/ap
 import { patient } from "@/modules/patient/infrastructure/persistence/patient.schema";
 import { DoctorPatient } from "../../domain/doctor-patient";
 
-export class DrizzleDoctorRepository implements DoctorRepository {
+export class DrizzleDoctorRepository extends DoctorRepository {
   async save(data: Doctor): Promise<void> {
     const {
       prices: doctorPrices,
@@ -192,7 +192,7 @@ export class DrizzleDoctorRepository implements DoctorRepository {
   }
 }
 
-export class DrizzleSpecialtyRepository implements SpecialtyRepository {
+export class DrizzleSpecialtyRepository extends SpecialtyRepository {
   async save(data: Specialty): Promise<void> {
     const primitives = data.toPrimitives();
     await database.insert(specialty).values(primitives).onConflictDoUpdate({

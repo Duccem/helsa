@@ -1,3 +1,3 @@
-export interface Adapter<Input, Output> {
-  build(input: Input): Output;
+export abstract class Adapter<Input, Output> {
+  abstract build(input: Input): Output;
 }

@@ -11,11 +11,11 @@ import {
   type AppointmentStatusValues,
   type AppointmentTypeValues,
 } from "../../domain/appointment";
-import type { AppointmentRepository, AppointmentSearchCriteria } from "../../domain/appointment-repository";
+import { AppointmentRepository, type AppointmentSearchCriteria } from "../../domain/appointment-repository";
 import { appointment, appointment_note, appointment_payment, appointment_rating } from "./appointment.schema";
 import { AppointmentNoteId } from "../../domain/appointment-note";
 
-export class DrizzleAppointmentRepository implements AppointmentRepository {
+export class DrizzleAppointmentRepository extends AppointmentRepository {
   private buildQuery(criteria: AppointmentSearchCriteria) {
     return and(
       criteria.organization_id ? eq(appointment.organization_id, criteria.organization_id) : undefined,

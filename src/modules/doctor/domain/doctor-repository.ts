@@ -10,17 +10,17 @@ export type DoctorSearchCriteria = PaginatedQuery & {
   max_price?: number;
 };
 
-export interface DoctorRepository {
-  save(doctor: Doctor): Promise<void>;
-  find(id: DoctorId): Promise<Doctor | null>;
-  findByUserId(userId: DoctorUserId): Promise<Doctor | null>;
-  search(criteria: DoctorSearchCriteria): Promise<PaginatedResult<Doctor>>;
-  getDoctorPatients(doctorId: DoctorId): Promise<DoctorPatient[]>;
+export abstract class DoctorRepository {
+  abstract save(doctor: Doctor): Promise<void>;
+  abstract find(id: DoctorId): Promise<Doctor | null>;
+  abstract findByUserId(userId: DoctorUserId): Promise<Doctor | null>;
+  abstract search(criteria: DoctorSearchCriteria): Promise<PaginatedResult<Doctor>>;
+  abstract getDoctorPatients(doctorId: DoctorId): Promise<DoctorPatient[]>;
 }
 
-export interface SpecialtyRepository {
-  save(specialty: Specialty): Promise<void>;
-  find(id: SpecialtyId): Promise<Specialty | null>;
-  search(name?: string): Promise<Specialty[]>;
+export abstract class SpecialtyRepository {
+  abstract save(specialty: Specialty): Promise<void>;
+  abstract find(id: SpecialtyId): Promise<Specialty | null>;
+  abstract search(name?: string): Promise<Specialty[]>;
 }
 
