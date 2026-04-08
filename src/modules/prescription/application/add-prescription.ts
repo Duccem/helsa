@@ -1,6 +1,8 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { Prescription } from "../domain/prescription";
 import { PrescriptionRepository } from "../domain/prescription-repository";
 
+@ApplicationService()
 export class AddPrescription {
   constructor(private readonly repository: PrescriptionRepository) {}
 

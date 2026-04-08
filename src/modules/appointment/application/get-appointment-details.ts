@@ -2,7 +2,9 @@ import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
 import { AppointmentId } from "../domain/appointment";
 import { AppointmentNotFound } from "../domain/appointment-not-found";
 import { AppointmentRepository } from "../domain/appointment-repository";
+import { ApplicationService } from "@/modules/shared/domain/service.";
 
+@ApplicationService()
 export class GetAppointmentDetails {
   constructor(private readonly repository: AppointmentRepository) {}
 

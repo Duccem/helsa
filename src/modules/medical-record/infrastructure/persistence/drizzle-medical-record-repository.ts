@@ -5,7 +5,9 @@ import { Primitives } from "@/modules/shared/domain/primitives";
 import { medical_record } from "./medical-record.schema";
 import { and, count, eq, gte, like, lte, or } from "drizzle-orm";
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 
+@InfrastructureService()
 export class DrizzleMedicalRecordRepository extends MedicalRecordRepository {
   private buildCriteria(criteria: MedicalRecordSearchCriteria) {
     return and(

@@ -1,7 +1,9 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { PatientUserId } from "../domain/patient";
 import { PatientNotFound } from "../domain/patient-not-found";
 import { PatientRepository } from "../domain/patient-repository";
 
+@ApplicationService()
 export class GetPatientProfile {
   constructor(private readonly repository: PatientRepository) {}
 
@@ -15,3 +17,4 @@ export class GetPatientProfile {
     return patient.toPrimitives();
   }
 }
+

@@ -1,5 +1,7 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { BillingService } from "../domain/billing-service";
 
+@ApplicationService()
 export class InitializeNewUserBilling {
   constructor(private billingService: BillingService) {}
 
@@ -7,3 +9,4 @@ export class InitializeNewUserBilling {
     await this.billingService.createCustomer(payload);
   }
 }
+

@@ -1,8 +1,10 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { AppointmentId } from "../domain/appointment";
 import { AppointmentNotFound } from "../domain/appointment-not-found";
 import { AppointmentNoteId } from "../domain/appointment-note";
 import { AppointmentRepository } from "../domain/appointment-repository";
 
+@ApplicationService()
 export class RemoveAppointmentNote {
   constructor(private readonly repository: AppointmentRepository) {}
 

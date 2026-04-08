@@ -2,7 +2,9 @@ import { resend } from "@/modules/shared/infrastructure/email";
 import { ReminderNotifier } from "../domain/reminder-notifier";
 import NextDoseReminderEmail from "@/modules/shared/infrastructure/email/templates/next-dose-reminder-email";
 import MissedDoseReminderEmail from "@/modules/shared/infrastructure/email/templates/missed-dose-reminder-email";
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 
+@InfrastructureService()
 export class ResendReminderNotifier extends ReminderNotifier {
   async notifyNextReminder(email: string, medicationName: string, reminderTime: Date): Promise<void> {
     await resend.emails.send({
@@ -21,3 +23,4 @@ export class ResendReminderNotifier extends ReminderNotifier {
     });
   }
 }
+

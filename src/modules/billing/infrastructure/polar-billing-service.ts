@@ -1,3 +1,4 @@
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 import {
   BillingService,
   Customer,
@@ -11,6 +12,7 @@ import {
 import { polar } from "./polar-client";
 import { medicalProducts } from "./polar-products";
 
+@InfrastructureService()
 export class PolarBillingService extends BillingService {
   async createCustomer(payload: NewCustomerPayload): Promise<Customer> {
     const customer = await polar.customers.create({

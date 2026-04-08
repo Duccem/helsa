@@ -2,7 +2,9 @@ import { ScheduleDayInput } from "../domain/schedule-day";
 import { ScheduleNotFound } from "../domain/schedule-not-found";
 import { ScheduleDoctorId } from "../domain/schedule";
 import { ScheduleRepository } from "../domain/schedule-repository";
+import { ApplicationService } from "@/modules/shared/domain/service.";
 
+@ApplicationService()
 export class AddDaysToSchedule {
   constructor(private readonly repository: ScheduleRepository) {}
 

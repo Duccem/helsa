@@ -1,5 +1,7 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { OrganizationRepository } from "../domain/organization-repository";
 
+@ApplicationService()
 export class GetOrganization {
   constructor(private readonly repository: OrganizationRepository) {}
 
@@ -9,3 +11,4 @@ export class GetOrganization {
     return organization;
   }
 }
+

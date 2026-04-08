@@ -3,7 +3,9 @@ import { Chat, ChatStatusValue } from "../../domain/chat";
 import { ChatRepository } from "../../domain/chat-repository";
 import { chat } from "./chat.schema";
 import { eq } from "drizzle-orm";
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 
+@InfrastructureService()
 export class DrizzleChatRepository extends ChatRepository {
   async saveChat(payload: Chat): Promise<void> {
     const primitives = payload.toPrimitives();

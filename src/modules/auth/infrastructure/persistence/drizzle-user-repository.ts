@@ -3,7 +3,8 @@ import { UserId, User } from "../../domain/user";
 import { UserRepository } from "../../domain/user-repository";
 import { eq } from "drizzle-orm";
 import { user } from "./auth.schema";
-
+import { InfrastructureService } from "@/modules/shared/domain/service.";
+@InfrastructureService()
 export class DrizzleUserRepository extends UserRepository {
   async get(user_id: UserId): Promise<User | null> {
     const data = await database.query.user.findFirst({

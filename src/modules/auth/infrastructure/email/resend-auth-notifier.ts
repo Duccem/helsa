@@ -6,7 +6,9 @@ import OrganizationInvitationEmail from "@/modules/shared/infrastructure/email/t
 import InvitationAcceptedEmail from "@/modules/shared/infrastructure/email/templates/invitation-accepted-email";
 import OrganizationCreatedEmail from "@/modules/shared/infrastructure/email/templates/organization-created-email";
 import WelcomeSignupEmail from "@/modules/shared/infrastructure/email/templates/welcome-signup";
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 
+@InfrastructureService()
 export class ResendAuthNotifier extends AuthNotifier {
   async notifyPasswordResetRequest(email: string, url: string, token: string): Promise<void> {
     await resend.emails.send({

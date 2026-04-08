@@ -1,7 +1,9 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { PatientId } from "../domain/patient";
 import { PatientNotFound } from "../domain/patient-not-found";
 import { PatientRepository } from "../domain/patient-repository";
 
+@ApplicationService()
 export class RemoveAllergy {
   constructor(private readonly repository: PatientRepository) {}
 
@@ -16,3 +18,4 @@ export class RemoveAllergy {
     await this.repository.save(patient);
   }
 }
+

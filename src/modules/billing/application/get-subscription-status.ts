@@ -1,6 +1,8 @@
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
 import { BillingService } from "../domain/billing-service";
+import { ApplicationService } from "@/modules/shared/domain/service.";
 
+@ApplicationService()
 export class GetSubscriptionStatus {
   constructor(private readonly billingService: BillingService) {}
 

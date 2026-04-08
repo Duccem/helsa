@@ -1,3 +1,4 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { Doctor } from "../domain/doctor";
 import { DoctorUserId } from "../domain/doctor";
 import { DoctorAlreadyExists } from "../domain/doctor-already-exists";
@@ -7,6 +8,7 @@ import { DoctorRepository, SpecialtyRepository } from "../domain/doctor-reposito
 import { SpecialtyId } from "../domain/specialty";
 import { SpecialtyNotFound } from "../domain/specialty-not-found";
 
+@ApplicationService()
 export class RegisterDoctor {
   constructor(
     private readonly doctorRepository: DoctorRepository,

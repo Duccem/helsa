@@ -2,7 +2,9 @@ import { ScheduleAlreadyExists } from "../domain/schedule-already-exists";
 import { ScheduleDayInput } from "../domain/schedule-day";
 import { Schedule, ScheduleDoctorId } from "../domain/schedule";
 import { ScheduleRepository } from "../domain/schedule-repository";
+import { ApplicationService } from "@/modules/shared/domain/service.";
 
+@ApplicationService()
 export class CreateSchedule {
   constructor(private readonly repository: ScheduleRepository) {}
 

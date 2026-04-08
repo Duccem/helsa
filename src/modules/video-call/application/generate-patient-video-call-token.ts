@@ -3,7 +3,9 @@ import { VideoCallAuthService } from "../domain/video-call-auth-service";
 import { VideoCallParticipantNotFound } from "../domain/video-call-participant-not-found";
 import { VideoCallRepository } from "../domain/video-call-repository";
 import { VideoCallNotFound } from "../domain/video-call-not-found";
+import { ApplicationService } from "@/modules/shared/domain/service.";
 
+@ApplicationService()
 export class GeneratePatientVideoCallToken {
   constructor(
     private readonly videoCallRepository: VideoCallRepository,
@@ -25,3 +27,4 @@ export class GeneratePatientVideoCallToken {
     return this.videoCallAuthService.getPatientToken(videoCall);
   }
 }
+

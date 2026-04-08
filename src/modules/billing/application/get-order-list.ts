@@ -1,5 +1,7 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { BillingService } from "../domain/billing-service";
 
+@ApplicationService()
 export class GetOrderList {
   constructor(private readonly service: BillingService) {}
 

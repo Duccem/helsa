@@ -2,7 +2,9 @@ import { Primitives } from "@/modules/shared/domain/primitives";
 import { AvailabilitySlot } from "../domain/availability-slot";
 import { ScheduleDoctorId } from "../domain/schedule";
 import { ScheduleRepository } from "../domain/schedule-repository";
+import { ApplicationService } from "@/modules/shared/domain/service.";
 
+@ApplicationService()
 export class GetAvailabilities {
   constructor(private readonly repository: ScheduleRepository) {}
 

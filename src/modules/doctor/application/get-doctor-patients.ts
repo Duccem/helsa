@@ -1,7 +1,9 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { DoctorUserId } from "../domain/doctor";
 import { DoctorNotFound } from "../domain/doctor-not-found";
 import { DoctorRepository } from "../domain/doctor-repository";
 
+@ApplicationService()
 export class GetDoctorPatients {
   constructor(private readonly doctorRepository: DoctorRepository) {}
 

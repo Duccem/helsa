@@ -1,7 +1,9 @@
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 import { VideoCall } from "../domain/video-call";
 import { VideoCallAuthService } from "../domain/video-call-auth-service";
 import jwt from "jsonwebtoken";
 
+@InfrastructureService()
 export class JwtVideoCallAuthService extends VideoCallAuthService {
   async getDoctorToken(videoCall: VideoCall): Promise<string> {
     const data = videoCall.toPrimitives();

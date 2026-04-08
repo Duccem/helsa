@@ -1,3 +1,4 @@
+import { ApplicationService } from "@/modules/shared/domain/service.";
 import { Diagnosis, DiagnosisCertaintyValues, DiagnosisIncomeValues, DiagnosisStateValues } from "../domain/diagnosis";
 import { DiagnosisRepository } from "../domain/diagnosis-repository";
 
@@ -10,6 +11,7 @@ export type CreateDiagnosisInputDto = {
   income?: DiagnosisIncomeValues;
 };
 
+@ApplicationService()
 export class CreateDiagnosis {
   constructor(private readonly repository: DiagnosisRepository) {}
 

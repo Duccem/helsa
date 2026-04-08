@@ -2,12 +2,14 @@ import { database } from "@/modules/shared/infrastructure/database/client";
 import { VideoCall, VideoCallAppointmentId, VideoCallId } from "../../domain/video-call";
 import { VideoCallRepository } from "../../domain/video-call-repository";
 import { video_call } from "./video-call.schema";
-import { eq, getTableColumns } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { appointment } from "@/modules/appointment/infrastructure/persistence/appointment.schema";
 import { doctor } from "@/modules/doctor/infrastructure/persistence/doctor.schema";
 import { patient } from "@/modules/patient/infrastructure/persistence/patient.schema";
 import { user } from "@/modules/auth/infrastructure/persistence/auth.schema";
+import { InfrastructureService } from "@/modules/shared/domain/service.";
 
+@InfrastructureService()
 export class DrizzleVideoCallRepository extends VideoCallRepository {
   async create(videoCall: VideoCall): Promise<void> {
     const data = videoCall.toPrimitives();
