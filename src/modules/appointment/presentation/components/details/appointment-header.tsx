@@ -15,6 +15,7 @@ import { useAppointmentDetail } from "./provider";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
+import { CopyPatientLinkButton } from "./copy-patient-link-button";
 import { StartAppointmentButton } from "./start-appointment-button";
 
 const statusLabels = {
@@ -79,7 +80,10 @@ export function AppointmentHeader() {
       </div>
       <div className="flex items-center gap-1">
         {appointment?.status !== "CANCELLED" && appointment?.status !== "FINISHED" && (
-          <StartAppointmentButton appointmentId={appointment.id} />
+          <>
+            <CopyPatientLinkButton appointmentId={appointment.id} />
+            <StartAppointmentButton appointmentId={appointment.id} />
+          </>
         )}
         <Button variant="ghost" size="icon">
           <Printer className="size-4" />
