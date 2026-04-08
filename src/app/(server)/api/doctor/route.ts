@@ -3,12 +3,8 @@ import { SearchDoctors } from "@/modules/doctor/application/search-doctors";
 import { DoctorAlreadyExists } from "@/modules/doctor/domain/doctor-already-exists";
 import { DoctorLicenseNotValid } from "@/modules/doctor/domain/doctor-license-not-valid";
 import { SpecialtyNotFound } from "@/modules/doctor/domain/specialty-not-found";
-import {
-  DrizzleDoctorRepository,
-  DrizzleSpecialtyRepository,
-} from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
-import { VenezuelanDoctorLicenseValidationService } from "@/modules/doctor/infrastructure/venezuelan-licencense-validation";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -26,11 +22,7 @@ const registerDoctorSchema = z.object({
 export const POST = async (request: NextRequest) => {
   const { session } = await authenticate();
   const body = await parseBody(request, registerDoctorSchema);
-  const service = new RegisterDoctor(
-    new DrizzleDoctorRepository(),
-    new DrizzleSpecialtyRepository(),
-    new VenezuelanDoctorLicenseValidationService(),
-  );
+  const service = container.get(RegisterDoctor);
 
   return routeHandler(
     async () => {
@@ -73,7 +65,7 @@ const searchDoctorsSchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, searchDoctorsSchema);
-  const service = new SearchDoctors(new DrizzleDoctorRepository());
+  const service = container.get(SearchDoctors);
 
   return routeHandler(
     async () => {

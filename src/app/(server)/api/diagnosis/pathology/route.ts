@@ -1,5 +1,5 @@
 import { ListPathologies } from "@/modules/diagnosis/application/list-pathologies";
-import { DrizzleDiagnosisRepository } from "@/modules/diagnosis/infrastructure/persistence/drizzle-diagnosis-repository";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -14,7 +14,7 @@ const listPathologiesSchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, listPathologiesSchema);
-  const service = new ListPathologies(new DrizzleDiagnosisRepository());
+  const service = container.get(ListPathologies);
 
   return routeHandler(
     async () => {

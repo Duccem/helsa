@@ -1,5 +1,5 @@
 import { ListSpecialties } from "@/modules/doctor/application/list-specialties";
-import { DrizzleSpecialtyRepository } from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -14,7 +14,7 @@ const searchSpecialtySchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, searchSpecialtySchema);
-  const service = new ListSpecialties(new DrizzleSpecialtyRepository());
+  const service = container.get(ListSpecialties);
 
   return routeHandler(
     async () => {

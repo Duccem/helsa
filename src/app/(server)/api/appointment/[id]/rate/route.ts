@@ -1,7 +1,7 @@
 import { AppointmentAddRating, AppointmentAddRatingErrors } from "@/modules/appointment/application/add-rating";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
-import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -19,7 +19,7 @@ const paramsSchema = z.object({
 
 export const POST = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]/rate">) => {
   await authenticate();
-  const service = new AppointmentAddRating(new DrizzleAppointmentRepository());
+  const service = container.get(AppointmentAddRating);
   const { id } = await parseParams(ctx.params, paramsSchema);
   const { rate } = await parseBody(request, bodySchema);
 

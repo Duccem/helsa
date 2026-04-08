@@ -1,7 +1,6 @@
 import { GetOrganization } from "@/modules/auth/application/get-organization";
-import { DrizzleOrganizationRepository } from "@/modules/auth/infrastructure/persistence/drizzle-organization-repository";
 import { InitializeNewOrganizationBilling } from "@/modules/billing/application/initialize-new-organization-billing";
-import { PolarBillingService } from "@/modules/billing/infrastructure/polar-billing-service";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
 
 export const initUserBilling = inngest.createFunction(
@@ -11,13 +10,13 @@ export const initUserBilling = inngest.createFunction(
     const { organizationId } = event.data;
 
     const orgData = await step.run("fetch user data", async () => {
-      const service = new GetOrganization(new DrizzleOrganizationRepository());
+      const service = container.get(GetOrganization);
       const organization = await service.execute(organizationId);
       return organization;
     });
 
     await step.run("proccess user billing", async () => {
-      const service = new InitializeNewOrganizationBilling(new PolarBillingService());
+      const service = container.get(InitializeNewOrganizationBilling);
       await service.execute({
         id: orgData.id,
         name: orgData.name,
@@ -28,4 +27,3 @@ export const initUserBilling = inngest.createFunction(
     return { success: true };
   },
 );
-

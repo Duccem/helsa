@@ -1,11 +1,5 @@
-import { GetUser } from "@/modules/auth/application/get-user";
-import { DrizzleUserRepository } from "@/modules/auth/infrastructure/persistence/drizzle-user-repository";
 import { RegisterDoctor } from "@/modules/doctor/application/register-doctor";
-import {
-  DrizzleDoctorRepository,
-  DrizzleSpecialtyRepository,
-} from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
-import { VenezuelanDoctorLicenseValidationService } from "@/modules/doctor/infrastructure/venezuelan-licencense-validation";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
 
 export const createDoctor = inngest.createFunction(
@@ -15,11 +9,7 @@ export const createDoctor = inngest.createFunction(
     const { userId } = event.data.attributes;
 
     await step.run("create_doctor_profile", async () => {
-      const creator = new RegisterDoctor(
-        new DrizzleDoctorRepository(),
-        new DrizzleSpecialtyRepository(),
-        new VenezuelanDoctorLicenseValidationService(),
-      );
+      const creator = container.get(RegisterDoctor);
 
       await creator.execute({
         user_id: userId,
@@ -30,4 +20,3 @@ export const createDoctor = inngest.createFunction(
     });
   },
 );
-

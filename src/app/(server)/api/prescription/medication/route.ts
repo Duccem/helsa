@@ -1,6 +1,6 @@
 import { SearchMedications } from "@/modules/prescription/application/search-medications";
-import { DrizzlePrescriptionRepository } from "@/modules/prescription/infrastructure/persistence/drizzle-prescription-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -19,7 +19,7 @@ const searchMedicationsSchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, searchMedicationsSchema);
-  const service = new SearchMedications(new DrizzlePrescriptionRepository());
+  const service = container.get(SearchMedications);
 
   return routeHandler(
     async () => {

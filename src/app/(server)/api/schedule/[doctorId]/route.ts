@@ -1,7 +1,7 @@
 import { GetSchedule } from "@/modules/schedule/application/get-schedule";
 import { ScheduleNotFound } from "@/modules/schedule/domain/schedule-not-found";
-import { DrizzleScheduleRepository } from "@/modules/schedule/infrastructure/persistence/drizzle-schedule-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -16,7 +16,7 @@ const getScheduleParamSchema = z.object({
 export const GET = async (_request: NextRequest, ctx: RouteContext<"/api/schedule/[doctorId]">) => {
   await authenticate();
   const query = await parseParams(ctx.params, getScheduleParamSchema);
-  const service = new GetSchedule(new DrizzleScheduleRepository());
+  const service = container.get(GetSchedule);
 
   return routeHandler(
     async () => {

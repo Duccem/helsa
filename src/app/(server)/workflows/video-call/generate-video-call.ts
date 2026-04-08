@@ -1,6 +1,6 @@
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
 import { CreateVideoCallForAppointment } from "@/modules/video-call/application/create-video-call-for-appointment";
-import { DrizzleVideoCallRepository } from "@/modules/video-call/infrastructure/persistence/drizzle-video-call-repository";
 
 export const generateVideoCall = inngest.createFunction(
   { name: "Generate video call for appointment", id: "generate-video-call-for-appointment" },
@@ -15,7 +15,7 @@ export const generateVideoCall = inngest.createFunction(
     }
 
     await step.run("create-video-call-for-appointment", async () => {
-      const service = new CreateVideoCallForAppointment(new DrizzleVideoCallRepository());
+      const service = container.get(CreateVideoCallForAppointment);
       await service.execute(appointment_id);
     });
   },

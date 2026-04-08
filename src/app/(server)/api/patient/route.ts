@@ -2,8 +2,8 @@ import { CreatePatient } from "@/modules/patient/application/create-patient";
 import { SearchPatients } from "@/modules/patient/application/search-patients";
 import { PatientGenderValues } from "@/modules/patient/domain/patient";
 import { PatientAlreadyExists } from "@/modules/patient/domain/patient-already-exists";
-import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -33,7 +33,7 @@ const createPatientSchema = z.object({
 export const POST = async (request: NextRequest) => {
   const { session } = await authenticate();
   const body = await parseBody(request, createPatientSchema);
-  const service = new CreatePatient(new DrizzlePatientRepository());
+  const service = container.get(CreatePatient);
 
   return routeHandler(
     async () => {
@@ -72,7 +72,7 @@ const searchPatientsSchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, searchPatientsSchema);
-  const service = new SearchPatients(new DrizzlePatientRepository());
+  const service = container.get(SearchPatients);
 
   return routeHandler(
     async () => {

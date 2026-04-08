@@ -1,8 +1,8 @@
 import { MarkReminderAsTaken } from "@/modules/prescription/application/mark-reminder-as-taken";
 import { MedicationReminderNotFound } from "@/modules/prescription/domain/medication-not-found";
 import { PrescriptionNotFound } from "@/modules/prescription/domain/prescription-not-found";
-import { DrizzlePrescriptionRepository } from "@/modules/prescription/infrastructure/persistence/drizzle-prescription-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -22,7 +22,7 @@ export const PUT = async (
 ) => {
   await authenticate();
   const { id, reminderId, medicationId } = await parseParams(ctx.params, paramsSchema);
-  const service = new MarkReminderAsTaken(new DrizzlePrescriptionRepository());
+  const service = container.get(MarkReminderAsTaken);
 
   return routeHandler(
     async () => {

@@ -3,12 +3,8 @@ import { UpdateDoctorProfile } from "@/modules/doctor/application/update-doctor-
 import { DoctorLicenseNotValid } from "@/modules/doctor/domain/doctor-license-not-valid";
 import { DoctorNotFound } from "@/modules/doctor/domain/doctor-not-found";
 import { SpecialtyNotFound } from "@/modules/doctor/domain/specialty-not-found";
-import {
-  DrizzleDoctorRepository,
-  DrizzleSpecialtyRepository,
-} from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
-import { VenezuelanDoctorLicenseValidationService } from "@/modules/doctor/infrastructure/venezuelan-licencense-validation";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -23,7 +19,7 @@ const paramsSchema = z.object({
 export const GET = async (_: NextRequest, ctx: RouteContext<"/api/doctor/[id]">) => {
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
-  const service = new GetDoctorDetails(new DrizzleDoctorRepository());
+  const service = container.get(GetDoctorDetails);
 
   return routeHandler(
     async () => {
@@ -52,11 +48,7 @@ export const PUT = async (request: NextRequest, ctx: RouteContext<"/api/doctor/[
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new UpdateDoctorProfile(
-    new DrizzleDoctorRepository(),
-    new DrizzleSpecialtyRepository(),
-    new VenezuelanDoctorLicenseValidationService(),
-  );
+  const service = container.get(UpdateDoctorProfile);
 
   return routeHandler(
     async () => {

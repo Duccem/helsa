@@ -1,6 +1,6 @@
 import { SetPhysicalInformation } from "@/modules/patient/application/set-physical-information";
 import { PatientNotFound } from "@/modules/patient/domain/patient-not-found";
-import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -23,7 +23,7 @@ export const PUT = async (request: NextRequest, ctx: RouteContext<"/api/patient/
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new SetPhysicalInformation(new DrizzlePatientRepository());
+  const service = container.get(SetPhysicalInformation);
 
   return routeHandler(
     async () => {

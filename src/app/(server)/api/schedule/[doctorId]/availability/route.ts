@@ -2,8 +2,8 @@ import { GenerateAvailability } from "@/modules/schedule/application/generate-av
 import { GetAvailabilities } from "@/modules/schedule/application/get-availabilities";
 import { AvailabilitySlotStateValues } from "@/modules/schedule/domain/availability-slot";
 import { ScheduleNotFound } from "@/modules/schedule/domain/schedule-not-found";
-import { DrizzleScheduleRepository } from "@/modules/schedule/infrastructure/persistence/drizzle-schedule-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseParams, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -18,7 +18,7 @@ const paramsSchema = z.object({
 export const POST = async (_: NextRequest, ctx: RouteContext<"/api/schedule/[doctorId]/availability">) => {
   await authenticate();
   const { doctorId } = await parseParams(ctx.params, paramsSchema);
-  const service = new GenerateAvailability(new DrizzleScheduleRepository());
+  const service = container.get(GenerateAvailability);
 
   return routeHandler(
     async () => {
@@ -48,7 +48,7 @@ export const GET = async (request: NextRequest, ctx: RouteContext<"/api/schedule
   await authenticate();
   const { doctorId } = await parseParams(ctx.params, paramsSchema);
   const query = parseQuery(request, getAvailabilitiesQuerySchema);
-  const service = new GetAvailabilities(new DrizzleScheduleRepository());
+  const service = container.get(GetAvailabilities);
 
   return routeHandler(
     async () => {

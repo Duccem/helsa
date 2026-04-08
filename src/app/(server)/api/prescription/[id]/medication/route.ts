@@ -1,9 +1,9 @@
 import { AddMedicationToPrescription } from "@/modules/prescription/application/add-medication-to-prescription";
 import { MedicationStateValues } from "@/modules/prescription/domain/medication";
 import { PrescriptionNotFound } from "@/modules/prescription/domain/prescription-not-found";
-import { DrizzlePrescriptionRepository } from "@/modules/prescription/infrastructure/persistence/drizzle-prescription-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -40,7 +40,7 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/prescri
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new AddMedicationToPrescription(new DrizzlePrescriptionRepository());
+  const service = container.get(AddMedicationToPrescription);
 
   return routeHandler(
     async () => {

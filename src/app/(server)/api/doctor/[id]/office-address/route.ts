@@ -1,7 +1,7 @@
 import { AddDoctorOfficeAddress } from "@/modules/doctor/application/add-doctor-office-address";
 import { DoctorNotFound } from "@/modules/doctor/domain/doctor-not-found";
-import { DrizzleDoctorRepository } from "@/modules/doctor/infrastructure/persistence/drizzle-doctor-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -25,7 +25,7 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/doctor/
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new AddDoctorOfficeAddress(new DrizzleDoctorRepository());
+  const service = container.get(AddDoctorOfficeAddress);
 
   return routeHandler(
     async () => {

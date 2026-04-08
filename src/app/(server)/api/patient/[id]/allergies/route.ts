@@ -1,7 +1,7 @@
 import { AddAllergy } from "@/modules/patient/application/add-allergy";
 import { RemoveAllergy } from "@/modules/patient/application/remove-allergy";
 import { PatientNotFound } from "@/modules/patient/domain/patient-not-found";
-import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -23,7 +23,7 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/patient
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new AddAllergy(new DrizzlePatientRepository());
+  const service = container.get(AddAllergy);
 
   return routeHandler(
     async () => {
@@ -55,7 +55,7 @@ export const DELETE = async (request: NextRequest, ctx: RouteContext<"/api/patie
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, deleteBodySchema);
-  const service = new RemoveAllergy(new DrizzlePatientRepository());
+  const service = container.get(RemoveAllergy);
 
   return routeHandler(
     async () => {

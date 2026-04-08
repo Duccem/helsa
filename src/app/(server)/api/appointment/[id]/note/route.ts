@@ -1,8 +1,8 @@
 import { AddAppointmentNote, AddAppointmentNoteErrors } from "@/modules/appointment/application/add-note";
 import { RemoveAppointmentNote } from "@/modules/appointment/application/remove-note";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
-import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -24,7 +24,7 @@ const deleteBodySchema = z.object({
 
 export const POST = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]/note">) => {
   await authenticate();
-  const service = new AddAppointmentNote(new DrizzleAppointmentRepository());
+  const service = container.get(AddAppointmentNote);
   const { id } = await parseParams(ctx.params, paramsSchema);
   const { note } = await parseBody(request, bodySchema);
 
@@ -51,7 +51,7 @@ export const DELETE = async (request: NextRequest, ctx: RouteContext<"/api/appoi
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const { noteId } = await parseBody(request, deleteBodySchema);
-  const service = new RemoveAppointmentNote(new DrizzleAppointmentRepository());
+  const service = container.get(RemoveAppointmentNote);
 
   return routeHandler(
     async () => {

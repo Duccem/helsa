@@ -1,7 +1,6 @@
 import { GetUser } from "@/modules/auth/application/get-user";
-import { DrizzleUserRepository } from "@/modules/auth/infrastructure/persistence/drizzle-user-repository";
 import { CreatePatient } from "@/modules/patient/application/create-patient";
-import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
 
 export const createPatient = inngest.createFunction(
@@ -11,12 +10,12 @@ export const createPatient = inngest.createFunction(
     const { userId } = event.data.attributes;
 
     const user = await step.run("get_user", async () => {
-      const getUser = new GetUser(new DrizzleUserRepository());
+      const getUser = container.get(GetUser);
       return await getUser.execute(userId);
     });
 
     await step.run("create_patient_profile", async () => {
-      const creator = new CreatePatient(new DrizzlePatientRepository());
+      const creator = container.get(CreatePatient);
       await creator.execute({
         user_id: userId,
         email: user.email,
@@ -26,4 +25,3 @@ export const createPatient = inngest.createFunction(
     });
   },
 );
-

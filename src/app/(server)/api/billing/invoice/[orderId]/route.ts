@@ -1,5 +1,5 @@
 import { GetOrGenerateInvoice } from "@/modules/billing/application/get-or-generate-invoice";
-import { PolarBillingService } from "@/modules/billing/infrastructure/polar-billing-service";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -11,14 +11,13 @@ const paramsSchema = z.object({
   orderId: z.string(),
 });
 
-const service = new GetOrGenerateInvoice(new PolarBillingService());
-
 export const GET = async (_req: NextRequest, ctx: RouteContext<"/api/billing/invoice/[orderId]">) => {
   await authenticate();
   const { orderId } = await parseParams(ctx.params, paramsSchema);
 
   return routeHandler(
     async () => {
+      const service = container.get(GetOrGenerateInvoice);
       const state = await service.execute(orderId);
 
       return HttpNextResponse.json(state);
@@ -35,6 +34,7 @@ export const POST = async (_req: NextRequest, ctx: RouteContext<"/api/billing/in
 
   return routeHandler(
     async () => {
+      const service = container.get(GetOrGenerateInvoice);
       const state = await service.execute(orderId);
 
       return HttpNextResponse.json(state);

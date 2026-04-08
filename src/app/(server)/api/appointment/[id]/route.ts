@@ -3,8 +3,8 @@ import z from "zod";
 import { GetAppointmentDetails } from "@/modules/appointment/application/get-appointment-details";
 import { UpdateAppointmentStatus } from "@/modules/appointment/application/update-status";
 import { AppointmentNotFound } from "@/modules/appointment/domain/appointment-not-found";
-import { DrizzleAppointmentRepository } from "@/modules/appointment/infrastructure/persistence/drizzle-appointment-repository";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -16,7 +16,7 @@ const paramsSchema = z.object({
 
 export const GET = async (_: NextRequest, ctx: RouteContext<"/api/appointment/[id]">) => {
   await authenticate();
-  const service = new GetAppointmentDetails(new DrizzleAppointmentRepository());
+  const service = container.get(GetAppointmentDetails);
   const { id } = await parseParams(ctx.params, paramsSchema);
 
   return routeHandler(
@@ -54,7 +54,7 @@ const bodySchema = z.object({
 
 export const PUT = async (request: NextRequest, ctx: RouteContext<"/api/appointment/[id]">) => {
   await authenticate();
-  const service = new UpdateAppointmentStatus(new DrizzleAppointmentRepository());
+  const service = container.get(UpdateAppointmentStatus);
   const { id } = await parseParams(ctx.params, paramsSchema);
   const { status } = await parseBody(request, bodySchema);
 

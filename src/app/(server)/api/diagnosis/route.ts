@@ -5,8 +5,8 @@ import {
   DiagnosisIncomeValues,
   DiagnosisStateValues,
 } from "@/modules/diagnosis/domain/diagnosis";
-import { DrizzleDiagnosisRepository } from "@/modules/diagnosis/infrastructure/persistence/drizzle-diagnosis-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseQuery } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -26,7 +26,7 @@ const createDiagnosisSchema = z.object({
 export const POST = async (request: NextRequest) => {
   await authenticate();
   const body = await parseBody(request, createDiagnosisSchema);
-  const service = new CreateDiagnosis(new DrizzleDiagnosisRepository());
+  const service = container.get(CreateDiagnosis);
 
   return routeHandler(
     async () => {
@@ -66,7 +66,7 @@ const listDiagnosesSchema = z.object({
 export const GET = async (request: NextRequest) => {
   await authenticate();
   const query = parseQuery(request, listDiagnosesSchema);
-  const service = new ListDiagnoses(new DrizzleDiagnosisRepository());
+  const service = container.get(ListDiagnoses);
 
   return routeHandler(
     async () => {

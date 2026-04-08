@@ -3,8 +3,8 @@ import { UpdatePatient } from "@/modules/patient/application/update-patient";
 import { PatientGenderValues } from "@/modules/patient/domain/patient";
 import { PatientAlreadyExists } from "@/modules/patient/domain/patient-already-exists";
 import { PatientNotFound } from "@/modules/patient/domain/patient-not-found";
-import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -19,7 +19,7 @@ const paramsSchema = z.object({
 export const GET = async (_: NextRequest, ctx: RouteContext<"/api/patient/[id]">) => {
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
-  const service = new GetPatientDetails(new DrizzlePatientRepository());
+  const service = container.get(GetPatientDetails);
 
   return routeHandler(
     async () => {
@@ -48,7 +48,7 @@ export const PUT = async (request: NextRequest, ctx: RouteContext<"/api/patient/
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, updatePatientSchema);
-  const service = new UpdatePatient(new DrizzlePatientRepository());
+  const service = container.get(UpdatePatient);
 
   return routeHandler(
     async () => {

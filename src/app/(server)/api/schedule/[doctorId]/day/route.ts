@@ -1,7 +1,7 @@
 import { AddDaysToSchedule } from "@/modules/schedule/application/add-days-to-schedule";
 import { ScheduleNotFound } from "@/modules/schedule/domain/schedule-not-found";
-import { DrizzleScheduleRepository } from "@/modules/schedule/infrastructure/persistence/drizzle-schedule-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -30,7 +30,7 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/schedul
   await authenticate();
   const { doctorId } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new AddDaysToSchedule(new DrizzleScheduleRepository());
+  const service = container.get(AddDaysToSchedule);
 
   return routeHandler(
     async () => {

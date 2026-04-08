@@ -1,7 +1,7 @@
 import { CreateSchedule } from "@/modules/schedule/application/create-schedule";
 import { ScheduleAlreadyExists } from "@/modules/schedule/domain/schedule-already-exists";
-import { DrizzleScheduleRepository } from "@/modules/schedule/infrastructure/persistence/drizzle-schedule-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -25,7 +25,7 @@ const createScheduleSchema = z.object({
 export const POST = async (request: NextRequest) => {
   await authenticate();
   const body = await parseBody(request, createScheduleSchema);
-  const service = new CreateSchedule(new DrizzleScheduleRepository());
+  const service = container.get(CreateSchedule);
 
   return routeHandler(
     async () => {

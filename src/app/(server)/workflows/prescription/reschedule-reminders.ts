@@ -1,6 +1,6 @@
 import { MarkRemindersAsForgotten } from "@/modules/prescription/application/mark-reminders-as-forgotten";
 import { SearchReminders } from "@/modules/prescription/application/search-reminders";
-import { DrizzlePrescriptionRepository } from "@/modules/prescription/infrastructure/persistence/drizzle-prescription-repository";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { inngest } from "@/modules/shared/infrastructure/event-bus/inngest-client";
 import { subHours } from "date-fns";
 
@@ -10,7 +10,7 @@ export const rescheduleReminders = inngest.createFunction(
   async ({ step }) => {
     const reminders = await step.run("get-reminders", async () => {
       const twoHoursAgo = subHours(new Date(), 2);
-      const service = new SearchReminders(new DrizzlePrescriptionRepository());
+      const service = container.get(SearchReminders);
       const data = await service.execute({
         is_taken: false,
         forgotten: false,
@@ -27,7 +27,7 @@ export const rescheduleReminders = inngest.createFunction(
     }
 
     await step.run("reschedule-reminders", async () => {
-      const service = new MarkRemindersAsForgotten(new DrizzlePrescriptionRepository());
+      const service = container.get(MarkRemindersAsForgotten);
 
       await Promise.all(
         reminders.map((reminder) => service.execute(reminder.prescription_id, reminder.medication_id, reminder.id)),
@@ -35,4 +35,3 @@ export const rescheduleReminders = inngest.createFunction(
     });
   },
 );
-

@@ -1,7 +1,7 @@
 import { AddContactInfo } from "@/modules/patient/application/add-contact-info";
 import { PatientNotFound } from "@/modules/patient/domain/patient-not-found";
-import { DrizzlePatientRepository } from "@/modules/patient/infrastructure/persistence/drizzle-patient-repository";
 import { InvalidArgument } from "@/modules/shared/domain/errors/invalid-argument";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody, parseParams } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -26,7 +26,7 @@ export const POST = async (request: NextRequest, ctx: RouteContext<"/api/patient
   await authenticate();
   const { id } = await parseParams(ctx.params, paramsSchema);
   const body = await parseBody(request, bodySchema);
-  const service = new AddContactInfo(new DrizzlePatientRepository());
+  const service = container.get(AddContactInfo);
 
   return routeHandler(
     async () => {

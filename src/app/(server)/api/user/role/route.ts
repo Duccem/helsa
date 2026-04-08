@@ -1,8 +1,7 @@
 import { ChangeRole } from "@/modules/auth/application/change-role";
 import { InvalidRole } from "@/modules/auth/domain/invalid-role";
 import { UserNotFound } from "@/modules/auth/domain/user-not-found";
-import { DrizzleUserRepository } from "@/modules/auth/infrastructure/persistence/drizzle-user-repository";
-import { InngestEventBus } from "@/modules/shared/infrastructure/event-bus/inngest-event-bus";
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
 import { parseBody } from "@/modules/shared/infrastructure/http/http-parsers";
 import { HttpNextResponse } from "@/modules/shared/infrastructure/http/next-http-response";
@@ -17,7 +16,7 @@ const changeRoleSchema = z.object({
 export const POST = async (request: NextRequest) => {
   const { session } = await authenticate();
   const { role } = await parseBody(request, changeRoleSchema);
-  const service = new ChangeRole(new DrizzleUserRepository(), new InngestEventBus());
+  const service = container.get(ChangeRole);
 
   return routeHandler(
     async () => {
