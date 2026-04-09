@@ -5,9 +5,7 @@ import { Patient, PatientGenderValues, PatientId, PatientUserId } from "../../do
 import { PatientRepository, PatientSearchCriteria } from "../../domain/patient-repository";
 import { allergy, contact_info, patient, physical_information, vitals } from "./patient.schema";
 import { AllergySeverityValues } from "../../domain/allergy";
-import { InfrastructureService } from "@/modules/shared/domain/service.";
 
-@InfrastructureService()
 export class DrizzlePatientRepository extends PatientRepository {
   async save(data: Patient): Promise<void> {
     const {

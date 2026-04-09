@@ -2,9 +2,7 @@ import { EventBus } from "@/modules/shared/domain/event-bus";
 import { UserId } from "../domain/user";
 import { UserNotFound } from "../domain/user-not-found";
 import { UserRepository } from "../domain/user-repository";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class ChangeRole {
   constructor(
     private readonly repository: UserRepository,

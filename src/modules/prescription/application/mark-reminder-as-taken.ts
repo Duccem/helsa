@@ -2,9 +2,7 @@ import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
 import { PrescriptionId } from "../domain/prescription";
 import { PrescriptionNotFound } from "../domain/prescription-not-found";
 import { PrescriptionRepository } from "../domain/prescription-repository";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class MarkReminderAsTaken {
   constructor(private readonly repository: PrescriptionRepository) {}
 

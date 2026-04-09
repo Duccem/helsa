@@ -5,9 +5,7 @@ import { Schedule, ScheduleDoctorId } from "../../domain/schedule";
 import { ScheduleRepository, SearchSchedulesCriteria } from "../../domain/schedule-repository";
 import { availability_slot, schedule, schedule_day } from "./schedule.schema";
 import { buildPagination, PaginatedResult } from "@/modules/shared/domain/query";
-import { InfrastructureService } from "@/modules/shared/domain/service.";
 
-@InfrastructureService()
 export class DrizzleScheduleRepository extends ScheduleRepository {
   async save(data: Schedule): Promise<void> {
     const { days, ...primitives } = data.toPrimitives();

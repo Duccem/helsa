@@ -1,9 +1,7 @@
-import { ApplicationService } from "@/modules/shared/domain/service.";
 import { PrescriptionId } from "../domain/prescription";
 import { PrescriptionNotFound } from "../domain/prescription-not-found";
 import { PrescriptionRepository } from "../domain/prescription-repository";
 
-@ApplicationService()
 export class MarkRemindersAsForgotten {
   constructor(private readonly repository: PrescriptionRepository) {}
 

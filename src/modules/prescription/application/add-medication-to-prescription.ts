@@ -2,9 +2,7 @@ import { PrescriptionId } from "../domain/prescription";
 import { PrescriptionNotFound } from "../domain/prescription-not-found";
 import { PrescriptionRepository } from "../domain/prescription-repository";
 import { MedicationAlternativeDrug, MedicationStateValues } from "../domain/medication";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class AddMedicationToPrescription {
   constructor(private readonly repository: PrescriptionRepository) {}
 

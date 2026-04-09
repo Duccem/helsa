@@ -1,4 +1,5 @@
-import { ContainerBuilder } from "diod";
+import "reflect-metadata";
+import { ContainerBuilder, type Identifier, type Newable } from "diod";
 
 // ── Appointment ──────────────────────────────────────────────────────────────
 import { AppointmentRepository } from "@/modules/appointment/domain/appointment-repository";
@@ -122,104 +123,113 @@ import { InngestEventBus } from "@/modules/shared/infrastructure/event-bus/innge
 
 const builder = new ContainerBuilder();
 
+const registerImplementation = <T>(
+  identifier: Identifier<T>,
+  implementation: Newable<T>,
+  dependencies: Identifier<unknown>[] = [],
+) => builder.register(identifier).use(implementation).withDependencies(dependencies);
+
+const registerUseCase = <T>(service: Newable<T>, dependencies: Identifier<unknown>[] = []) =>
+  builder.registerAndUse(service).withDependencies(dependencies);
+
 // ── Infrastructure: repositories & external service implementations ───────────
-builder.register(AppointmentRepository).use(DrizzleAppointmentRepository);
-builder.register(UserRepository).use(DrizzleUserRepository);
-builder.register(OrganizationRepository).use(DrizzleOrganizationRepository);
-builder.register(AuthNotifier).use(ResendAuthNotifier);
-builder.register(BillingService).use(PolarBillingService);
-builder.register(ChatRepository).use(DrizzleChatRepository);
-builder.register(DiagnosisRepository).use(DrizzleDiagnosisRepository);
-builder.register(DoctorRepository).use(DrizzleDoctorRepository);
-builder.register(SpecialtyRepository).use(DrizzleSpecialtyRepository);
-builder.register(DoctorLicenseValidationService).use(VenezuelanDoctorLicenseValidationService);
-builder.register(MedicalRecordRepository).use(DrizzleMedicalRecordRepository);
-builder.register(PatientRepository).use(DrizzlePatientRepository);
-builder.register(PrescriptionRepository).use(DrizzlePrescriptionRepository);
-builder.register(ReminderNotifier).use(ResendReminderNotifier);
-builder.register(ScheduleRepository).use(DrizzleScheduleRepository);
-builder.register(VideoCallRepository).use(DrizzleVideoCallRepository);
-builder.register(VideoCallAuthService).use(JwtVideoCallAuthService);
-builder.register(EventBus).use(InngestEventBus);
+registerImplementation(AppointmentRepository, DrizzleAppointmentRepository);
+registerImplementation(UserRepository, DrizzleUserRepository);
+registerImplementation(OrganizationRepository, DrizzleOrganizationRepository);
+registerImplementation(AuthNotifier, ResendAuthNotifier);
+registerImplementation(BillingService, PolarBillingService);
+registerImplementation(ChatRepository, DrizzleChatRepository);
+registerImplementation(DiagnosisRepository, DrizzleDiagnosisRepository);
+registerImplementation(DoctorRepository, DrizzleDoctorRepository);
+registerImplementation(SpecialtyRepository, DrizzleSpecialtyRepository);
+registerImplementation(DoctorLicenseValidationService, VenezuelanDoctorLicenseValidationService);
+registerImplementation(MedicalRecordRepository, DrizzleMedicalRecordRepository);
+registerImplementation(PatientRepository, DrizzlePatientRepository);
+registerImplementation(PrescriptionRepository, DrizzlePrescriptionRepository);
+registerImplementation(ReminderNotifier, ResendReminderNotifier);
+registerImplementation(ScheduleRepository, DrizzleScheduleRepository);
+registerImplementation(VideoCallRepository, DrizzleVideoCallRepository);
+registerImplementation(VideoCallAuthService, JwtVideoCallAuthService);
+registerImplementation(EventBus, InngestEventBus);
 
 // ── Application: use cases ────────────────────────────────────────────────────
 
 // Appointment
-builder.registerAndUse(GetAppointmentDetails);
-builder.registerAndUse(AddAppointmentNote);
-builder.registerAndUse(AppointmentAddRating);
-builder.registerAndUse(ScheduleAppointment);
-builder.registerAndUse(RemoveAppointmentNote);
-builder.registerAndUse(SearchAppointments);
-builder.registerAndUse(UpdateAppointmentStatus);
+registerUseCase(GetAppointmentDetails, [AppointmentRepository]);
+registerUseCase(AddAppointmentNote, [AppointmentRepository]);
+registerUseCase(AppointmentAddRating, [AppointmentRepository]);
+registerUseCase(ScheduleAppointment, [AppointmentRepository]);
+registerUseCase(RemoveAppointmentNote, [AppointmentRepository]);
+registerUseCase(SearchAppointments, [AppointmentRepository]);
+registerUseCase(UpdateAppointmentStatus, [AppointmentRepository]);
 
 // Auth
-builder.registerAndUse(UserRegistration);
-builder.registerAndUse(OrganizationCreation);
-builder.registerAndUse(GetUser);
-builder.registerAndUse(GetOrganization);
-builder.registerAndUse(ChangeRole);
+registerUseCase(UserRegistration, [AuthNotifier, EventBus]);
+registerUseCase(OrganizationCreation, [AuthNotifier, EventBus]);
+registerUseCase(GetUser, [UserRepository]);
+registerUseCase(GetOrganization, [OrganizationRepository]);
+registerUseCase(ChangeRole, [UserRepository, EventBus]);
 
 // Billing
-builder.registerAndUse(InitializeNewUserBilling);
-builder.registerAndUse(InitializeNewOrganizationBilling);
-builder.registerAndUse(GetSubscriptionStatus);
-builder.registerAndUse(GetOrderList);
-builder.registerAndUse(GetOrGenerateInvoice);
+registerUseCase(InitializeNewUserBilling, [BillingService]);
+registerUseCase(InitializeNewOrganizationBilling, [BillingService]);
+registerUseCase(GetSubscriptionStatus, [BillingService]);
+registerUseCase(GetOrderList, [BillingService]);
+registerUseCase(GetOrGenerateInvoice, [BillingService]);
 
 // Diagnosis
-builder.registerAndUse(ListPathologies);
-builder.registerAndUse(ListDiagnoses);
-builder.registerAndUse(CreateDiagnosis);
+registerUseCase(ListPathologies, [DiagnosisRepository]);
+registerUseCase(ListDiagnoses, [DiagnosisRepository]);
+registerUseCase(CreateDiagnosis, [DiagnosisRepository]);
 
 // Doctor
-builder.registerAndUse(RegisterDoctor);
-builder.registerAndUse(UpdateDoctorProfile);
-builder.registerAndUse(GetDoctorProfile);
-builder.registerAndUse(GetDoctorDetails);
-builder.registerAndUse(SearchDoctors);
-builder.registerAndUse(ListSpecialties);
-builder.registerAndUse(AddDoctorPrice);
-builder.registerAndUse(AddDoctorOfficeAddress);
-builder.registerAndUse(GetDoctorPatients);
+registerUseCase(RegisterDoctor, [DoctorRepository, SpecialtyRepository, DoctorLicenseValidationService]);
+registerUseCase(UpdateDoctorProfile, [DoctorRepository, SpecialtyRepository, DoctorLicenseValidationService]);
+registerUseCase(GetDoctorProfile, [DoctorRepository]);
+registerUseCase(GetDoctorDetails, [DoctorRepository]);
+registerUseCase(SearchDoctors, [DoctorRepository]);
+registerUseCase(ListSpecialties, [SpecialtyRepository]);
+registerUseCase(AddDoctorPrice, [DoctorRepository]);
+registerUseCase(AddDoctorOfficeAddress, [DoctorRepository]);
+registerUseCase(GetDoctorPatients, [DoctorRepository]);
 
 // Patient
-builder.registerAndUse(CreatePatient);
-builder.registerAndUse(UpdatePatient);
-builder.registerAndUse(GetPatientProfile);
-builder.registerAndUse(GetPatientDetails);
-builder.registerAndUse(SearchPatients);
-builder.registerAndUse(AddVitals);
-builder.registerAndUse(AddContactInfo);
-builder.registerAndUse(AddAllergy);
-builder.registerAndUse(RemoveAllergy);
-builder.registerAndUse(SetPhysicalInformation);
+registerUseCase(CreatePatient, [PatientRepository]);
+registerUseCase(UpdatePatient, [PatientRepository]);
+registerUseCase(GetPatientProfile, [PatientRepository]);
+registerUseCase(GetPatientDetails, [PatientRepository]);
+registerUseCase(SearchPatients, [PatientRepository]);
+registerUseCase(AddVitals, [PatientRepository]);
+registerUseCase(AddContactInfo, [PatientRepository]);
+registerUseCase(AddAllergy, [PatientRepository]);
+registerUseCase(RemoveAllergy, [PatientRepository]);
+registerUseCase(SetPhysicalInformation, [PatientRepository]);
 
 // Prescription
-builder.registerAndUse(AddPrescription);
-builder.registerAndUse(SearchPrescriptions);
-builder.registerAndUse(GetPrescriptionDetails);
-builder.registerAndUse(GetPrescriptionDetailsSystem);
-builder.registerAndUse(UpdatePrescription);
-builder.registerAndUse(AddMedicationToPrescription);
-builder.registerAndUse(UpdateMedication);
-builder.registerAndUse(SearchMedications);
-builder.registerAndUse(SearchReminders);
-builder.registerAndUse(MarkReminderAsTaken);
-builder.registerAndUse(MarkRemindersAsForgotten);
+registerUseCase(AddPrescription, [PrescriptionRepository]);
+registerUseCase(SearchPrescriptions, [PrescriptionRepository]);
+registerUseCase(GetPrescriptionDetails, [PrescriptionRepository]);
+registerUseCase(GetPrescriptionDetailsSystem, [PrescriptionRepository]);
+registerUseCase(UpdatePrescription, [PrescriptionRepository]);
+registerUseCase(AddMedicationToPrescription, [PrescriptionRepository]);
+registerUseCase(UpdateMedication, [PrescriptionRepository]);
+registerUseCase(SearchMedications, [PrescriptionRepository]);
+registerUseCase(SearchReminders, [PrescriptionRepository]);
+registerUseCase(MarkReminderAsTaken, [PrescriptionRepository]);
+registerUseCase(MarkRemindersAsForgotten, [PrescriptionRepository]);
 
 // Schedule
-builder.registerAndUse(CreateSchedule);
-builder.registerAndUse(AddDaysToSchedule);
-builder.registerAndUse(GetSchedule);
-builder.registerAndUse(SearchSchedule);
-builder.registerAndUse(GetAvailabilities);
-builder.registerAndUse(GenerateAvailability);
+registerUseCase(CreateSchedule, [ScheduleRepository]);
+registerUseCase(AddDaysToSchedule, [ScheduleRepository]);
+registerUseCase(GetSchedule, [ScheduleRepository]);
+registerUseCase(SearchSchedule, [ScheduleRepository]);
+registerUseCase(GetAvailabilities, [ScheduleRepository]);
+registerUseCase(GenerateAvailability, [ScheduleRepository]);
 
 // Video Call
-builder.registerAndUse(CreateVideoCallForAppointment);
-builder.registerAndUse(GeneratePatientVideoCallToken);
-builder.registerAndUse(GenerateDoctorVideoCallToken);
+registerUseCase(CreateVideoCallForAppointment, [VideoCallRepository]);
+registerUseCase(GeneratePatientVideoCallToken, [VideoCallRepository, VideoCallAuthService]);
+registerUseCase(GenerateDoctorVideoCallToken, [VideoCallRepository, VideoCallAuthService]);
 
-export const container = builder.build();
+export const container = builder.build({ autowire: false });
 

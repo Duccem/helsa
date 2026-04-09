@@ -2,9 +2,7 @@ import { PatientAlreadyExists } from "../domain/patient-already-exists";
 import { PatientId, PatientGenderValues } from "../domain/patient";
 import { PatientNotFound } from "../domain/patient-not-found";
 import { PatientRepository } from "../domain/patient-repository";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class UpdatePatient {
   constructor(private readonly repository: PatientRepository) {}
 

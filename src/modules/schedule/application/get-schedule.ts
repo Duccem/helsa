@@ -2,9 +2,7 @@ import { Primitives } from "@/modules/shared/domain/primitives";
 import { Schedule, ScheduleDoctorId } from "../domain/schedule";
 import { ScheduleNotFound } from "../domain/schedule-not-found";
 import { ScheduleRepository } from "../domain/schedule-repository";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class GetSchedule {
   constructor(private readonly repository: ScheduleRepository) {}
 

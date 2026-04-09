@@ -2,9 +2,7 @@ import { PaginatedResult } from "@/modules/shared/domain/query";
 import { Medication } from "../domain/medication";
 import { MedicationSearchCriteria, PrescriptionRepository } from "../domain/prescription-repository";
 import { Primitives } from "@/modules/shared/domain/primitives";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class SearchMedications {
   constructor(private readonly repository: PrescriptionRepository) {}
 

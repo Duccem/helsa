@@ -1,9 +1,7 @@
-import { ApplicationService } from "@/modules/shared/domain/service.";
 import { DoctorId } from "../domain/doctor";
 import { DoctorNotFound } from "../domain/doctor-not-found";
 import { DoctorRepository } from "../domain/doctor-repository";
 
-@ApplicationService()
 export class AddDoctorPrice {
   constructor(private readonly repository: DoctorRepository) {}
 

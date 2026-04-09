@@ -7,9 +7,7 @@ import { appointment } from "@/modules/appointment/infrastructure/persistence/ap
 import { doctor } from "@/modules/doctor/infrastructure/persistence/doctor.schema";
 import { patient } from "@/modules/patient/infrastructure/persistence/patient.schema";
 import { user } from "@/modules/auth/infrastructure/persistence/auth.schema";
-import { InfrastructureService } from "@/modules/shared/domain/service.";
 
-@InfrastructureService()
 export class DrizzleVideoCallRepository extends VideoCallRepository {
   async create(videoCall: VideoCall): Promise<void> {
     const data = videoCall.toPrimitives();

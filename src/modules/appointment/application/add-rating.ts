@@ -2,7 +2,6 @@ import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
 import { AppointmentId } from "../domain/appointment";
 import { AppointmentNotFound } from "../domain/appointment-not-found";
 import { AppointmentRepository } from "../domain/appointment-repository";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
 export type AppointmentAddRatingInputDto = {
   appointment_id: string;
@@ -11,7 +10,6 @@ export type AppointmentAddRatingInputDto = {
 
 export type AppointmentAddRatingErrors = AppointmentNotFound | NotAuthorized;
 
-@ApplicationService()
 export class AppointmentAddRating {
   constructor(private readonly repository: AppointmentRepository) {}
 

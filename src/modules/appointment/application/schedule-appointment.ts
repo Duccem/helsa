@@ -1,9 +1,7 @@
-import { ApplicationService } from "@/modules/shared/domain/service.";
 import { Appointment } from "../domain/appointment";
 import { AppointmentRepository } from "../domain/appointment-repository";
 import { AppointmentScheduledAtSameTime } from "../domain/appointment-scheduled-at-same-time";
 
-@ApplicationService()
 export class ScheduleAppointment {
   constructor(private readonly repository: AppointmentRepository) {}
 

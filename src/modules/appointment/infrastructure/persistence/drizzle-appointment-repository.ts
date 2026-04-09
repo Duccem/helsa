@@ -14,9 +14,7 @@ import {
 import { AppointmentRepository, type AppointmentSearchCriteria } from "../../domain/appointment-repository";
 import { appointment, appointment_note, appointment_payment, appointment_rating } from "./appointment.schema";
 import { AppointmentNoteId } from "../../domain/appointment-note";
-import { InfrastructureService } from "@/modules/shared/domain/service.";
 
-@InfrastructureService()
 export class DrizzleAppointmentRepository extends AppointmentRepository {
   private buildQuery(criteria: AppointmentSearchCriteria) {
     return and(

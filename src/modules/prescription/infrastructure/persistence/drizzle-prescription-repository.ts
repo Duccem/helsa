@@ -11,9 +11,7 @@ import {
 import { medication, medication_reminder, prescription } from "./prescription.schema";
 import { Medication, MedicationId, MedicationStateValues } from "../../domain/medication";
 import { MedicationReminder } from "../../domain/medication-reminder";
-import { InfrastructureService } from "@/modules/shared/domain/service.";
 
-@InfrastructureService()
 export class DrizzlePrescriptionRepository extends PrescriptionRepository {
   async save(data: Prescription): Promise<void> {
     const { medications, ...primitives } = data.toPrimitives();

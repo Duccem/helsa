@@ -1,6 +1,5 @@
 import { Pathology } from "../domain/pathology";
 import { DiagnosisRepository } from "../domain/diagnosis-repository";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
 export type ListPathologiesInputDto = {
   query?: string;
@@ -8,7 +7,6 @@ export type ListPathologiesInputDto = {
 
 export type ListPathologiesOutputDto = Pathology[];
 
-@ApplicationService()
 export class ListPathologies {
   constructor(private readonly repository: DiagnosisRepository) {}
 

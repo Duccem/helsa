@@ -1,9 +1,7 @@
 import { EventBus } from "@/modules/shared/domain/event-bus";
 import { AuthNotifier } from "../domain/auth-notifier";
 import { UserCreatedEvent } from "../domain/user-created-event";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class UserRegistration {
   constructor(
     private readonly notifier: AuthNotifier,

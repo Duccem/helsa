@@ -1,4 +1,3 @@
-import { ApplicationService } from "@/modules/shared/domain/service.";
 import { DoctorId } from "../domain/doctor";
 import { DoctorLicenseNotValid } from "../domain/doctor-license-not-valid";
 import { DoctorLicenseValidationService } from "../domain/doctor-license-validation-service";
@@ -7,7 +6,6 @@ import { DoctorRepository, SpecialtyRepository } from "../domain/doctor-reposito
 import { SpecialtyId } from "../domain/specialty";
 import { SpecialtyNotFound } from "../domain/specialty-not-found";
 
-@ApplicationService()
 export class UpdateDoctorProfile {
   constructor(
     private readonly doctorRepository: DoctorRepository,

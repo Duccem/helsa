@@ -3,9 +3,7 @@ import { ScheduleNotFound } from "../domain/schedule-not-found";
 import { ScheduleDoctorId } from "../domain/schedule";
 import { ScheduleRepository } from "../domain/schedule-repository";
 import { addMonths } from "date-fns";
-import { ApplicationService } from "@/modules/shared/domain/service.";
 
-@ApplicationService()
 export class GenerateAvailability {
   constructor(private readonly repository: ScheduleRepository) {}
 

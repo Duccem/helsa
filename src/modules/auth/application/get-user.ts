@@ -1,9 +1,7 @@
-import { ApplicationService } from "@/modules/shared/domain/service.";
 import { UserId } from "../domain/user";
 import { UserNotFound } from "../domain/user-not-found";
 import { UserRepository } from "../domain/user-repository";
 
-@ApplicationService()
 export class GetUser {
   constructor(private readonly repository: UserRepository) {}
 
