@@ -16,7 +16,9 @@ export const inngest = new Inngest({ id: "helsa" });
 
 **File**: `src/modules/shared/infrastructure/event-bus/inngest-event-bus.ts`
 
-Implements the abstract `EventBus` interface from the domain layer. Domain events published on aggregates are sent to Inngest as events, which trigger corresponding workflow functions.
+Implements the abstract `EventBus` port from the domain layer. Domain events published on aggregates are sent to Inngest as events, which trigger corresponding workflow functions.
+
+Workflow functions resolve their use cases the same way API routes do — through `container.get(UseCase)` from `src/modules/shared/infrastructure/dependency-injection/diod.config.ts`. They never instantiate services or repositories directly.
 
 ### Route Handler
 

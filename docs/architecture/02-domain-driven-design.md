@@ -16,7 +16,7 @@ The codebase follows a modular DDD architecture. Each domain module lives under 
 └─────────────────────────────────────┘
 ```
 
-**Dependency rule**: Inner layers never depend on outer layers. The domain layer has zero external dependencies. The application layer depends only on domain interfaces. Infrastructure implements those interfaces.
+**Dependency rule**: Inner layers never depend on outer layers. The domain layer has zero external dependencies. The application layer depends only on domain ports (declared as abstract classes — see DI section below). Infrastructure provides the concrete implementations.
 
 ## Base Abstractions (`src/modules/shared/domain/`)
 
@@ -73,7 +73,7 @@ src/modules/<module>/
 ├── domain/
 │   ├── <aggregate>.ts              # Aggregate root
 │   ├── <value-object>.ts           # Value objects
-│   ├── <module>-repository.ts      # Repository interface
+│   ├── <module>-repository.ts      # Repository port (abstract class)
 │   ├── errors/                     # Domain errors
 │   └── events/                     # Domain events
 ├── application/
@@ -94,5 +94,29 @@ src/modules/<module>/
 
 - **Commands** return `void` (side-effect only).
 - **Queries** return primitive types or domain objects directly (no DTOs).
-- Use cases receive repository interfaces and service interfaces through constructor parameters.
-- No DI container; dependencies are wired at the API route handler level.
+- Use cases receive repository and service ports through constructor parameters.
+- Use cases are decorated with `@ApplicationService` and resolved through the `diod` container — they are never instantiated by hand at the route level.
+
+## Dependency Injection (`diod`)
+
+The project uses [`diod`](https://www.npmjs.com/package/diod) as its DI container. Because `diod` resolves bindings via runtime constructor metadata, **ports are declared as abstract classes, not TypeScript interfaces** — abstract classes are real values at runtime and can serve as DI tokens.
+
+### Service decorators
+
+All decorators are re-exported from [`src/modules/shared/domain/service..ts`](../../src/modules/shared/domain/service..ts) and ultimately wrap `diod`'s `Service`:
+
+| Decorator | Applied to |
+|-----------|------------|
+| `@DomainService` | Pure domain services |
+| `@ApplicationService` | Use cases under `application/` |
+| `@InfrastructureService` | Drizzle repositories, notifiers, external adapters |
+
+### Container
+
+All bindings live in [`src/modules/shared/infrastructure/dependency-injection/diod.config.ts`](../../src/modules/shared/infrastructure/dependency-injection/diod.config.ts), which exports a singleton `container`:
+
+- Ports are bound to implementations with `builder.registerAndUse(AbstractPort).asInstance(ConcreteImpl)`.
+- Use cases are registered with `builder.registerAndUse(UseCase)` (their constructor dependencies are resolved transitively).
+- Consumers (API routes, Inngest workflows) call `container.get(UseCase)` to obtain a fully wired instance.
+
+When adding a new use case, repository, notifier, or domain service, register it in `diod.config.ts` so it can be resolved.

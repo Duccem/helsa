@@ -9,7 +9,7 @@ chat-agent/
 ├── domain/
 │   ├── chat.ts                    # Chat aggregate (id, title, user, messages, status)
 │   ├── chat-message.ts            # ChatMessage entity (role, content)
-│   └── chat-repository.ts         # Repository interface
+│   └── chat-repository.ts         # Repository port (abstract class)
 ├── infrastructure/
 │   ├── agents/helsa/index.ts      # ToolLoopAgent configuration
 │   ├── persistence/

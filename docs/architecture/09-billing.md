@@ -4,12 +4,12 @@ The platform integrates with [Polar](https://polar.sh/) for subscription managem
 
 ## Architecture
 
-The billing module follows the same DDD pattern with a domain interface and infrastructure implementation:
+The billing module follows the same DDD pattern with a domain port (abstract class) and infrastructure implementation:
 
 ```
 billing/
 ├── domain/
-│   └── billing-service.ts          # BillingService interface
+│   └── billing-service.ts          # BillingService port (abstract class)
 ├── application/
 │   ├── initialize-new-user-billing.ts
 │   ├── initialize-new-organization-billing.ts
@@ -22,20 +22,20 @@ billing/
     └── polar-products.ts           # Product/plan definitions
 ```
 
-## BillingService Interface
+## BillingService Port
 
 ```typescript
-interface BillingService {
-  createCustomer(externalId: string, email: string, name: string): Promise<void>;
-  createSubscription(customerId: string, planId: string): Promise<void>;
-  getSubscriptionStatus(customerId: string): Promise<SubscriptionStatus>;
-  getOrders(customerId: string, page: number): Promise<OrderList>;
-  getOrder(orderId: string): Promise<Order>;
-  getInvoice(orderId: string): Promise<string>; // Returns invoice PDF URL
+export abstract class BillingService {
+  abstract createCustomer(externalId: string, email: string, name: string): Promise<void>;
+  abstract createSubscription(customerId: string, planId: string): Promise<void>;
+  abstract getSubscriptionStatus(customerId: string): Promise<SubscriptionStatus>;
+  abstract getOrders(customerId: string, page: number): Promise<OrderList>;
+  abstract getOrder(orderId: string): Promise<Order>;
+  abstract getInvoice(orderId: string): Promise<string>; // Returns invoice PDF URL
 }
 ```
 
-This abstraction allows the billing provider to be swapped without changing application or domain code.
+`BillingService` is declared as an abstract class (not a TypeScript interface) so the `diod` container can use it as a runtime DI token. The Polar implementation is bound to it in `diod.config.ts`, and use cases receive it through their constructor. This abstraction allows the billing provider to be swapped without changing application or domain code.
 
 ## Polar Client
 

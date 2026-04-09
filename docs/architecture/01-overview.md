@@ -53,7 +53,7 @@ src/
 ## Key Design Decisions
 
 - **Domain-Driven Design**: Each bounded context is a self-contained module with four layers (domain, application, infrastructure, presentation).
-- **No DI Container**: Dependencies are instantiated inline at the API route level, keeping the system simple and explicit.
+- **Dependency Injection with `diod`**: A single container in `src/modules/shared/infrastructure/dependency-injection/diod.config.ts` registers every repository, notifier, and use case. API routes and Inngest workflows resolve services via `container.get(...)` rather than instantiating them by hand. To make this work with `diod`'s runtime metadata, repository/notifier ports are declared as **abstract classes** rather than TypeScript interfaces.
 - **Event-Driven**: Domain events are published through an event bus (backed by Inngest) to decouple modules and trigger asynchronous workflows.
 - **Multi-Tenant by Organization**: All data is scoped to organizations, with role-based access control at the member level.
 - **API-First**: All mutations go through REST API routes; frontend components fetch data via React Query.

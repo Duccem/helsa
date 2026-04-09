@@ -18,7 +18,7 @@ Handles user identity, session management, and organization membership.
 
 - **Aggregate**: User, Organization
 - **Domain Events**: UserCreatedEvent, OrganizationCreatedEvent
-- **Interfaces**: AuthNotifier (for email notifications)
+- **Ports** (abstract classes): AuthNotifier (for email notifications)
 - **Use Cases**: GetUser, GetOrganization, ChangeRole, UserRegistration, OrganizationCreation
 - **Infrastructure**: better-auth server/client, Google OAuth, role-based access control, invitation system
 
@@ -26,7 +26,7 @@ Handles user identity, session management, and organization membership.
 
 Manages subscriptions, orders, and invoicing through the Polar payment platform.
 
-- **Interface**: BillingService (createCustomer, createSubscription, getSubscriptionStatus, getOrders, getInvoice)
+- **Port** (abstract class): BillingService (createCustomer, createSubscription, getSubscriptionStatus, getOrders, getInvoice)
 - **Use Cases**: InitializeNewUserBilling, InitializeNewOrganizationBilling, GetSubscriptionStatus, GetOrderList, GetOrGenerateInvoice
 - **Infrastructure**: PolarBillingService, product/plan definitions
 
@@ -81,7 +81,7 @@ Handles medication prescriptions and automated reminders.
 - **Aggregate**: Prescription
 - **Value Objects**: Medication, MedicationReminder
 - **Medication States**: PENDING, ACTIVE, PAUSED, COMPLETED
-- **Interfaces**: ReminderNotifier (for dose reminders via email)
+- **Ports** (abstract classes): ReminderNotifier (for dose reminders via email)
 - **Use Cases**: CreatePrescription, GetPrescriptionDetails, SearchReminders
 - **Background Jobs**: Scheduled reminders via Inngest (every 15 minutes), missed dose alerts
 

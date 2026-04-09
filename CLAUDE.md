@@ -24,12 +24,23 @@ Next.js 16 (App Router, React 19, React Compiler) | TypeScript | PostgreSQL (Neo
 
 Multi-tenant healthcare SaaS with modular DDD architecture. Each domain module (`src/modules/<module>/`) has four layers:
 
-- **domain/** — Aggregate root entities (extend `Aggregate`), value objects (extend `ValueObject`), domain errors (extend `DomainError`), domain events, repository interfaces
+- **domain/** — Aggregate root entities (extend `Aggregate`), value objects (extend `ValueObject`), domain errors (extend `DomainError`), domain events, repository/notifier abstract classes (not interfaces — see DI below)
 - **application/** — Use cases/services. Commands return `void`. Use primitive types or domain objects for I/O (no DTOs)
 - **infrastructure/** — Drizzle schema + repository implementations, external service adapters
 - **presentation/** — React components, hooks (client-side)
 
 Domain modules: `appointment`, `auth`, `billing`, `chat-agent`, `diagnosis`, `doctor`, `patient`, `prescription`, `schedule`. Shared infrastructure lives in `src/modules/shared/`.
+
+### Dependency Injection
+
+The project uses [`diod`](https://www.npmjs.com/package/diod) for DI. Because `diod` resolves dependencies via constructor metadata, **repository and notifier ports are abstract classes, not TypeScript interfaces** — abstract classes survive at runtime as tokens the container can bind to.
+
+- Decorate classes with the appropriate service decorator from [src/modules/shared/domain/service..ts](src/modules/shared/domain/service..ts):
+  - `@DomainService` — domain services
+  - `@ApplicationService` — application use cases
+  - `@InfrastructureService` — repository/adapter implementations
+- All bindings live in [src/modules/shared/infrastructure/dependency-injection/diod.config.ts](src/modules/shared/infrastructure/dependency-injection/diod.config.ts), which exports a singleton `container`. Register new abstract ports with `.registerAndUse(Abstract).asInstance(Concrete)` and new use cases with `.registerAndUse(UseCase)`.
+- Consumers (API routes, workflows) retrieve services with `container.get(UseCase)` — never instantiate use cases or repositories manually.
 
 ### Database
 
@@ -44,9 +55,11 @@ Routes live in `src/app/(server)/api/`. Pattern for each route handler:
 
 1. Call `authenticate()` or `authenticateOrg()` from `@/modules/shared/infrastructure/http/http-authenticate`
 2. Parse input with `parseBody()`/`parseQuery()` using Zod schemas defined inline
-3. Instantiate the use case service with its repository/dependencies directly (no DI container)
+3. Resolve the use case via `container.get(UseCase)` from `@/modules/shared/infrastructure/dependency-injection/diod.config` — do not instantiate services or repositories directly
 4. Wrap execution in `routeHandler()` with domain error mapping to HTTP status codes
 5. Return responses via `HttpNextResponse` helpers (`.json()`, `.created()`, `.domainError()`)
+
+The same `container.get(...)` pattern applies to Inngest workflows under `src/app/(server)/workflows/`.
 
 ### Frontend
 

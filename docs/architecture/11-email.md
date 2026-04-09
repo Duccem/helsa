@@ -28,11 +28,11 @@ All templates are React components located in `src/modules/shared/infrastructure
 
 ## Notifier Pattern
 
-Email sending is abstracted behind domain interfaces, following DDD principles:
+Email sending is abstracted behind domain ports (declared as abstract classes so they can serve as `diod` DI tokens), following DDD principles:
 
 ### AuthNotifier
 
-**Interface**: `src/modules/auth/domain/auth-notifier.ts`
+**Port (abstract class)**: `src/modules/auth/domain/auth-notifier.ts`
 **Implementation**: `src/modules/auth/infrastructure/email/resend-auth-notifier.ts`
 
 Methods:
@@ -45,7 +45,7 @@ Methods:
 
 ### ReminderNotifier
 
-**Interface**: `src/modules/prescription/domain/reminder-notifier.ts`
+**Port (abstract class)**: `src/modules/prescription/domain/reminder-notifier.ts`
 **Implementation**: `src/modules/prescription/infrastructure/resend-reminder-notifier.ts`
 
 Methods:

@@ -7,6 +7,8 @@ All API endpoints live under `src/app/(server)/api/` and follow a consistent pat
 Every route handler follows these steps:
 
 ```typescript
+import { container } from "@/modules/shared/infrastructure/dependency-injection/diod.config";
+
 export async function POST(request: NextRequest) {
   // 1. Authenticate
   const { session } = await authenticate();
@@ -18,11 +20,8 @@ export async function POST(request: NextRequest) {
     // ...
   }));
 
-  // 3. Instantiate use case with dependencies
-  const service = new CreateEntity(
-    new DrizzleEntityRepository(),
-    new ExternalServiceAdapter(),
-  );
+  // 3. Resolve the use case from the DI container
+  const service = container.get(CreateEntity);
 
   // 4. Execute with error handling
   return routeHandler(
@@ -38,6 +37,8 @@ export async function POST(request: NextRequest) {
   );
 }
 ```
+
+Use cases, repositories, notifiers, and adapters are wired in [`src/modules/shared/infrastructure/dependency-injection/diod.config.ts`](../../src/modules/shared/infrastructure/dependency-injection/diod.config.ts). Route handlers never call `new` on application or infrastructure classes — they always go through `container.get(...)`. The same pattern applies to Inngest workflows under `src/app/(server)/workflows/`.
 
 ### Key Utilities
 

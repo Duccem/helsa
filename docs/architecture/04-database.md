@@ -460,14 +460,14 @@ export default defineConfig({
 
 ## Repository Pattern
 
-Each module defines a repository interface in its domain layer and a Drizzle implementation in its infrastructure layer:
+Each module defines a repository port in its domain layer (declared as an **abstract class** so it can serve as a `diod` DI token) and a Drizzle implementation in its infrastructure layer:
 
 ```
-domain/<module>-repository.ts          → Interface
-infrastructure/persistence/drizzle-<module>-repository.ts → Implementation
+domain/<module>-repository.ts          → Abstract class (port)
+infrastructure/persistence/drizzle-<module>-repository.ts → Drizzle implementation
 ```
 
-Repositories use Drizzle's query builder for type-safe SQL generation and return domain objects (aggregates/entities), not raw database rows.
+Repositories use Drizzle's query builder for type-safe SQL generation and return domain objects (aggregates/entities), not raw database rows. Concrete repositories are decorated with `@InfrastructureService` and bound to their abstract port in `src/modules/shared/infrastructure/dependency-injection/diod.config.ts`.
 
 ## Environment
 
