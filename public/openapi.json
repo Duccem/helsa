@@ -1,0 +1,3184 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Helsa API",
+    "version": "1.0.0",
+    "description": "OpenAPI specification for the Helsa application API routes, excluding auth and workflow endpoints."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Appointments"
+    },
+    {
+      "name": "Billing"
+    },
+    {
+      "name": "Chat"
+    },
+    {
+      "name": "Diagnosis"
+    },
+    {
+      "name": "Doctors"
+    },
+    {
+      "name": "Patients"
+    },
+    {
+      "name": "Payment"
+    },
+    {
+      "name": "Prescriptions"
+    },
+    {
+      "name": "Schedules"
+    },
+    {
+      "name": "Storage"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Video Call"
+    }
+  ],
+  "paths": {
+    "/api/appointment": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Search appointments",
+        "description": "Requires an authenticated session.",
+        "operationId": "searchAppointments",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentStatusFilter"
+            }
+          },
+          {
+            "name": "doctorId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "patientId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentMode"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AppointmentType"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "hour",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TimeString"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "date",
+                "status",
+                "created_at"
+              ],
+              "default": "date"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "name": "organizationId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointments search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Create appointment",
+        "description": "Requires an authenticated session.",
+        "operationId": "createAppointment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreatedNoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/appointment/{id}": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Get appointment details",
+        "description": "Requires an authenticated session.",
+        "operationId": "getAppointmentById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Update appointment status",
+        "description": "Requires an authenticated session.",
+        "operationId": "updateAppointmentStatus",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentStatusUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/appointment/{id}/note": {
+      "post": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Add appointment note",
+        "description": "Requires an authenticated session.",
+        "operationId": "addAppointmentNote",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentNoteCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Remove appointment note",
+        "description": "Requires an authenticated session.",
+        "operationId": "removeAppointmentNote",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentNoteDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/appointment/{id}/rate": {
+      "post": {
+        "tags": [
+          "Appointments"
+        ],
+        "summary": "Rate appointment",
+        "description": "Requires an authenticated session.",
+        "operationId": "rateAppointment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentRatingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/billing": {
+      "get": {
+        "tags": [
+          "Billing"
+        ],
+        "summary": "Get billing status",
+        "description": "Requires an authenticated session. Admin users resolve billing by organization.",
+        "operationId": "getBillingStatus",
+        "responses": {
+          "200": {
+            "description": "Billing or subscription status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/billing/orders": {
+      "get": {
+        "tags": [
+          "Billing"
+        ],
+        "summary": "List billing orders",
+        "description": "Requires an authenticated session. Admin users resolve orders by organization.",
+        "operationId": "listBillingOrders",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/billing/usage": {
+      "get": {
+        "tags": [
+          "Billing"
+        ],
+        "summary": "Get usage metrics",
+        "operationId": "getBillingUsage",
+        "responses": {
+          "200": {
+            "description": "Usage metrics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingUsageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/billing/invoice/{orderId}": {
+      "get": {
+        "tags": [
+          "Billing"
+        ],
+        "summary": "Get or generate invoice",
+        "description": "Requires an authenticated session.",
+        "operationId": "getInvoice",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrderId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Billing"
+        ],
+        "summary": "Generate invoice",
+        "description": "Requires an authenticated session.",
+        "operationId": "generateInvoice",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/OrderId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated or existing invoice state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/chat/helsa": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Stream Helsa agent response",
+        "description": "Requires an authenticated session. Starts or continues an agent-backed chat and streams UI output.",
+        "operationId": "postHelsaChat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelsaChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming agent response.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/diagnosis": {
+      "get": {
+        "tags": [
+          "Diagnosis"
+        ],
+        "summary": "List diagnoses",
+        "description": "Requires an authenticated session.",
+        "operationId": "listDiagnoses",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cieCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "certainty",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/DiagnosisCertainty"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/DiagnosisState"
+            }
+          },
+          {
+            "name": "income",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/DiagnosisIncome"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Diagnosis search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Diagnosis"
+        ],
+        "summary": "Create diagnosis",
+        "description": "Requires an authenticated session.",
+        "operationId": "createDiagnosis",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiagnosisCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreatedNoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/diagnosis/pathology": {
+      "get": {
+        "tags": [
+          "Diagnosis"
+        ],
+        "summary": "List pathologies",
+        "description": "Requires an authenticated session.",
+        "operationId": "listPathologies",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pathologies list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Search doctors",
+        "description": "Requires an authenticated session.",
+        "operationId": "searchDoctors",
+        "parameters": [
+          {
+            "name": "specialtyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "minScore",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "minExperience",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctors search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Register doctor profile",
+        "description": "Requires an authenticated session.",
+        "operationId": "registerDoctor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorCreateUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreatedNoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor/{id}": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Get doctor details",
+        "description": "Requires an authenticated session.",
+        "operationId": "getDoctorById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Update doctor profile",
+        "description": "Requires an authenticated session.",
+        "operationId": "updateDoctor",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorCreateUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor/{id}/office-address": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Add doctor office address",
+        "description": "Requires an authenticated session.",
+        "operationId": "addDoctorOfficeAddress",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorOfficeAddressRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor/{id}/price": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Add doctor price",
+        "description": "Requires an authenticated session.",
+        "operationId": "addDoctorPrice",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DoctorPriceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor/me": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "Get current doctor profile",
+        "description": "Requires an authenticated session.",
+        "operationId": "getCurrentDoctor",
+        "responses": {
+          "200": {
+            "description": "Current doctor profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "doctor": {
+                      "$ref": "#/components/schemas/GenericObject"
+                    }
+                  },
+                  "required": [
+                    "doctor"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor/patients": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "List current doctor patients",
+        "description": "Requires an authenticated session.",
+        "operationId": "getDoctorPatients",
+        "responses": {
+          "200": {
+            "description": "Patients associated with the authenticated doctor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "patients": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GenericObject"
+                      }
+                    }
+                  },
+                  "required": [
+                    "patients"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/doctor/specialty": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "summary": "List specialties",
+        "description": "Requires an authenticated session.",
+        "operationId": "listDoctorSpecialties",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specialties list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/patient": {
+      "get": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Search patients",
+        "description": "Requires an authenticated session.",
+        "operationId": "searchPatients",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PatientGender"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Patients search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Create patient",
+        "description": "Requires an authenticated session.",
+        "operationId": "createPatient",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreatedNoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/patient/{id}": {
+      "get": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Get patient details",
+        "description": "Requires an authenticated session.",
+        "operationId": "getPatientById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Patient details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Update patient",
+        "description": "Requires an authenticated session.",
+        "operationId": "updatePatient",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/patient/{id}/allergies": {
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Add patient allergy",
+        "description": "Requires an authenticated session.",
+        "operationId": "addPatientAllergy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllergyCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Remove patient allergy",
+        "description": "Requires an authenticated session.",
+        "operationId": "removePatientAllergy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllergyDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/patient/{id}/contact-info": {
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Add patient contact info",
+        "description": "Requires an authenticated session.",
+        "operationId": "addPatientContactInfo",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientContactInfoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/patient/{id}/physical-information": {
+      "put": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Set patient physical information",
+        "description": "Requires an authenticated session.",
+        "operationId": "setPatientPhysicalInformation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientPhysicalInformationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/patient/{id}/vitals": {
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Add patient vitals",
+        "description": "Requires an authenticated session.",
+        "operationId": "addPatientVitals",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PatientId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientVitalsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/payment/checkout": {
+      "get": {
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Start Polar checkout",
+        "description": "Returns the hosted checkout experience from Polar.",
+        "operationId": "startCheckout",
+        "responses": {
+          "200": {
+            "description": "Hosted checkout response.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payment/portal": {
+      "get": {
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Open customer portal",
+        "description": "Uses the current authenticated session to resolve the Polar customer portal.",
+        "operationId": "openCustomerPortal",
+        "responses": {
+          "200": {
+            "description": "Hosted customer portal response.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payment/webhook": {
+      "post": {
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Receive Polar webhook",
+        "description": "Polar webhook endpoint validated with the configured webhook secret.",
+        "operationId": "handlePaymentWebhook",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/prescription": {
+      "get": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Search prescriptions",
+        "description": "Requires an authenticated session.",
+        "operationId": "searchPrescriptions",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "doctorId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prescriptions search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Create prescription",
+        "description": "Requires an authenticated session.",
+        "operationId": "createPrescription",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrescriptionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreatedNoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/prescription/{id}": {
+      "get": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Get prescription details",
+        "description": "Requires an authenticated session.",
+        "operationId": "getPrescriptionById",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrescriptionId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prescription details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Update prescription",
+        "description": "Requires an authenticated session.",
+        "operationId": "updatePrescription",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrescriptionId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrescriptionUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/prescription/medication": {
+      "get": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Search medications",
+        "description": "Requires an authenticated session.",
+        "operationId": "searchMedications",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "prescriptionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medication search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/prescription/{id}/medication": {
+      "post": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Add medication to prescription",
+        "description": "Requires an authenticated session.",
+        "operationId": "addMedicationToPrescription",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrescriptionId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrescriptionMedicationCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/prescription/{id}/medication/{medicationId}": {
+      "put": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Update medication",
+        "description": "Requires an authenticated session.",
+        "operationId": "updatePrescriptionMedication",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrescriptionId"
+          },
+          {
+            "$ref": "#/components/parameters/MedicationId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrescriptionMedicationUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/prescription/{id}/medication/{medicationId}/{reminderId}/taken": {
+      "put": {
+        "tags": [
+          "Prescriptions"
+        ],
+        "summary": "Mark reminder as taken",
+        "description": "Requires an authenticated session.",
+        "operationId": "markMedicationReminderTaken",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PrescriptionId"
+          },
+          {
+            "$ref": "#/components/parameters/MedicationId"
+          },
+          {
+            "$ref": "#/components/parameters/ReminderId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/schedule": {
+      "post": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "Create schedule",
+        "description": "Requires an authenticated session.",
+        "operationId": "createSchedule",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/CreatedNoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/schedule/{doctorId}": {
+      "get": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "Get schedule",
+        "description": "Requires an authenticated session.",
+        "operationId": "getSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor schedule.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/schedule/{doctorId}/availability": {
+      "get": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "List availability slots",
+        "description": "Requires an authenticated session.",
+        "operationId": "getScheduleAvailability",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AvailabilitySlotState"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availability slots.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "slots": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GenericObject"
+                      }
+                    }
+                  },
+                  "required": [
+                    "slots"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "Generate availability slots",
+        "description": "Requires an authenticated session.",
+        "operationId": "generateScheduleAvailability",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/schedule/{doctorId}/day": {
+      "post": {
+        "tags": [
+          "Schedules"
+        ],
+        "summary": "Add days to schedule",
+        "description": "Requires an authenticated session.",
+        "operationId": "addDaysToSchedule",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DoctorId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleUpdateDaysRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/storage": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "UploadThing route metadata",
+        "description": "Proxy handler generated by UploadThing.",
+        "operationId": "getStorageRouteMetadata",
+        "responses": {
+          "200": {
+            "description": "UploadThing route metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "UploadThing action",
+        "description": "Proxy handler generated by UploadThing.",
+        "operationId": "postStorageRouteAction",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericObject"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "UploadThing action response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/role": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Change current user role",
+        "description": "Requires an authenticated session.",
+        "operationId": "changeCurrentUserRole",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRoleChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/video-call/{appointmentId}/doctor-token": {
+      "get": {
+        "tags": [
+          "Video Call"
+        ],
+        "summary": "Generate doctor video token",
+        "description": "Requires an authenticated session.",
+        "operationId": "generateDoctorVideoCallToken",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/video-call/{appointmentId}/patient-token": {
+      "get": {
+        "tags": [
+          "Video Call"
+        ],
+        "summary": "Generate patient video token",
+        "description": "Requires an authenticated session.",
+        "operationId": "generatePatientVideoCallToken",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppointmentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      },
+      "AppointmentId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "DoctorId": {
+        "name": "doctorId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "PatientId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "PrescriptionId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "MedicationId": {
+        "name": "medicationId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "ReminderId": {
+        "name": "reminderId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "OrderId": {
+        "name": "orderId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "CreatedNoContent": {
+        "description": "Resource created."
+      },
+      "NoContent": {
+        "description": "Operation completed successfully."
+      },
+      "BadRequest": {
+        "description": "Request validation failed or the domain rejected the input.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DomainErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication is required.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DomainErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "The authenticated user is not allowed to perform this operation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DomainErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Requested resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DomainErrorResponse"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Resource conflict.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DomainErrorResponse"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Unexpected server error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InternalServerErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "GenericObject": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "DomainErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/GenericObject"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "InternalServerErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "InternalServerError"
+          },
+          "message": {
+            "type": "string",
+            "example": "Internal server error"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ]
+      },
+      "TimeString": {
+        "type": "string",
+        "pattern": "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$",
+        "examples": [
+          "09:30",
+          "09:30:00"
+        ]
+      },
+      "AppointmentMode": {
+        "type": "string",
+        "enum": [
+          "ONLINE",
+          "IN_PERSON"
+        ]
+      },
+      "AppointmentType": {
+        "type": "string",
+        "enum": [
+          "CONSULTATION",
+          "FOLLOW_UP",
+          "CHECK_UP",
+          "EMERGENCY",
+          "PROCEDURE"
+        ]
+      },
+      "AppointmentStatusFilter": {
+        "type": "string",
+        "enum": [
+          "SCHEDULED",
+          "IN_PROGRESS",
+          "CANCELLED",
+          "FINISHED"
+        ]
+      },
+      "AppointmentStatus": {
+        "type": "string",
+        "enum": [
+          "SCHEDULED",
+          "CONFIRMED",
+          "PAYED",
+          "READY",
+          "STARTED",
+          "CANCELLED",
+          "MISSED_BY_PATIENT",
+          "MISSED_BY_THERAPIST",
+          "FINISHED"
+        ]
+      },
+      "PaymentMode": {
+        "type": "string",
+        "enum": [
+          "PREPAID",
+          "POSTPAID",
+          "CREDIT"
+        ]
+      },
+      "AppointmentCreateRequest": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "hour": {
+            "$ref": "#/components/schemas/TimeString"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "doctorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "motive": {
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/AppointmentMode"
+          },
+          "type": {
+            "$ref": "#/components/schemas/AppointmentType"
+          },
+          "organizationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0
+          },
+          "payment_mode": {
+            "$ref": "#/components/schemas/PaymentMode"
+          }
+        },
+        "required": [
+          "date",
+          "hour",
+          "patientId",
+          "doctorId",
+          "motive",
+          "mode",
+          "type",
+          "amount",
+          "payment_mode"
+        ]
+      },
+      "AppointmentStatusUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/AppointmentStatus"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "AppointmentNoteCreateRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "note"
+        ]
+      },
+      "AppointmentNoteDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "noteId"
+        ]
+      },
+      "AppointmentRatingRequest": {
+        "type": "object",
+        "properties": {
+          "rate": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "rate"
+        ]
+      },
+      "BillingUsageResponse": {
+        "type": "object",
+        "properties": {
+          "patients": {
+            "type": "integer"
+          },
+          "video_call_hours": {
+            "type": "integer"
+          },
+          "ai_usage": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "patients",
+          "video_call_hours",
+          "ai_usage"
+        ]
+      },
+      "HelsaChatRequest": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenericObject"
+            }
+          },
+          "chat_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "messages",
+          "chat_id"
+        ]
+      },
+      "DiagnosisCertainty": {
+        "type": "string",
+        "enum": [
+          "PRESUMPTIVE",
+          "DIFFERENTIAL",
+          "DEFINITIVE",
+          "DISCARD"
+        ]
+      },
+      "DiagnosisState": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "REMISSION",
+          "CURED",
+          "RECURRENT",
+          "DECEASED"
+        ]
+      },
+      "DiagnosisIncome": {
+        "type": "string",
+        "enum": [
+          "INCOME",
+          "PRINCIPAL",
+          "SECONDARY",
+          "EGRESS"
+        ]
+      },
+      "DiagnosisCreateRequest": {
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cieCode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "certainty": {
+            "$ref": "#/components/schemas/DiagnosisCertainty"
+          },
+          "state": {
+            "$ref": "#/components/schemas/DiagnosisState"
+          },
+          "income": {
+            "$ref": "#/components/schemas/DiagnosisIncome"
+          }
+        },
+        "required": [
+          "patientId",
+          "summary",
+          "cieCode"
+        ]
+      },
+      "DoctorCreateUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "specialtyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "licenseNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "experience": {
+            "type": "number",
+            "minimum": 0
+          },
+          "bio": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "specialtyId",
+          "licenseNumber",
+          "experience"
+        ]
+      },
+      "DoctorOfficeAddressRequest": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number"
+              },
+              "longitude": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "location"
+        ]
+      },
+      "DoctorPriceRequest": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "mode": {
+            "$ref": "#/components/schemas/PaymentMode"
+          }
+        },
+        "required": [
+          "amount",
+          "mode"
+        ]
+      },
+      "PatientGender": {
+        "type": "string",
+        "enum": [
+          "MAN",
+          "WOMAN",
+          "OTHER"
+        ]
+      },
+      "PatientContactInfoItem": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "minLength": 1
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "phone"
+            ]
+          },
+          {
+            "required": [
+              "address"
+            ]
+          }
+        ]
+      },
+      "PatientCreateRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/PatientGender"
+          },
+          "contactInfo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientContactInfoItem"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "birthDate",
+          "gender"
+        ]
+      },
+      "PatientUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "gender": {
+            "$ref": "#/components/schemas/PatientGender"
+          }
+        },
+        "required": [
+          "name",
+          "birthDate"
+        ]
+      },
+      "AllergySeverity": {
+        "type": "string",
+        "enum": [
+          "LOW",
+          "MODERATE",
+          "HIGH",
+          "CRITICAL"
+        ]
+      },
+      "AllergyCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "$ref": "#/components/schemas/AllergySeverity"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "AllergyDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "allergyId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "allergyId"
+        ]
+      },
+      "PatientContactInfoRequest": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "minLength": 1
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "phone"
+            ]
+          },
+          {
+            "required": [
+              "address"
+            ]
+          }
+        ]
+      },
+      "PatientPhysicalInformationRequest": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "bloodType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bodyMassIndex": {
+            "type": "number"
+          }
+        }
+      },
+      "PatientVitalsRequest": {
+        "type": "object",
+        "properties": {
+          "bloodPressure": {
+            "type": "number"
+          },
+          "heartRate": {
+            "type": "number"
+          },
+          "respiratoryRate": {
+            "type": "number"
+          },
+          "oxygenSaturation": {
+            "type": "number"
+          },
+          "temperature": {
+            "type": "number"
+          }
+        }
+      },
+      "PrescriptionCreateRequest": {
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "doctorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "observation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "patientId",
+          "doctorId",
+          "observation"
+        ]
+      },
+      "PrescriptionUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "observation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "observation"
+        ]
+      },
+      "MedicationState": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "ACTIVE",
+          "PAUSED",
+          "COMPLETED"
+        ]
+      },
+      "MedicationAlternative": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "brand": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dosage": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dosageUnit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "administrationMethod": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "brand",
+          "dosage",
+          "dosageUnit",
+          "administrationMethod"
+        ]
+      },
+      "PrescriptionMedicationCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dosage": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "dosageUnit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "frequency": {
+            "type": "string",
+            "minLength": 1
+          },
+          "administrationMethod": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicationAlternative"
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MedicationState"
+          }
+        },
+        "required": [
+          "name",
+          "dosage",
+          "dosageUnit",
+          "frequency",
+          "administrationMethod",
+          "startDate"
+        ]
+      },
+      "PrescriptionMedicationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dosage": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "dosageUnit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "frequency": {
+            "type": "string",
+            "minLength": 1
+          },
+          "administrationMethod": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicationAlternative"
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/MedicationState"
+          }
+        }
+      },
+      "ScheduleDay": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "startHour": {
+            "$ref": "#/components/schemas/TimeString"
+          },
+          "endHour": {
+            "$ref": "#/components/schemas/TimeString"
+          }
+        },
+        "required": [
+          "day",
+          "startHour",
+          "endHour"
+        ]
+      },
+      "ScheduleCreateRequest": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "appointmentDuration": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "maxAppointmentsPerDay": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "days": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDay"
+            }
+          }
+        },
+        "required": [
+          "doctorId",
+          "appointmentDuration",
+          "maxAppointmentsPerDay",
+          "days"
+        ]
+      },
+      "ScheduleUpdateDaysRequest": {
+        "type": "object",
+        "properties": {
+          "deletePrevious": {
+            "type": "boolean",
+            "default": true
+          },
+          "days": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDay"
+            }
+          }
+        },
+        "required": [
+          "days"
+        ]
+      },
+      "AvailabilitySlotState": {
+        "type": "string",
+        "enum": [
+          "AVAILABLE",
+          "TAKEN"
+        ]
+      },
+      "UserRoleChangeRequest": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "patient",
+              "doctor",
+              "admin"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      }
+    }
+  }
+}
