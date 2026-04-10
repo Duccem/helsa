@@ -13,6 +13,7 @@ type CallHeaderProps = {
   callStartedAt: number | null;
   showLiveAssistant?: boolean;
   showLiveVitals?: boolean;
+  canManageConsultation?: boolean;
   onToggleLiveAssistantAction?: () => void;
   onToggleLiveVitalsAction?: () => void;
 };
@@ -33,18 +34,20 @@ export const CallHeader = ({
   callStartedAt,
   showLiveAssistant = true,
   showLiveVitals = true,
+  canManageConsultation = false,
   onToggleLiveAssistantAction,
   onToggleLiveVitalsAction,
 }: CallHeaderProps) => {
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     if (!callStartedAt) return;
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, [callStartedAt]);
 
-  const duration = callStartedAt ? formatDuration(now - callStartedAt) : "00:00";
+  const duration = callStartedAt && now ? formatDuration(now - callStartedAt) : "00:00";
 
   return (
     <div className="flex items-center justify-between gap-4  px-4 py-3  md:px-4">
@@ -67,10 +70,10 @@ export const CallHeader = ({
       <div className="flex items-center gap-2">
         <SidebarTrigger className="rounded-full border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground !p-3" />
 
-        {onToggleLiveAssistantAction ? (
+        {onToggleLiveAssistantAction && canManageConsultation ? (
           <Button
             type="button"
-            variant={showLiveAssistant ? "secondary" : "outline"}
+            variant={showLiveAssistant ? "default" : "secondary"}
             size="sm"
             onClick={onToggleLiveAssistantAction}
             className="rounded-full"
@@ -80,10 +83,10 @@ export const CallHeader = ({
           </Button>
         ) : null}
 
-        {onToggleLiveVitalsAction ? (
+        {onToggleLiveVitalsAction && canManageConsultation ? (
           <Button
             type="button"
-            variant={showLiveVitals ? "secondary" : "outline"}
+            variant={showLiveVitals ? "default" : "secondary"}
             size="sm"
             onClick={onToggleLiveVitalsAction}
             className="rounded-full"

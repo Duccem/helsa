@@ -45,10 +45,12 @@ export type JitsiState = {
   isScreenSharing: boolean;
   isChatOpen: boolean;
   isRecording: boolean;
+  hasCallEnded: boolean;
   participantsCount: number;
   messages: JitsiChatMessage[];
   unreadMessages: number;
   callStartedAt: number | null;
+  callEndedAt: number | null;
   devices: JitsiDevices;
   currentDevices: JitsiCurrentDevices;
 };
@@ -63,10 +65,12 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
     isScreenSharing: false,
     isChatOpen: false,
     isRecording: false,
+    hasCallEnded: false,
     participantsCount: 1,
     messages: [],
     unreadMessages: 0,
     callStartedAt: null,
+    callEndedAt: null,
     devices: { audioInput: [], audioOutput: [], videoInput: [] },
     currentDevices: {},
   });
@@ -81,6 +85,29 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
       document.head.appendChild(script);
     });
   }, []);
+
+  const teardownConference = useCallback(
+    (markAsEnded = false) => {
+      apiRef.current?.dispose?.();
+      apiRef.current = null;
+
+      const container = document.getElementById(containerId);
+      container?.replaceChildren();
+
+      if (markAsEnded) {
+        setState((s) => ({
+          ...s,
+          hasCallEnded: true,
+          isReady: false,
+          isRecording: false,
+          isScreenSharing: false,
+          participantsCount: 1,
+          callEndedAt: Date.now(),
+        }));
+      }
+    },
+    [containerId],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -167,10 +194,21 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
         } catch {}
       };
 
+      const markCallAsEnded = () => teardownConference(true);
+
       api.addEventListener("videoConferenceJoined", () => {
-        setState((s) => ({ ...s, isReady: true, callStartedAt: Date.now() }));
+        setState((s) => ({
+          ...s,
+          isReady: true,
+          hasCallEnded: false,
+          callStartedAt: Date.now(),
+          callEndedAt: null,
+        }));
         refreshDevices();
       });
+
+      api.addEventListener("videoConferenceLeft", markCallAsEnded);
+      api.addEventListener("readyToClose", markCallAsEnded);
 
       api.addEventListener("deviceListChanged", refreshDevices);
 
@@ -241,11 +279,10 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
 
     return () => {
       mounted = false;
-      apiRef.current?.dispose?.();
-      apiRef.current = null;
+      teardownConference(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomName, jwt]);
+  }, [roomName, jwt, teardownConference]);
 
   const controls = {
     toggleMic: () => apiRef.current?.executeCommand("toggleAudio"),
@@ -254,7 +291,10 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
     toggleTileView: () => apiRef.current?.executeCommand("toggleTileView"),
     toggleChat: () =>
       setState((s) => ({ ...s, isChatOpen: !s.isChatOpen, unreadMessages: !s.isChatOpen ? 0 : s.unreadMessages })),
-    hangup: () => apiRef.current?.executeCommand("hangup"),
+    hangup: () => {
+      apiRef.current?.executeCommand("hangup");
+      teardownConference(true);
+    },
     sendMessage: (msg: string) => apiRef.current?.executeCommand("sendChatMessage", msg),
     startRecording: () => apiRef.current?.executeCommand("startRecording", { mode: "file" }),
     stopRecording: () => apiRef.current?.executeCommand("stopRecording", "file"),
