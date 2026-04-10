@@ -1,20 +1,18 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# General instructions for GitHub Copilot
 
 ## Commands
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Next.js dev server (port 3000) |
-| `npm run build` | Production build |
-| `npm run lint` | Biome linter (`biome check`) |
-| `npm run format` | Biome formatter (`biome format --write`) |
-| `npm run database:build` | Generate Drizzle migrations (`drizzle-kit generate`) |
-| `npm run database:migrate` | Apply migrations (`drizzle-kit migrate`) |
-| `npm run database:dev` | Drizzle Studio (port 3001) |
-| `npm run email:dev` | Email template preview (port 3002) |
-| `npm run workflow:dev` | Inngest dev server |
+| Command                    | Purpose                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `npm run dev`              | Next.js dev server (port 3000)                       |
+| `npm run build`            | Production build                                     |
+| `npm run lint`             | Biome linter (`biome check`)                         |
+| `npm run format`           | Biome formatter (`biome format --write`)             |
+| `npm run database:build`   | Generate Drizzle migrations (`drizzle-kit generate`) |
+| `npm run database:migrate` | Apply migrations (`drizzle-kit migrate`)             |
+| `npm run database:dev`     | Drizzle Studio (port 3001)                           |
+| `npm run email:dev`        | Email template preview (port 3002)                   |
+| `npm run workflow:dev`     | Inngest dev server                                   |
 
 ## Tech Stack
 
@@ -83,7 +81,33 @@ The same `container.get(...)` pattern applies to Inngest workflows under `src/ap
 - **Strings:** double quotes
 - **Indentation:** 2 spaces
 
+- Use kebab-case for file names.
+- Use kebab-case for CSS class names.
+- Use camelCase for JavaScript variable and function names.
+- Use PascalCase for React component names.
+- Use PascalCase for TypeScript types, classes and interface names.
+- Use snake_case for classes properties and database column names.
+- Use 2 spaces for indentation.
+- Use double quotes for strings in JavaScript and TypeScript.
+
+## DDD
+
+- All domain entities, interfaces and types should be placed in the domain folder of the corresponding module/aggregate.
+- All application services, commands, queries and handlers should be placed in the application folder of the corresponding module/aggregate.
+- All infrastructure services, repositories and implementations should be placed in the infrastructure folder of the corresponding module/aggregate.
+- All presentation layer components, such as controllers, routes and views should be placed in the presentation folder of the corresponding module/aggregate.
+- Use the repository pattern for data access and persistence.
+- Use the command-query separation principle for application services.
+- Use the dependency inversion principle to decouple the application layer from the infrastructure layer.
+- Use domain events to communicate between different parts of the system and to trigger side effects.
+- Use value objects to represent complex data structures and to encapsulate business rules.
+- Use aggregates to group related entities and to enforce invariants.
+
 ## Testing
 
-- Vitest for unit/integration tests, Playwright for E2E
-- Test targets: use cases (application layer), domain services, value objects, infrastructure services
+- Use Vitest for unit testing and integration testing.
+- Use Playwright for end-to-end testing.
+- Use test-driven development (TDD) approach for writing tests.
+- Write tests taking into account edge cases and potential failure scenarios.
+- The small pieces of code that should be tested are use cases on the application layer, domain services and value objects on the domain layer, and infrastructure services on the infrastructure layer.
+- Use mocks and stubs to isolate the code being tested and to simulate dependencies.
