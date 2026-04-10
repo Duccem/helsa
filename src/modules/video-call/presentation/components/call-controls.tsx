@@ -1,8 +1,19 @@
 "use client";
 
-import { Camera, Headphones, MessageSquare, Mic, MicOff, MonitorUp, PhoneOff, Video, VideoOff } from "lucide-react";
-import type { JitsiCurrentDevices, JitsiDevice, JitsiDevices } from "../hooks/use-jitsi";
+import {
+  Camera,
+  ClipboardPlus,
+  Headphones,
+  MessageSquare,
+  Mic,
+  MicOff,
+  MonitorUp,
+  PhoneOff,
+  Video,
+  VideoOff,
+} from "lucide-react";
 import { cn } from "@/modules/shared/presentation/lib/utils";
+import type { JitsiCurrentDevices, JitsiDevice, JitsiDevices } from "../hooks/use-jitsi";
 import { DevicePicker } from "./device-picker";
 
 type CallControlsProps = {
@@ -10,17 +21,20 @@ type CallControlsProps = {
   isCameraMuted: boolean;
   isScreenSharing: boolean;
   isChatOpen: boolean;
+  canManageConsultation: boolean;
+  isDoctorPanelOpen: boolean;
   unreadMessages: number;
   devices: JitsiDevices;
   currentDevices: JitsiCurrentDevices;
-  onToggleMic: () => void;
-  onToggleCamera: () => void;
-  onToggleScreenShare: () => void;
-  onToggleChat: () => void;
-  onHangup: () => void;
-  onSelectAudioInput: (device: JitsiDevice) => void;
-  onSelectAudioOutput: (device: JitsiDevice) => void;
-  onSelectVideoInput: (device: JitsiDevice) => void;
+  onToggleMicAction: () => void;
+  onToggleCameraAction: () => void;
+  onToggleScreenShareAction: () => void;
+  onToggleChatAction: () => void;
+  onToggleDoctorPanelAction: () => void;
+  onHangupAction: () => void;
+  onSelectAudioInputAction: (device: JitsiDevice) => void;
+  onSelectAudioOutputAction: (device: JitsiDevice) => void;
+  onSelectVideoInputAction: (device: JitsiDevice) => void;
 };
 
 type ControlButtonProps = {
@@ -41,19 +55,19 @@ const ControlButton = ({ active, danger, onClick, label, badge, children, hasOpt
       aria-label={label}
       title={label}
       className={cn(
-        "group relative flex size-12 items-center justify-center border rounded-full transition-all duration-200",
-        "backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
+        "group relative flex size-11 items-center justify-center rounded-full border transition-all duration-200",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
         "active:scale-95",
         active
-          ? "border-white/10 bg-white/10 text-white hover:bg-white/15"
-          : "border-red-500/30 bg-red-500/15 text-red-300 hover:bg-red-500/25",
-        danger && "size-14 border-red-500/40 bg-red-500 text-white hover:bg-red-600",
+          ? "border-border bg-background text-foreground hover:bg-muted"
+          : "border-border bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
+        danger && "size-12 border-transparent bg-destructive text-white hover:bg-destructive/90",
         hasOptions && "rounded-r-none",
       )}
     >
       {children}
       {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground ring-2 ring-[#0a0a0f]">
+        <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground ring-2 ring-background">
           {badge > 9 ? "9+" : badge}
         </span>
       )}
@@ -66,25 +80,28 @@ export const CallControls = ({
   isCameraMuted,
   isScreenSharing,
   isChatOpen,
+  canManageConsultation,
+  isDoctorPanelOpen,
   unreadMessages,
   devices,
   currentDevices,
-  onToggleMic,
-  onToggleCamera,
-  onToggleScreenShare,
-  onToggleChat,
-  onHangup,
-  onSelectAudioInput,
-  onSelectAudioOutput,
-  onSelectVideoInput,
+  onToggleMicAction,
+  onToggleCameraAction,
+  onToggleScreenShareAction,
+  onToggleChatAction,
+  onToggleDoctorPanelAction,
+  onHangupAction,
+  onSelectAudioInputAction,
+  onSelectAudioOutputAction,
+  onSelectVideoInputAction,
 }: CallControlsProps) => {
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-6">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-2 shadow-2xl backdrop-blur-xl">
+    <div className="flex items-center justify-center px-4 py-3">
+      <div className="flex flex-wrap items-center justify-center gap-2 rounded-full border border-border/70 bg-background/95 px-3 py-2 shadow-lg">
         <div className="flex  items-center gap-0">
           <ControlButton
             active={!isMicMuted}
-            onClick={onToggleMic}
+            onClick={onToggleMicAction}
             label={isMicMuted ? "Activar micrófono" : "Silenciar micrófono"}
             hasOptions
           >
@@ -98,7 +115,7 @@ export const CallControls = ({
                 icon: <Mic className="size-3.5" />,
                 devices: devices.audioInput,
                 currentDeviceId: currentDevices.audioInput?.deviceId,
-                onSelect: onSelectAudioInput,
+                onSelect: onSelectAudioInputAction,
                 emptyLabel: "Sin micrófonos disponibles",
               },
               {
@@ -106,7 +123,7 @@ export const CallControls = ({
                 icon: <Headphones className="size-3.5" />,
                 devices: devices.audioOutput,
                 currentDeviceId: currentDevices.audioOutput?.deviceId,
-                onSelect: onSelectAudioOutput,
+                onSelect: onSelectAudioOutputAction,
                 emptyLabel: "Sin altavoces disponibles",
               },
             ]}
@@ -116,7 +133,7 @@ export const CallControls = ({
         <div className="flex items-center gap-0">
           <ControlButton
             active={!isCameraMuted}
-            onClick={onToggleCamera}
+            onClick={onToggleCameraAction}
             label={isCameraMuted ? "Activar cámara" : "Apagar cámara"}
             hasOptions
           >
@@ -130,7 +147,7 @@ export const CallControls = ({
                 icon: <Camera className="size-3.5" />,
                 devices: devices.videoInput,
                 currentDeviceId: currentDevices.videoInput?.deviceId,
-                onSelect: onSelectVideoInput,
+                onSelect: onSelectVideoInputAction,
                 emptyLabel: "Sin cámaras disponibles",
               },
             ]}
@@ -140,7 +157,7 @@ export const CallControls = ({
         <div className="flex flex-col items-center gap-1">
           <ControlButton
             active={!isScreenSharing}
-            onClick={onToggleScreenShare}
+            onClick={onToggleScreenShareAction}
             label={isScreenSharing ? "Detener compartir" : "Compartir pantalla"}
           >
             <MonitorUp className="size-5" />
@@ -150,7 +167,7 @@ export const CallControls = ({
         <div className="flex flex-col items-center gap-1">
           <ControlButton
             active={!isChatOpen}
-            onClick={onToggleChat}
+            onClick={onToggleChatAction}
             label="Chat"
             badge={isChatOpen ? 0 : unreadMessages}
           >
@@ -158,10 +175,22 @@ export const CallControls = ({
           </ControlButton>
         </div>
 
-        <div className="mx-1 h-12 w-px self-center bg-white/10" />
+        {canManageConsultation ? (
+          <div className="flex flex-col items-center gap-1">
+            <ControlButton
+              active={isDoctorPanelOpen}
+              onClick={onToggleDoctorPanelAction}
+              label={isDoctorPanelOpen ? "Cerrar panel clínico" : "Abrir panel clínico"}
+            >
+              <ClipboardPlus className="size-5" />
+            </ControlButton>
+          </div>
+        ) : null}
+
+        <div className="mx-1 hidden h-10 w-px self-center bg-border md:block" />
 
         <div className="flex flex-col items-center gap-1">
-          <ControlButton danger onClick={onHangup} label="Finalizar llamada">
+          <ControlButton danger onClick={onHangupAction} label="Finalizar llamada">
             <PhoneOff className="size-5" />
           </ControlButton>
         </div>

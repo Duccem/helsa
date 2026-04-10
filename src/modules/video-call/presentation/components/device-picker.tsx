@@ -40,8 +40,8 @@ export const DevicePicker = ({ label, sections }: DevicePickerProps) => {
         aria-label={label}
         title={label}
         className={cn(
-          "flex size-12 items-center justify-center rounded-r-full border border-white/10 bg-white/10 text-white/80 transition hover:bg-white/20",
-          open && "bg-white/20 text-white",
+          "flex size-11 items-center justify-center rounded-r-full border border-border  text-foreground transition bg-background",
+          open && "bg-white/20 text-foreground",
         )}
       >
         <ChevronUp className={cn("size-3.5 transition-transform", open && "rotate-180")} />
