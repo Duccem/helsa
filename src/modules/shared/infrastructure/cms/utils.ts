@@ -5,12 +5,23 @@ import { join } from "path";
 
 const postsDirectory = join(process.cwd(), "src/modules/shared/infrastructure/cms/posts");
 
+function sanitizeSlug(value: string): string {
+  const normalized = value.toLowerCase().trim();
+  if (!/^[a-z0-9-]+$/.test(normalized)) {
+    throw new Error(`Invalid post slug: ${value}`);
+  }
+  return normalized;
+}
+
 export function getPostSlugs() {
-  return fs.readdirSync(postsDirectory);
+  return fs
+    .readdirSync(postsDirectory)
+    .filter((fileName) => fileName.endsWith(".md"))
+    .map((fileName) => sanitizeSlug(fileName.replace(/\.md$/, "")));
 }
 
 export function getPostBySlug(slug: string) {
-  const realSlug = slug.replace(/\.md$/, "");
+  const realSlug = sanitizeSlug(slug.replace(/\.md$/, ""));
   const fullPath = join(postsDirectory, `${realSlug}.md`);
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
