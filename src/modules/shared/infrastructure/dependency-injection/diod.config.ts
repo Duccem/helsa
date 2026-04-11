@@ -63,6 +63,11 @@ import { AddDoctorPrice } from "@/modules/doctor/application/add-doctor-price";
 import { AddDoctorOfficeAddress } from "@/modules/doctor/application/add-doctor-office-address";
 import { GetDoctorPatients } from "@/modules/doctor/application/get-doctor-patients";
 
+// --- Home ---
+import { HomeMetricRepository } from "@/modules/home/domain/home-metric-repository";
+import { DrizzleHomeMetricRepository } from "@/modules/home/infrastructure/drizzle-home-metric-repository";
+import { GetDoctorHomeMetrics } from "@/modules/home/application/get-doctor-home-metrics";
+
 // ── Medical Record ───────────────────────────────────────────────────────────
 import { MedicalRecordRepository } from "@/modules/medical-record/domain/medical-record-repository";
 import { DrizzleMedicalRecordRepository } from "@/modules/medical-record/infrastructure/persistence/drizzle-medical-record-repository";
@@ -143,6 +148,7 @@ registerImplementation(DiagnosisRepository, DrizzleDiagnosisRepository);
 registerImplementation(DoctorRepository, DrizzleDoctorRepository);
 registerImplementation(SpecialtyRepository, DrizzleSpecialtyRepository);
 registerImplementation(DoctorLicenseValidationService, VenezuelanDoctorLicenseValidationService);
+registerImplementation(HomeMetricRepository, DrizzleHomeMetricRepository);
 registerImplementation(MedicalRecordRepository, DrizzleMedicalRecordRepository);
 registerImplementation(PatientRepository, DrizzlePatientRepository);
 registerImplementation(PrescriptionRepository, DrizzlePrescriptionRepository);
@@ -192,6 +198,9 @@ registerUseCase(ListSpecialties, [SpecialtyRepository]);
 registerUseCase(AddDoctorPrice, [DoctorRepository]);
 registerUseCase(AddDoctorOfficeAddress, [DoctorRepository]);
 registerUseCase(GetDoctorPatients, [DoctorRepository]);
+
+//Home
+registerUseCase(GetDoctorHomeMetrics, [DoctorRepository, HomeMetricRepository]);
 
 // Patient
 registerUseCase(CreatePatient, [PatientRepository]);
