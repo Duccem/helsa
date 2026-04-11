@@ -19,7 +19,6 @@ const CONTAINER_ID = "jitsi-container";
 export const CallLayout = () => {
   const router = useRouter();
   const { data } = authClient.useSession();
-  const { data: role } = authClient.useActiveMemberRole();
   const [token] = useQueryState("token");
   const [appointmentId] = useQueryState("appointmentId", parseAsString.withDefault(""));
   const [hasMounted, setHasMounted] = useState(false);
@@ -31,7 +30,7 @@ export const CallLayout = () => {
     setHasMounted(true);
   }, []);
 
-  const canManageConsultation = hasMounted && role?.role === "doctor";
+  const canManageConsultation = data ? data.user.role === "doctor" : false;
 
   const displayName = data?.user.name ?? "Usuario";
   const { appointment, patient } = useCallAppointment(appointmentId);
@@ -256,15 +255,6 @@ export const CallLayout = () => {
           ) : null}
         </SidebarProvider>
       </div>
-
-      <style jsx global>{`
-        .jitsi-custom iframe {
-          border: 0 !important;
-          width: 100% !important;
-          height: 100% !important;
-          background: #262627 !important;
-        }
-      `}</style>
     </div>
   );
 };

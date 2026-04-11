@@ -70,19 +70,6 @@ export const CallHeader = ({
       <div className="flex items-center gap-2">
         <SidebarTrigger className="rounded-full border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground !p-3" />
 
-        {onToggleLiveAssistantAction && canManageConsultation ? (
-          <Button
-            type="button"
-            variant={showLiveAssistant ? "default" : "secondary"}
-            size="sm"
-            onClick={onToggleLiveAssistantAction}
-            className="rounded-full"
-          >
-            <Sparkles data-icon="inline-start" />
-            Assistant
-          </Button>
-        ) : null}
-
         {onToggleLiveVitalsAction && canManageConsultation ? (
           <Button
             type="button"
@@ -115,4 +102,3 @@ export const CallHeader = ({
     </div>
   );
 };
-

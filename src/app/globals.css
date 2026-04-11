@@ -180,3 +180,10 @@
     display: none;
   }
 }
+
+.jitsi-custom iframe {
+  border: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #262627 !important;
+}

@@ -196,7 +196,7 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
 
       const markCallAsEnded = () => teardownConference(true);
 
-      api.addEventListener("videoConferenceJoined", () => {
+      api.on("videoConferenceJoined", () => {
         setState((s) => ({
           ...s,
           isReady: true,
@@ -207,38 +207,39 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
         refreshDevices();
       });
 
-      api.addEventListener("videoConferenceLeft", markCallAsEnded);
-      api.addEventListener("readyToClose", markCallAsEnded);
+      api.on("videoConferenceLeft", markCallAsEnded);
+      api.on("readyToClose", markCallAsEnded);
 
-      api.addEventListener("deviceListChanged", refreshDevices);
+      api.on("deviceListChanged", refreshDevices);
 
-      api.addEventListener("audioMuteStatusChanged", (e: any) => {
+      api.on("audioMuteStatusChanged", (e: any) => {
         setState((s) => ({ ...s, isMicMuted: !!e.muted }));
       });
 
-      api.addEventListener("videoMuteStatusChanged", (e: any) => {
+      api.on("videoMuteStatusChanged", (e: any) => {
         setState((s) => ({ ...s, isCameraMuted: !!e.muted }));
       });
 
-      api.addEventListener("screenSharingStatusChanged", (e: any) => {
+      api.on("screenSharingStatusChanged", (e: any) => {
         setState((s) => ({ ...s, isScreenSharing: !!e.on }));
       });
 
-      api.addEventListener("recordingStatusChanged", (e: any) => {
+      api.on("recordingStatusChanged", (e: any) => {
         setState((s) => ({ ...s, isRecording: !!e.on }));
       });
 
       const recomputeParticipants = () => {
         try {
+          console.log("Recomputing participants count...");
           const count = api.getNumberOfParticipants?.() ?? 1;
           setState((s) => ({ ...s, participantsCount: count }));
         } catch {}
       };
 
-      api.addEventListener("participantJoined", recomputeParticipants);
-      api.addEventListener("participantLeft", recomputeParticipants);
+      api.on("participantJoined", recomputeParticipants);
+      api.on("participantLeft", recomputeParticipants);
 
-      api.addEventListener("incomingMessage", (e: any) => {
+      api.on("incomingMessage", (e: any) => {
         setState((s) => ({
           ...s,
           messages: [
@@ -255,7 +256,7 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
         }));
       });
 
-      api.addEventListener("outgoingMessage", (e: any) => {
+      api.on("outgoingMessage", (e: any) => {
         setState((s) => ({
           ...s,
           messages: [
@@ -272,7 +273,7 @@ export function useJitsi({ containerId, roomName, jwt, userInfo, onEvents = {} }
       });
 
       Object.entries(onEvents).forEach(([event, handler]) => {
-        api.addEventListener(event, handler);
+        api.on(event, handler);
       });
     };
     init();
