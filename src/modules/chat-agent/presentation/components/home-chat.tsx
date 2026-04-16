@@ -13,9 +13,7 @@ import {
   PromptInputFooter,
   PromptInputSubmit,
   PromptInputTextarea,
-  PromptInputTools,
 } from "@/modules/shared/presentation/components/ai-elements/prompt-input";
-import { SpeechInput } from "@/modules/shared/presentation/components/ai-elements/speech-input";
 import { Suggestion, Suggestions } from "@/modules/shared/presentation/components/ai-elements/suggestion";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/shared/presentation/components/ui/tooltip";
@@ -24,6 +22,8 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { SquarePenIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ToolCallRenderer } from "./tool-call-renderer";
+import { ToolResultsPanel } from "./tools/tool-results-panel";
 
 const suggestions = [
   "Resume el historial clínico de mi próximo paciente",
@@ -110,10 +110,6 @@ export const HomeChat = () => {
     setText(event.target.value);
   }, []);
 
-  const handleTranscriptionChange = useCallback((transcript: string) => {
-    setText((prev) => (prev ? `${prev} ${transcript}` : transcript));
-  }, []);
-
   const isSubmitDisabled = useMemo(
     () => !text.trim() || status === "streaming" || status === "submitted",
     [text, status],
@@ -122,58 +118,64 @@ export const HomeChat = () => {
   const showSuggestions = messages.length === 0;
 
   return (
-    <div className="relative flex flex-1 max-h-[700px] flex-col divide-y overflow-hidden border border-border rounded-2xl">
-      <div className="flex items-center justify-between px-4 py-2 shrink-0">
-        <span className="text-sm font-medium text-muted-foreground">Helsa AI</span>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button disabled={isArchiving} onClick={handleNewChat} size="icon-sm" variant="ghost">
-                <SquarePenIcon className="size-4" />
-              </Button>
-            }
-          />
+    <div className="flex flex-1 flex-col gap-4 lg:flex-row">
+      <div className="relative flex max-h-[700px] flex-1 flex-col divide-y overflow-hidden rounded-2xl border border-border bg-background">
+        <div className="flex shrink-0 items-center justify-between px-4 py-2">
+          <span className="text-sm font-medium text-muted-foreground">Helsa AI</span>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button disabled={isArchiving} onClick={handleNewChat} size="icon-sm" variant="ghost">
+                  <SquarePenIcon className="size-4" />
+                </Button>
+              }
+            />
 
-          <TooltipContent>Nueva conversación</TooltipContent>
-        </Tooltip>
-      </div>
-      <Conversation>
-        <ConversationContent className="min-h-[500px]">
-          {messages.map((message) => (
-            <Message from={message.role} key={message.id}>
-              <MessageContent>
-                {message.parts.map((part, i) => {
-                  if (part.type === "text") {
-                    return <MessageResponse key={i}>{part.text}</MessageResponse>;
-                  }
-                  return null;
-                })}
-              </MessageContent>
-            </Message>
-          ))}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
-      <div className="grid shrink-0 gap-4 pt-4">
-        {showSuggestions && (
-          <Suggestions className="px-4">
-            {suggestions.map((suggestion) => (
-              <Suggestion key={suggestion} onClick={handleSuggestionClick} suggestion={suggestion} />
+            <TooltipContent>Nueva conversación</TooltipContent>
+          </Tooltip>
+        </div>
+        <Conversation>
+          <ConversationContent className="min-h-[500px]">
+            {messages.map((message) => (
+              <Message from={message.role} key={message.id}>
+                <MessageContent>
+                  {message.parts.map((part, i) => {
+                    if (part.type === "text") {
+                      return <MessageResponse key={i}>{part.text}</MessageResponse>;
+                    }
+                    if (part.type.startsWith("tool-")) {
+                      return <ToolCallRenderer key={i} part={part as any} />;
+                    }
+                    return null;
+                  })}
+                </MessageContent>
+              </Message>
             ))}
-          </Suggestions>
-        )}
-        <div className="w-full px-4 pb-4">
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputBody>
-              <PromptInputTextarea onChange={handleTextChange} value={text} placeholder="Consulta con Helsa" />
-            </PromptInputBody>
-            <PromptInputFooter className="justify-end">
-              <PromptInputSubmit disabled={isSubmitDisabled} status={status} />
-            </PromptInputFooter>
-          </PromptInput>
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+        <div className="grid shrink-0 gap-4 pt-4">
+          {showSuggestions && (
+            <Suggestions className="px-4">
+              {suggestions.map((suggestion) => (
+                <Suggestion key={suggestion} onClick={handleSuggestionClick} suggestion={suggestion} />
+              ))}
+            </Suggestions>
+          )}
+          <div className="w-full px-4 pb-4">
+            <PromptInput onSubmit={handleSubmit}>
+              <PromptInputBody>
+                <PromptInputTextarea onChange={handleTextChange} value={text} placeholder="Consulta con Helsa" />
+              </PromptInputBody>
+              <PromptInputFooter className="justify-end">
+                <PromptInputSubmit disabled={isSubmitDisabled} status={status} />
+              </PromptInputFooter>
+            </PromptInput>
+          </div>
         </div>
       </div>
+
+      <ToolResultsPanel messages={messages} />
     </div>
   );
 };
-

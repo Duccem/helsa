@@ -36,14 +36,14 @@ export const getHelsaAgent = () => {
     instructions,
     callOptionsSchema: agentContextSchema,
     tools: {
-      // getDoctorProfile: getDoctorProfileTool,
+      getDoctorProfile: getDoctorProfileTool,
       searchAppointments: searchAppointmentsTool,
-      // getAppointmentDetails: getAppointmentDetailsTool,
-      // getPatientDetails: getPatientDetailsTool,
-      // listPatientDiagnoses: listPatientDiagnosesTool,
-      // searchPatientPrescriptions: searchPatientPrescriptionsTool,
-      // getDoctorSchedule: getDoctorScheduleTool,
-      // getDoctorAvailability: getDoctorAvailabilityTool,
+      getAppointmentDetails: getAppointmentDetailsTool,
+      getPatientDetails: getPatientDetailsTool,
+      listPatientDiagnoses: listPatientDiagnosesTool,
+      searchPatientPrescriptions: searchPatientPrescriptionsTool,
+      getDoctorSchedule: getDoctorScheduleTool,
+      getDoctorAvailability: getDoctorAvailabilityTool,
     },
     prepareCall: ({ options, ...rest }) => {
       return {
