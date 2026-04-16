@@ -1,4 +1,4 @@
-import { helsa } from "@/modules/chat-agent/infrastructure/agents/helsa";
+import { getHelsaAgent } from "@/modules/chat-agent/infrastructure/agents/helsa";
 import { saveChat } from "@/modules/chat-agent/infrastructure/agents/utils";
 import { NotAuthorized } from "@/modules/shared/domain/errors/not-authorized";
 import { authenticate } from "@/modules/shared/infrastructure/http/http-authenticate";
@@ -13,7 +13,7 @@ export const POST = async (req: NextRequest) => {
     const { messages, chat_id } = await req.json();
 
     return createAgentUIStreamResponse({
-      agent: helsa,
+      agent: getHelsaAgent(),
       uiMessages: messages,
       options: {
         user_id: session.user.id,

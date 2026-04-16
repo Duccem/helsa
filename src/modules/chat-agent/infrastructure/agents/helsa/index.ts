@@ -1,36 +1,62 @@
 import { google } from "@ai-sdk/google";
 import { InferAgentUIMessage, stepCountIs, ToolLoopAgent } from "ai";
 import { agentContextSchema } from "../utils";
+import { getDoctorProfileTool } from "./tools/get-doctor-profile";
+import { searchAppointmentsTool } from "./tools/search-appointments";
+import { getAppointmentDetailsTool } from "./tools/get-appointment-details";
+import { getPatientDetailsTool } from "./tools/get-patient-details";
+import { listPatientDiagnosesTool } from "./tools/list-patient-diagnoses";
+import { searchPatientPrescriptionsTool } from "./tools/search-patient-prescriptions";
+import { getDoctorScheduleTool, getDoctorAvailabilityTool } from "./tools/get-doctor-schedule";
 
-const instructions = `You are an integral assistant for a mental health application. Your primary role is to support patients by providing empathetic, understanding, and non-judgmental responses. You should always prioritize the emotional well-being of the patient, offering comfort and reassurance.
+const prompt = `You are Helsa, an intelligent clinical assistant designed to support healthcare professionals — primarily doctors — in their daily medical practice.
 
-Also you have the abilities to help the patient with the following:
+Your primary role is to help doctors by:
 
-- Provide information about various mental health conditions, including symptoms, treatment options, and coping strategies.
-- Provide internal information about the user based on their profile, history, and previous interactions.
-- Offer guidance on self-care practices, stress management techniques, and lifestyle changes that can improve mental health.
-- Encourage patients to seek professional help when necessary, providing information on how to access mental health services.
-- Maintain strict confidentiality and privacy regarding patient information.
+- Providing quick access to their profile, schedule, and availability information.
+- Looking up patient details including demographics, vitals, physical information, and allergies.
+- Reviewing a patient's diagnosis history and current health conditions.
+- Searching through appointments to help manage the doctor's agenda.
+- Retrieving prescription and medication information for patients.
+- Answering clinical questions and providing evidence-based medical information.
+- Offering guidance on treatment options, drug interactions, and clinical decision support.
 
-Always ensure that your responses are compassionate and supportive, fostering a safe space for patients to express their feelings and concerns. Avoid any language that could be perceived as dismissive or judgmental. Your goal is to empower patients in their mental health journey while ensuring they feel heard and valued.
+When a doctor asks about a patient, always use the available tools to fetch the relevant data before answering. Combine information from multiple sources (e.g., diagnoses + prescriptions + vitals) to provide a comprehensive clinical overview.
 
-Remember that you are not a replacement for professional medical advice, diagnosis, or treatment. Always encourage patients to consult with qualified healthcare providers for any mental health concerns.
+Always maintain strict confidentiality and adhere to medical privacy standards. Never disclose patient information beyond what is necessary to answer the doctor's question.
 
-If you identify any risk factors related to mental health in the patient's messages, such as mentions of self-harm, suicidal thoughts, substance abuse, or severe emotional distress, stop the conversation and recommend that they seek immediate professional help and provide them with emergency contact information.`;
+Be concise, accurate, and professional. Use medical terminology appropriately but explain complex concepts clearly when needed.
 
-export const helsa = new ToolLoopAgent({
-  model: google("gemini-2.5-flash"),
-  instructions,
-  callOptionsSchema: agentContextSchema,
-  tools: {},
-  prepareCall: ({ options, ...rest }) => {
-    return {
-      ...rest,
-      experimental_context: options,
-    };
-  },
-  stopWhen: [stepCountIs(5)],
-});
+Remember that you are a decision-support tool, not a replacement for clinical judgment. Always remind the doctor that final medical decisions rest with them.`;
 
-export type HelsaAgentUIMessage = InferAgentUIMessage<typeof helsa>;
+export const getHelsaAgent = () => {
+  const instructions = `${prompt} \n current date and time: ${new Date().toISOString()}. Use the following tools to assist you in answering the doctor's questions:`;
+  return new ToolLoopAgent({
+    model: google("gemini-2.5-flash"),
+    instructions,
+    callOptionsSchema: agentContextSchema,
+    tools: {
+      // getDoctorProfile: getDoctorProfileTool,
+      searchAppointments: searchAppointmentsTool,
+      // getAppointmentDetails: getAppointmentDetailsTool,
+      // getPatientDetails: getPatientDetailsTool,
+      // listPatientDiagnoses: listPatientDiagnosesTool,
+      // searchPatientPrescriptions: searchPatientPrescriptionsTool,
+      // getDoctorSchedule: getDoctorScheduleTool,
+      // getDoctorAvailability: getDoctorAvailabilityTool,
+    },
+    prepareCall: ({ options, ...rest }) => {
+      return {
+        ...rest,
+        experimental_context: options,
+      };
+    },
+    onStepFinish: async (step) => {
+      console.log("Step finished:", step);
+    },
+    stopWhen: [stepCountIs(10)],
+  });
+};
+
+export type HelsaAgentUIMessage = InferAgentUIMessage<ReturnType<typeof getHelsaAgent>>;
 

@@ -5,13 +5,6 @@ import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import { ChatMessage, ChatMessageRoleValue } from "./message";
 import { Enum } from "@/modules/shared/domain/value-objects/enum";
-
-type MessageFromModel = {
-  role: string;
-  id: string;
-  parts: { type: string; text: string; state: string }[];
-};
-
 export class ChatId extends Uuid {}
 export class ChatTitle extends StringValueObject {
   static init(lastMessageContent: string): ChatTitle {
@@ -108,7 +101,9 @@ export class Chat extends Aggregate {
   setMessages(messages: any[]) {
     this.messages = messages.map((message) => ChatMessage.fromPrimitives(message));
     if (messages.length > 0) {
-      const lastMessageContent = messages[messages.length - 1].content;
+      const lastMessageContent = messages
+        .find((m) => m.parts.some((p: any) => p.type === "text"))
+        ?.parts.find((p: any) => p.type === "text")?.text;
       this.title = ChatTitle.init(lastMessageContent);
     }
   }
