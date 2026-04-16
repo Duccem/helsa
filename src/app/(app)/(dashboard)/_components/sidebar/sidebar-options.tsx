@@ -59,9 +59,9 @@ export function SidebarOptions({ role }: { role?: string | null }) {
         <SidebarGroup key={c.title + i}>
           <SidebarGroupLabel>{c.title.toUpperCase()}</SidebarGroupLabel>
           <SidebarMenu>
-            {c.items.map((item) => (
+            {c.items.map((item, j) => (
               <Collapsible
-                key={item.title}
+                key={item.title + j}
                 render={() => (
                   <SidebarMenuItem>
                     {!item.items ? (

@@ -92,6 +92,7 @@ function InputGroupButton({
       data-size={size}
       variant={variant}
       className={cn(inputGroupButtonVariants({ size }), className)}
+      suppressHydrationWarning
       {...props}
     />
   );
@@ -130,6 +131,7 @@ function InputGroupTextarea({ className, ...props }: React.ComponentProps<"texta
         "flex-1 resize-none rounded-lg border-0 bg-transparent py-2 shadow-none ring-0 focus-visible:ring-0 disabled:bg-transparent aria-invalid:ring-0 dark:bg-transparent dark:disabled:bg-transparent",
         className,
       )}
+      suppressHydrationWarning
       {...props}
     />
   );

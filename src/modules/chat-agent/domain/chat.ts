@@ -3,8 +3,14 @@ import { Primitives } from "@/modules/shared/domain/primitives";
 import { StringValueObject } from "@/modules/shared/domain/value-object";
 import { Timestamp } from "@/modules/shared/domain/value-objects/timestamp";
 import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
-import { ChatMessage } from "./message";
+import { ChatMessage, ChatMessageRoleValue } from "./message";
 import { Enum } from "@/modules/shared/domain/value-objects/enum";
+
+type MessageFromModel = {
+  role: string;
+  id: string;
+  parts: { type: string; text: string; state: string }[];
+};
 
 export class ChatId extends Uuid {}
 export class ChatTitle extends StringValueObject {
@@ -66,7 +72,7 @@ export class Chat extends Aggregate {
   static fromPrimitives(primitives: Primitives<Chat>): Chat {
     return new Chat(
       ChatId.fromString(primitives.id),
-      ChatTitle.fromString(primitives.title),
+      ChatTitle.fromString(primitives.messages[0].parts.find((p) => p.type === "text")?.text ?? "New Chat"),
       ChatUserId.fromString(primitives.user_id),
       primitives.messages.map((message) => ChatMessage.fromPrimitives(message)),
       ChatDate.fromDate(new Date(primitives.date)),
@@ -75,15 +81,28 @@ export class Chat extends Aggregate {
   }
 
   static create(chat_id: string, messages: Primitives<ChatMessage>[], user_id: string): Chat {
-    const lastMessageContent = messages.length > 0 ? messages[messages.length - 1].content : "New Chat";
+    const lastMessageContent =
+      messages.length > 0
+        ? (messages[messages.length - 1].parts.find((p) => p.type === "text")?.text ?? "New Chat")
+        : "New Chat";
     return new Chat(
       ChatId.fromString(chat_id),
       ChatTitle.init(lastMessageContent),
       new ChatUserId(user_id),
-      messages.map((message) => ChatMessage.fromPrimitives(message)),
+      messages.map((message) =>
+        ChatMessage.fromPrimitives({
+          role: message.role as ChatMessageRoleValue,
+          id: message.id,
+          parts: message.parts ?? [],
+        }),
+      ),
       ChatDate.now(),
       ChatStatus.active(),
     );
+  }
+
+  archive(): void {
+    this.status = ChatStatus.archived();
   }
 
   setMessages(messages: any[]) {

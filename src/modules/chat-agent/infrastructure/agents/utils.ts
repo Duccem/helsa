@@ -5,14 +5,14 @@ import { DrizzleChatRepository } from "../persistence/drizzle-chat-repository";
 export async function getChat(user_id: string) {
   const respoistory = new DrizzleChatRepository();
 
-  const chat = await respoistory.getChat(user_id);
+  const chat = await respoistory.getActiveChat(user_id);
 
   return chat?.toPrimitives() || null;
 }
 
 export async function saveChat(chat_id: string, user_id: string, messages: any[]) {
   const respoistory = new DrizzleChatRepository();
-  const existingChat = await respoistory.getChat(user_id);
+  const existingChat = await respoistory.getActiveChat(user_id);
 
   if (existingChat) {
     existingChat.setMessages(messages);

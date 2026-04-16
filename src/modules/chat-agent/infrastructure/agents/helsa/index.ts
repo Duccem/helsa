@@ -19,7 +19,7 @@ Remember that you are not a replacement for professional medical advice, diagnos
 If you identify any risk factors related to mental health in the patient's messages, such as mentions of self-harm, suicidal thoughts, substance abuse, or severe emotional distress, stop the conversation and recommend that they seek immediate professional help and provide them with emergency contact information.`;
 
 export const helsa = new ToolLoopAgent({
-  model: google("gemini-3-flash-preview"),
+  model: google("gemini-2.5-flash"),
   instructions,
   callOptionsSchema: agentContextSchema,
   tools: {},

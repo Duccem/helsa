@@ -37,6 +37,8 @@ import { GetOrGenerateInvoice } from "@/modules/billing/application/get-or-gener
 // ── Chat Agent ───────────────────────────────────────────────────────────────
 import { ChatRepository } from "@/modules/chat-agent/domain/chat-repository";
 import { DrizzleChatRepository } from "@/modules/chat-agent/infrastructure/persistence/drizzle-chat-repository";
+import { GetActiveChat } from "@/modules/chat-agent/application/get-active-chat";
+import { ArchiveChat } from "@/modules/chat-agent/application/archive-chat";
 
 // ── Diagnosis ────────────────────────────────────────────────────────────────
 import { DiagnosisRepository } from "@/modules/diagnosis/domain/diagnosis-repository";
@@ -182,6 +184,10 @@ registerUseCase(InitializeNewOrganizationBilling, [BillingService]);
 registerUseCase(GetSubscriptionStatus, [BillingService]);
 registerUseCase(GetOrderList, [BillingService]);
 registerUseCase(GetOrGenerateInvoice, [BillingService]);
+
+// Chat Agent
+registerUseCase(GetActiveChat, [ChatRepository]);
+registerUseCase(ArchiveChat, [ChatRepository]);
 
 // Diagnosis
 registerUseCase(ListPathologies, [DiagnosisRepository]);

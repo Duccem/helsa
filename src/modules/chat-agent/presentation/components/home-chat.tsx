@@ -1,469 +1,173 @@
 "use client";
-"use client";
 
-import {
-  Attachment,
-  AttachmentPreview,
-  AttachmentRemove,
-  Attachments,
-} from "@/modules/shared/presentation/components/ai-elements/attachments";
+import { Uuid } from "@/modules/shared/domain/value-objects/uuid";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/modules/shared/presentation/components/ai-elements/conversation";
-import {
-  Message,
-  MessageBranch,
-  MessageBranchContent,
-  MessageBranchNext,
-  MessageBranchPage,
-  MessageBranchPrevious,
-  MessageBranchSelector,
-  MessageContent,
-  MessageResponse,
-} from "@/modules/shared/presentation/components/ai-elements/message";
-import {
-  ModelSelector,
-  ModelSelectorContent,
-  ModelSelectorEmpty,
-  ModelSelectorGroup,
-  ModelSelectorInput,
-  ModelSelectorItem,
-  ModelSelectorList,
-  ModelSelectorLogo,
-  ModelSelectorLogoGroup,
-  ModelSelectorName,
-  ModelSelectorTrigger,
-} from "@/modules/shared/presentation/components/ai-elements/model-selector";
-import type { PromptInputMessage } from "@/modules/shared/presentation/components/ai-elements/prompt-input";
+import { Message, MessageContent, MessageResponse } from "@/modules/shared/presentation/components/ai-elements/message";
 import {
   PromptInput,
-  PromptInputActionAddAttachments,
-  PromptInputActionMenu,
-  PromptInputActionMenuContent,
-  PromptInputActionMenuTrigger,
   PromptInputBody,
-  PromptInputButton,
   PromptInputFooter,
-  PromptInputHeader,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
-  usePromptInputAttachments,
 } from "@/modules/shared/presentation/components/ai-elements/prompt-input";
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "@/modules/shared/presentation/components/ai-elements/reasoning";
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from "@/modules/shared/presentation/components/ai-elements/sources";
 import { SpeechInput } from "@/modules/shared/presentation/components/ai-elements/speech-input";
 import { Suggestion, Suggestions } from "@/modules/shared/presentation/components/ai-elements/suggestion";
-import type { ToolUIPart } from "ai";
-import { CheckIcon, GlobeIcon } from "lucide-react";
-import { nanoid } from "nanoid";
-import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
-
-interface MessageType {
-  key: string;
-  from: "user" | "assistant";
-  sources?: { href: string; title: string }[];
-  versions: {
-    id: string;
-    content: string;
-  }[];
-  reasoning?: {
-    content: string;
-    duration: number;
-  };
-  tools?: {
-    name: string;
-    description: string;
-    status: ToolUIPart["state"];
-    parameters: Record<string, unknown>;
-    result: string | undefined;
-    error: string | undefined;
-  }[];
-}
-
-const initialMessages: MessageType[] = [];
-
-const models = [
-  {
-    chef: "OpenAI",
-    chefSlug: "openai",
-    id: "gpt-4o",
-    name: "GPT-4o",
-    providers: ["openai", "azure"],
-  },
-  {
-    chef: "OpenAI",
-    chefSlug: "openai",
-    id: "gpt-4o-mini",
-    name: "GPT-4o Mini",
-    providers: ["openai", "azure"],
-  },
-  {
-    chef: "Anthropic",
-    chefSlug: "anthropic",
-    id: "claude-opus-4-20250514",
-    name: "Claude 4 Opus",
-    providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-  },
-  {
-    chef: "Anthropic",
-    chefSlug: "anthropic",
-    id: "claude-sonnet-4-20250514",
-    name: "Claude 4 Sonnet",
-    providers: ["anthropic", "azure", "google", "amazon-bedrock"],
-  },
-  {
-    chef: "Google",
-    chefSlug: "google",
-    id: "gemini-2.0-flash-exp",
-    name: "Gemini 2.0 Flash",
-    providers: ["google"],
-  },
-];
+import { Button } from "@/modules/shared/presentation/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/modules/shared/presentation/components/ui/tooltip";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { SquarePenIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const suggestions = [
-  "What are the latest trends in AI?",
-  "How does machine learning work?",
-  "Explain quantum computing",
+  "Resume el historial clínico de mi próximo paciente",
+  "¿Qué medicamentos tienen contraindicaciones con metformina?",
+  "Genera una nota de evolución para el último paciente atendido",
+  "¿Cuáles son los criterios diagnósticos para hipertensión arterial?",
+  "Revisa las citas pendientes de hoy",
+  "Sugiere un plan de tratamiento para diabetes tipo 2",
 ];
 
-const mockResponses = [
-  "That's a great question! Let me help you understand this concept better. The key thing to remember is that proper implementation requires careful consideration of the underlying principles and best practices in the field.",
-  "I'd be happy to explain this topic in detail. From my understanding, there are several important factors to consider when approaching this problem. Let me break it down step by step for you.",
-  "This is an interesting topic that comes up frequently. The solution typically involves understanding the core concepts and applying them in the right context. Here's what I recommend...",
-  "Great choice of topic! This is something that many developers encounter. The approach I'd suggest is to start with the fundamentals and then build up to more complex scenarios.",
-  "That's definitely worth exploring. From what I can see, the best way to handle this is to consider both the theoretical aspects and practical implementation details.",
-];
-
-const delay = (ms: number): Promise<void> =>
-  // eslint-disable-next-line promise/avoid-new -- setTimeout requires a new Promise
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
-const chefs = ["OpenAI", "Anthropic", "Google"];
-
-const AttachmentItem = ({
-  attachment,
-  onRemove,
-}: {
-  attachment: { id: string; name: string; type: "file"; url: string; mediaType: string };
-  onRemove: (id: string) => void;
-}) => {
-  const handleRemove = useCallback(() => {
-    onRemove(attachment.id);
-  }, [onRemove, attachment.id]);
-
-  return (
-    <Attachment data={attachment} onRemove={handleRemove}>
-      <AttachmentPreview />
-      <AttachmentRemove />
-    </Attachment>
-  );
-};
-
-const PromptInputAttachmentsDisplay = () => {
-  const attachments = usePromptInputAttachments();
-
-  const handleRemove = useCallback(
-    (id: string) => {
-      attachments.remove(id);
-    },
-    [attachments],
-  );
-
-  if (attachments.files.length === 0) {
-    return null;
-  }
-
-  return (
-    <Attachments variant="inline">
-      {attachments.files.map((attachment) => (
-        <AttachmentItem attachment={attachment as any} key={attachment.id} onRemove={handleRemove} />
-      ))}
-    </Attachments>
-  );
-};
-
-const SuggestionItem = ({ suggestion, onClick }: { suggestion: string; onClick: (suggestion: string) => void }) => {
-  const handleClick = useCallback(() => {
-    onClick(suggestion);
-  }, [onClick, suggestion]);
-
-  return <Suggestion onClick={handleClick} suggestion={suggestion} />;
-};
-
-const ModelItem = ({
-  m,
-  isSelected,
-  onSelect,
-}: {
-  m: (typeof models)[0];
-  isSelected: boolean;
-  onSelect: (id: string) => void;
-}) => {
-  const handleSelect = useCallback(() => {
-    onSelect(m.id);
-  }, [onSelect, m.id]);
-
-  return (
-    <ModelSelectorItem onSelect={handleSelect} value={m.id}>
-      <ModelSelectorLogo provider={m.chefSlug} />
-      <ModelSelectorName>{m.name}</ModelSelectorName>
-      <ModelSelectorLogoGroup>
-        {m.providers.map((provider) => (
-          <ModelSelectorLogo key={provider} provider={provider} />
-        ))}
-      </ModelSelectorLogoGroup>
-      {isSelected ? <CheckIcon className="ml-auto size-4" /> : <div className="ml-auto size-4" />}
-    </ModelSelectorItem>
-  );
-};
+type ActiveChatResponse = {
+  id: string;
+  messages: UIMessage[];
+} | null;
 
 export const HomeChat = () => {
-  const [model, setModel] = useState<string>(models[0].id);
-  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [text, setText] = useState<string>("");
-  const [useWebSearch, setUseWebSearch] = useState<boolean>(false);
-  const [status, setStatus] = useState<"submitted" | "streaming" | "ready" | "error">("ready");
-  const [messages, setMessages] = useState<MessageType[]>(initialMessages);
-  const [, setStreamingMessageId] = useState<string | null>(null);
+  const [newChatId, setNewChatId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const selectedModelData = useMemo(() => models.find((m) => m.id === model), [model]);
-
-  const updateMessageContent = useCallback((messageId: string, newContent: string) => {
-    setMessages((prev) =>
-      prev.map((msg) => {
-        if (msg.versions.some((v) => v.id === messageId)) {
-          return {
-            ...msg,
-            versions: msg.versions.map((v) => (v.id === messageId ? { ...v, content: newContent } : v)),
-          };
-        }
-        return msg;
-      }),
-    );
-  }, []);
-
-  const streamResponse = useCallback(
-    async (messageId: string, content: string) => {
-      setStatus("streaming");
-      setStreamingMessageId(messageId);
-
-      const words = content.split(" ");
-      let currentContent = "";
-
-      for (const [i, word] of words.entries()) {
-        currentContent += (i > 0 ? " " : "") + word;
-        updateMessageContent(messageId, currentContent);
-        await delay(Math.random() * 100 + 50);
-      }
-
-      setStatus("ready");
-      setStreamingMessageId(null);
+  const { data: activeChat } = useQuery<ActiveChatResponse>({
+    queryKey: ["active-chat"],
+    queryFn: async () => {
+      const response = await fetch("/api/chat");
+      if (!response.ok) throw new Error("Failed to fetch active chat");
+      return response.json();
     },
-    [updateMessageContent],
-  );
+    refetchOnWindowFocus: false,
+    initialData: null,
+  });
 
-  const addUserMessage = useCallback(
-    (content: string) => {
-      const userMessage: MessageType = {
-        from: "user",
-        key: `user-${Date.now()}`,
-        versions: [
-          {
-            content,
-            id: `user-${Date.now()}`,
-          },
-        ],
-      };
+  const chatId = useMemo(() => newChatId ?? activeChat?.id ?? Uuid.generate().value, [newChatId, activeChat?.id]);
 
-      setMessages((prev) => [...prev, userMessage]);
+  const { messages, sendMessage, status, setMessages } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat/helsa",
+      body: { chat_id: chatId },
+    }),
+  });
 
-      setTimeout(() => {
-        const assistantMessageId = `assistant-${Date.now()}`;
-        const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-
-        const assistantMessage: MessageType = {
-          from: "assistant",
-          key: `assistant-${Date.now()}`,
-          versions: [
-            {
-              content: "",
-              id: assistantMessageId,
-            },
-          ],
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
-        streamResponse(assistantMessageId, randomResponse);
-      }, 500);
+  const { mutate: archiveAndReset, isPending: isArchiving } = useMutation({
+    mutationFn: async (chatId: string) => {
+      const response = await fetch(`/api/chat/${chatId}/archive`, { method: "PATCH" });
+      if (!response.ok) throw new Error("Failed to archive chat");
     },
-    [streamResponse],
-  );
-
-  const handleSubmit = useCallback(
-    (message: PromptInputMessage) => {
-      const hasText = Boolean(message.text);
-      const hasAttachments = Boolean(message.files?.length);
-
-      if (!(hasText || hasAttachments)) {
-        return;
-      }
-
-      setStatus("submitted");
-
-      if (message.files?.length) {
-        toast.success("Files attached", {
-          description: `${message.files.length} file(s) attached to message`,
-        });
-      }
-
-      addUserMessage(message.text || "Sent with attachments");
-      setText("");
+    onSuccess: () => {
+      setNewChatId(Uuid.generate().value);
+      setMessages([]);
+      queryClient.setQueryData(["active-chat"], null);
     },
-    [addUserMessage],
-  );
+  });
+
+  useEffect(() => {
+    if (activeChat?.messages?.length && !newChatId) {
+      setMessages(activeChat.messages as UIMessage[]);
+    }
+  }, [activeChat, setMessages, newChatId]);
+
+  const handleNewChat = useCallback(() => {
+    const currentId = activeChat?.id;
+    if (currentId) {
+      archiveAndReset(currentId);
+    } else {
+      setNewChatId(Uuid.generate().value);
+      setMessages([]);
+    }
+  }, [activeChat?.id, archiveAndReset, setMessages]);
+
+  const handleSubmit = useCallback(() => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    sendMessage({ parts: [{ type: "text", text: trimmed }] });
+    setText("");
+  }, [text, sendMessage]);
 
   const handleSuggestionClick = useCallback(
     (suggestion: string) => {
-      setStatus("submitted");
-      addUserMessage(suggestion);
+      sendMessage({ parts: [{ type: "text", text: suggestion }] });
     },
-    [addUserMessage],
+    [sendMessage],
   );
-
-  const handleTranscriptionChange = useCallback((transcript: string) => {
-    setText((prev) => (prev ? `${prev} ${transcript}` : transcript));
-  }, []);
 
   const handleTextChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(event.target.value);
   }, []);
 
-  const toggleWebSearch = useCallback(() => {
-    setUseWebSearch((prev) => !prev);
+  const handleTranscriptionChange = useCallback((transcript: string) => {
+    setText((prev) => (prev ? `${prev} ${transcript}` : transcript));
   }, []);
 
-  const handleModelSelect = useCallback((modelId: string) => {
-    setModel(modelId);
-    setModelSelectorOpen(false);
-  }, []);
+  const isSubmitDisabled = useMemo(
+    () => !text.trim() || status === "streaming" || status === "submitted",
+    [text, status],
+  );
 
-  const isSubmitDisabled = useMemo(() => !(text.trim() || status) || status === "streaming", [text, status]);
+  const showSuggestions = messages.length === 0;
 
   return (
     <div className="relative flex flex-1 max-h-[700px] flex-col divide-y overflow-hidden border border-border rounded-2xl">
+      <div className="flex items-center justify-between px-4 py-2 shrink-0">
+        <span className="text-sm font-medium text-muted-foreground">Helsa AI</span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button disabled={isArchiving} onClick={handleNewChat} size="icon-sm" variant="ghost">
+                <SquarePenIcon className="size-4" />
+              </Button>
+            }
+          />
+
+          <TooltipContent>Nueva conversación</TooltipContent>
+        </Tooltip>
+      </div>
       <Conversation>
         <ConversationContent className="min-h-[500px]">
-          {messages.map(({ versions, ...message }) => (
-            <MessageBranch defaultBranch={0} key={message.key}>
-              <MessageBranchContent>
-                {versions.map((version) => (
-                  <Message from={message.from} key={`${message.key}-${version.id}`}>
-                    <div>
-                      {message.sources?.length && (
-                        <Sources>
-                          <SourcesTrigger count={message.sources.length} />
-                          <SourcesContent>
-                            {message.sources.map((source) => (
-                              <Source href={source.href} key={source.href} title={source.title} />
-                            ))}
-                          </SourcesContent>
-                        </Sources>
-                      )}
-                      {message.reasoning && (
-                        <Reasoning duration={message.reasoning.duration}>
-                          <ReasoningTrigger />
-                          <ReasoningContent>{message.reasoning.content}</ReasoningContent>
-                        </Reasoning>
-                      )}
-                      <MessageContent>
-                        <MessageResponse>{version.content}</MessageResponse>
-                      </MessageContent>
-                    </div>
-                  </Message>
-                ))}
-              </MessageBranchContent>
-              {versions.length > 1 && (
-                <MessageBranchSelector>
-                  <MessageBranchPrevious />
-                  <MessageBranchPage />
-                  <MessageBranchNext />
-                </MessageBranchSelector>
-              )}
-            </MessageBranch>
+          {messages.map((message) => (
+            <Message from={message.role} key={message.id}>
+              <MessageContent>
+                {message.parts.map((part, i) => {
+                  if (part.type === "text") {
+                    return <MessageResponse key={i}>{part.text}</MessageResponse>;
+                  }
+                  return null;
+                })}
+              </MessageContent>
+            </Message>
           ))}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
       <div className="grid shrink-0 gap-4 pt-4">
-        <Suggestions className="px-4">
-          {suggestions.map((suggestion) => (
-            <SuggestionItem key={suggestion} onClick={handleSuggestionClick} suggestion={suggestion} />
-          ))}
-        </Suggestions>
+        {showSuggestions && (
+          <Suggestions className="px-4">
+            {suggestions.map((suggestion) => (
+              <Suggestion key={suggestion} onClick={handleSuggestionClick} suggestion={suggestion} />
+            ))}
+          </Suggestions>
+        )}
         <div className="w-full px-4 pb-4">
-          <PromptInput globalDrop multiple onSubmit={handleSubmit}>
-            <PromptInputHeader>
-              <PromptInputAttachmentsDisplay />
-            </PromptInputHeader>
+          <PromptInput onSubmit={handleSubmit}>
             <PromptInputBody>
-              <PromptInputTextarea onChange={handleTextChange} value={text} />
+              <PromptInputTextarea onChange={handleTextChange} value={text} placeholder="Consulta con Helsa" />
             </PromptInputBody>
-            <PromptInputFooter>
-              <PromptInputTools>
-                <PromptInputActionMenu>
-                  <PromptInputActionMenuTrigger />
-                  <PromptInputActionMenuContent>
-                    <PromptInputActionAddAttachments />
-                  </PromptInputActionMenuContent>
-                </PromptInputActionMenu>
-                <SpeechInput
-                  className="shrink-0"
-                  onTranscriptionChange={handleTranscriptionChange}
-                  size="icon-sm"
-                  variant="ghost"
-                />
-                <ModelSelector onOpenChange={setModelSelectorOpen} open={modelSelectorOpen}>
-                  <ModelSelectorTrigger
-                    render={
-                      <PromptInputButton>
-                        {selectedModelData?.chefSlug && <ModelSelectorLogo provider={selectedModelData.chefSlug} />}
-                        {selectedModelData?.name && <ModelSelectorName>{selectedModelData.name}</ModelSelectorName>}
-                      </PromptInputButton>
-                    }
-                  />
-
-                  <ModelSelectorContent>
-                    <ModelSelectorInput placeholder="Search models..." />
-                    <ModelSelectorList>
-                      <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
-                      {chefs.map((chef) => (
-                        <ModelSelectorGroup heading={chef} key={chef}>
-                          {models
-                            .filter((m) => m.chef === chef)
-                            .map((m) => (
-                              <ModelItem isSelected={model === m.id} key={m.id} m={m} onSelect={handleModelSelect} />
-                            ))}
-                        </ModelSelectorGroup>
-                      ))}
-                    </ModelSelectorList>
-                  </ModelSelectorContent>
-                </ModelSelector>
-              </PromptInputTools>
+            <PromptInputFooter className="justify-end">
               <PromptInputSubmit disabled={isSubmitDisabled} status={status} />
             </PromptInputFooter>
           </PromptInput>
