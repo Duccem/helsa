@@ -9,7 +9,6 @@ export class OfficeAddressDoctorId extends Uuid {}
 export class OfficeAddressText extends StringValueObject {}
 export class OfficeAddressCreatedAt extends Timestamp {}
 export class OfficeAddressUpdatedAt extends Timestamp {}
-
 export class OfficeAddressLatitude extends NumberValueObject {}
 export class OfficeAddressLongitude extends NumberValueObject {}
 export class OfficeAddressLocation {

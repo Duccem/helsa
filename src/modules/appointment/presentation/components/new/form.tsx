@@ -3,7 +3,6 @@
 import { Doctor } from "@/modules/doctor/domain/doctor";
 import { DoctorPatient } from "@/modules/doctor/domain/doctor-patient";
 import { AvailabilitySlot } from "@/modules/schedule/domain/availability-slot";
-import { Schedule } from "@/modules/schedule/domain/schedule";
 import { Primitives } from "@/modules/shared/domain/primitives";
 import { Button } from "@/modules/shared/presentation/components/ui/button";
 import { Calendar } from "@/modules/shared/presentation/components/ui/calendar";
@@ -16,23 +15,17 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/modules/shared/presentation/components/ui/field";
 import { Label } from "@/modules/shared/presentation/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/modules/shared/presentation/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/modules/shared/presentation/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/modules/shared/presentation/components/ui/select";
 import { Textarea } from "@/modules/shared/presentation/components/ui/textarea";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { endOfDay, format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarDays, CircleDollarSign, Clock3, ListCollapse, Loader2, MapPin, Pin, Users, Video } from "lucide-react";
+import { CalendarDays, CircleDollarSign, Clock3, ListCollapse, Loader2, MapPin, Users, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import z, { set } from "zod";
+import z from "zod";
 import { useNewAppointment } from "./provider";
 
 const formSchema = z.object({
