@@ -1,0 +1,3 @@
+{
+  "extends": "@helsa/config/tsconfig.base.json"
+}
