@@ -1,2 +1,10 @@
+export * from "./appointment";
+export * from "./audit";
 export * from "./auth";
-export {};
+export * from "./consent";
+export * from "./note";
+export * from "./patient";
+export * from "./payment";
+export * from "./task";
+export * from "./therapist";
+export * from "./video";

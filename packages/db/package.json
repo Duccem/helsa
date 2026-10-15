@@ -16,6 +16,7 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "drizzle-orm": "catalog:",
+    "uuid": "^14.0.3",
     "zod": "catalog:"
   },
   "devDependencies": {
