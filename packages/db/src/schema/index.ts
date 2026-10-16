@@ -8,3 +8,4 @@ export * from "./payment";
 export * from "./task";
 export * from "./therapist";
 export * from "./video";
+export * from "./waitlist";
