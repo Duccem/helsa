@@ -45,7 +45,8 @@
     "rules": {
       "preset": "recommended",
       "correctness": {
-        "useExhaustiveDependencies": "info"
+        "useExhaustiveDependencies": "info",
+        "useHookAtTopLevel": "off"
       },
       "nursery": {
         "useSortedClasses": {

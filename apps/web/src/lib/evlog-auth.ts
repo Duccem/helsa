@@ -1,4 +1,4 @@
-import { createAuthMiddleware, type BetterAuthInstance } from "evlog/better-auth";
+import { type BetterAuthInstance, createAuthMiddleware } from "evlog/better-auth";
 
 import { useLogger } from "@/lib/evlog";
 
