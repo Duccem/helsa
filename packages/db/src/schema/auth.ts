@@ -15,6 +15,10 @@ export const user = pgTable(
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
+    role: table.text("role"),
+    banned: table.boolean("banned"),
+    banReason: table.text("ban_reason"),
+    banExpires: table.timestamp("ban_expires")
   })
 );
 
