@@ -33,7 +33,13 @@
     "enabled": true,
     "indentStyle": "tab"
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -46,7 +52,11 @@
           "level": "warn",
           "fix": "safe",
           "options": {
-            "functions": ["clsx", "cva", "cn"]
+            "functions": [
+              "clsx",
+              "cva",
+              "cn"
+            ]
           }
         }
       },
@@ -61,6 +71,9 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error"
+      },
+      "performance": {
+        "noImgElement": "off"
       }
     }
   },

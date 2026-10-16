@@ -1,1 +1,7 @@
 @import "@helsa/ui/globals.css";
+
+@theme inline {
+	--font-display: var(--font-outfit), ui-sans-serif, sans-serif;
+	--font-landing: var(--font-figtree), ui-sans-serif, sans-serif;
+	--color-night: oklch(0.2 0.06 287);
+}
