@@ -30,7 +30,7 @@ export const session = pgTable(
       .notNull(),
     ipAddress: table.text("ip_address"),
     userAgent: table.text("user_agent"),
-    userId: table.text("user_id")
+    userId: table.uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     activeOrganizationId: table.uuid("active_organization_id"),
@@ -45,7 +45,7 @@ export const account = pgTable(
     id: table.uuid("id").primaryKey().$defaultFn(v7),
     accountId: table.text("account_id").notNull(),
     providerId: table.text("provider_id").notNull(),
-    userId: table.text("user_id")
+    userId: table.uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: table.text("access_token"),

@@ -11,7 +11,7 @@ export const consent_template = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     // NULL = system template
-    therapist_id: t.text().references(() => therapist.user_id, { onDelete: "cascade" }),
+    therapist_id: t.uuid().references(() => therapist.user_id, { onDelete: "cascade" }),
     title: t.text().notNull(),
     version: t.integer().notNull().default(1),
     body_md: t.text().notNull(),
@@ -25,7 +25,7 @@ export const patient_consent = pgTable(
   "patient_consent",
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
-    therapist_id: t.text().notNull(),
+    therapist_id: t.uuid().notNull(),
     patient_id: t.uuid().notNull(),
     template_id: t.uuid().references(() => consent_template.id, { onDelete: "set null" }),
     body_snapshot_md: t.text().notNull(),

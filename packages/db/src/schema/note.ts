@@ -22,7 +22,7 @@ export const note_template = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     // NULL = system template
-    therapist_id: t.text().references(() => therapist.user_id, { onDelete: "cascade" }),
+    therapist_id: t.uuid().references(() => therapist.user_id, { onDelete: "cascade" }),
     kind: note_template_kind().notNull(),
     name: t.text().notNull(),
     structure: t.jsonb().notNull(), // sections: [{key, label, type, placeholder}]
@@ -42,7 +42,7 @@ export const session_note = pgTable(
   "session_note",
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
-    therapist_id: t.text().notNull(),
+    therapist_id: t.uuid().notNull(),
     patient_id: t.uuid().notNull(),
     // The SQL design uses FK (appointment_id, patient_id) ON DELETE SET NULL (appointment_id),
     // which drizzle can't express; a single-column FK is used instead.

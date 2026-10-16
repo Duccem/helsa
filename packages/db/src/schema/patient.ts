@@ -21,12 +21,12 @@ export const patient = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     therapist_id: t
-      .text()
+      .uuid()
       .notNull()
       .references(() => therapist.user_id, { onDelete: "cascade" }),
     // Portal access (better-auth magic-link user).
     user_id: t
-      .text()
+      .uuid()
       .unique()
       .references(() => user.id, { onDelete: "set null" }),
     first_name: t.text().notNull(),
@@ -67,11 +67,11 @@ export const file = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     therapist_id: t
-      .text()
+      .uuid()
       .notNull()
       .references(() => therapist.user_id, { onDelete: "cascade" }),
     patient_id: t.uuid(),
-    uploaded_by: t.text().references(() => user.id, { onDelete: "set null" }),
+    uploaded_by: t.uuid().references(() => user.id, { onDelete: "set null" }),
     storage_key: t.text().notNull().unique(),
     original_name: t.text().notNull(),
     mime_type: t.text().notNull(),

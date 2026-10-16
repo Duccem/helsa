@@ -10,7 +10,7 @@ export const patient_task = pgTable(
   "patient_task",
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
-    therapist_id: t.text().notNull(),
+    therapist_id: t.uuid().notNull(),
     patient_id: t.uuid().notNull(),
     title: t.text().notNull(),
     instructions: t.text(),

@@ -43,7 +43,7 @@ export const appointment_series = pgTable(
   "appointment_series",
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
-    therapist_id: t.text().notNull(),
+    therapist_id: t.uuid().notNull(),
     patient_id: t.uuid().notNull(),
     rrule: t.text().notNull(), // RFC 5545, e.g. 'FREQ=WEEKLY;BYDAY=TU'
     local_start_time: t.time().notNull(),
@@ -69,7 +69,7 @@ export const appointment = pgTable(
   "appointment",
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
-    therapist_id: t.text().notNull(),
+    therapist_id: t.uuid().notNull(),
     patient_id: t.uuid().notNull(),
     series_id: t.uuid().references(() => appointment_series.id, { onDelete: "set null" }),
     starts_at: t.timestamp({ withTimezone: true }).notNull(),

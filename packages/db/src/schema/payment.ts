@@ -31,7 +31,7 @@ export const session_payment = pgTable(
   "session_payment",
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
-    therapist_id: t.text().notNull(),
+    therapist_id: t.uuid().notNull(),
     patient_id: t.uuid().notNull(),
     // NULL = deposit or package. The SQL design uses FK (appointment_id, patient_id)
     // ON DELETE SET NULL (appointment_id), which drizzle can't express.

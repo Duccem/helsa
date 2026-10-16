@@ -20,10 +20,10 @@ export const access_log = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     therapist_id: t
-      .text()
+      .uuid()
       .notNull()
       .references(() => therapist.user_id, { onDelete: "cascade" }),
-    actor_user_id: t.text().references(() => user.id, { onDelete: "set null" }),
+    actor_user_id: t.uuid().references(() => user.id, { onDelete: "set null" }),
     patient_id: t.uuid().references(() => patient.id, { onDelete: "set null" }),
     entity_type: t.text().notNull(), // 'patient', 'session_note', 'file', ...
     entity_id: t.text().notNull(),

@@ -13,7 +13,7 @@ export const therapist = pgTable(
   "therapist",
   (t) => ({
     user_id: t
-      .text()
+      .uuid()
       .primaryKey()
       .references(() => user.id, { onDelete: "cascade" }),
     display_name: t.text().notNull(),
@@ -21,7 +21,7 @@ export const therapist = pgTable(
     license_number: t.text(),
     license_body: t.text(),
     license_verified_at: t.timestamp({ withTimezone: true }),
-    license_verified_by: t.text().references(() => user.id, { onDelete: "set null" }),
+    license_verified_by: t.uuid().references(() => user.id, { onDelete: "set null" }),
     phone_e164: t.text(),
     country_code: t.char({ length: 2 }).notNull().default("VE"),
     timezone: t.text().notNull().default("America/Caracas"),
@@ -49,7 +49,7 @@ export const availability_rule = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     therapist_id: t
-      .text()
+      .uuid()
       .notNull()
       .references(() => therapist.user_id, { onDelete: "cascade" }),
     weekday: t.smallint().notNull(), // 0 = sunday
@@ -66,7 +66,7 @@ export const availability_block = pgTable(
   (t) => ({
     id: t.uuid().primaryKey().$defaultFn(v7),
     therapist_id: t
-      .text()
+      .uuid()
       .notNull()
       .references(() => therapist.user_id, { onDelete: "cascade" }),
     starts_at: t.timestamp({ withTimezone: true }).notNull(),
