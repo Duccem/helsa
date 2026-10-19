@@ -4,15 +4,14 @@ import { cn } from "@helsa/ui/lib/utils";
 import { Check, Mail, ShieldCheck, Video } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { usePathname } from "next/navigation";
-
-import { EASE_OUT } from "@/components/landing/motion/reveal";
-
 import {
 	ArmchairDoodle,
 	CandleKeyDoodle,
 	OpenDoorDoodle,
 	SessionDoodle,
-} from "./doodles";
+} from "@/components/doodles/auth-scenes";
+import { doodleTokens } from "@/components/doodles/primitives";
+import { EASE_OUT } from "@/components/landing/motion/reveal";
 
 /* A fragment of the product next to each doodle, the way it looks inside Helsa. */
 
@@ -148,16 +147,6 @@ const scenes: Record<string, Scene> = {
 			"Al cambiarla cerramos tus sesiones abiertas en otros equipos.",
 	},
 };
-
-const doodleTokens = cn(
-	"[--doodle-paper:oklch(0.99_0.004_288)]",
-	"[--doodle-accent:var(--color-primary)]",
-	"[--doodle-soft:color-mix(in_oklch,var(--color-primary)_24%,var(--color-background))]",
-	"[--doodle-warm:color-mix(in_oklch,var(--color-chart-3)_55%,white)]",
-	"[--doodle-leaf:color-mix(in_oklch,var(--color-chart-2)_60%,white)]",
-	"[--doodle-dark:var(--color-foreground)] dark:[--doodle-dark:oklch(0.17_0.02_288)]",
-	"dark:[--doodle-soft:color-mix(in_oklch,var(--color-primary)_32%,var(--color-background))]",
-);
 
 function useScene() {
 	const pathname = usePathname();

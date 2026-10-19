@@ -1,48 +1,45 @@
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@helsa/ui/components/accordion";
-import { Plus } from "lucide-react";
+import { cn } from "@helsa/ui/lib/utils";
 
-import { Container } from "./container";
+import { Chapter, ChapterInner } from "./chapter";
 import { faqs } from "./content";
-import { Reveal } from "./motion/reveal";
+import { Reveal, RevealGroup, RevealItem } from "./motion/reveal";
 
 export function FaqSection() {
 	return (
-		<section id="preguntas" className="scroll-mt-16 py-20 lg:py-28">
-			<Container className="max-w-3xl">
-				<Reveal>
-					<h2 className="font-display font-medium text-3xl tracking-tight sm:text-4xl">
-						Preguntas frecuentes
-					</h2>
-				</Reveal>
+		<Chapter id="preguntas" aria-labelledby="preguntas-title" className="mt-3">
+			<div className="flex min-h-[30svh] items-end bg-chapter-lilac-deep pt-24 pb-10 lg:min-h-[40svh] lg:pb-14">
+				<ChapterInner>
+					<Reveal>
+						<h2
+							id="preguntas-title"
+							className="font-display font-medium text-[clamp(2.75rem,7vw,7rem)] leading-[0.92] tracking-[-0.04em]"
+						>
+							Lo que nos preguntan
+						</h2>
+					</Reveal>
+				</ChapterInner>
+			</div>
 
-				<Reveal delay={0.15}>
-					<Accordion className="mt-10 border-border border-t">
-						{faqs.map((faq) => (
-							<AccordionItem
-								key={faq.question}
-								value={faq.question}
-								className="border-border border-b"
-							>
-								<AccordionTrigger className="items-center py-5 font-medium text-[15px] hover:no-underline [&>[data-slot=accordion-trigger-icon]]:hidden">
-									{faq.question}
-									<Plus
-										aria-hidden="true"
-										className="size-4 shrink-0 text-primary transition-transform duration-200 group-aria-expanded/accordion-trigger:rotate-45"
-									/>
-								</AccordionTrigger>
-								<AccordionContent className="pb-5 text-muted-foreground text-sm leading-relaxed">
-									<p>{faq.answer}</p>
-								</AccordionContent>
-							</AccordionItem>
-						))}
-					</Accordion>
-				</Reveal>
-			</Container>
-		</section>
+			{faqs.map((faq, index) => (
+				<div
+					key={faq.question}
+					className={cn(index % 2 === 0 ? "bg-chapter-lilac" : "bg-background")}
+				>
+					<RevealGroup className="mx-auto grid w-full max-w-7xl gap-4 px-5 py-8 sm:px-10 lg:grid-cols-12 lg:gap-8 lg:px-16 lg:py-14">
+						<RevealItem className="lg:col-span-5">
+							<h3 className="font-display font-medium text-[1.375rem] leading-snug tracking-[-0.015em] lg:text-[1.875rem]">
+								{faq.question}
+							</h3>
+						</RevealItem>
+						<RevealItem
+							as="p"
+							className="text-[17px] leading-relaxed lg:col-span-6 lg:col-start-7 lg:text-lg"
+						>
+							{faq.answer}
+						</RevealItem>
+					</RevealGroup>
+				</div>
+			))}
+		</Chapter>
 	);
 }

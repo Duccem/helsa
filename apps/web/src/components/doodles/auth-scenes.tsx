@@ -1,84 +1,17 @@
 "use client";
 
-import { m } from "motion/react";
-
-/*
- * Hand-drawn scenes for the auth panel. Strokes use `currentColor` (the
- * foreground ink) and fills read the `--doodle-*` tokens set on the panel,
- * so every scene follows the theme and dark mode on its own.
- */
-
-const paper = "var(--doodle-paper)";
-const soft = "var(--doodle-soft)";
-const accent = "var(--doodle-accent)";
-const warm = "var(--doodle-warm)";
-const leaf = "var(--doodle-leaf)";
-const dark = "var(--doodle-dark)";
-
-const ink = {
-	stroke: "currentColor",
-	strokeWidth: 3,
-	strokeLinecap: "round",
-	strokeLinejoin: "round",
-} as const;
-
-/** A loose line that draws itself in, the signature of every scene. */
-function Squiggle({
-	d,
-	delay = 0.35,
-	dashed = false,
-}: {
-	d: string;
-	delay?: number;
-	dashed?: boolean;
-}) {
-	return (
-		<m.path
-			d={d}
-			fill="none"
-			stroke={accent}
-			strokeWidth={3}
-			strokeLinecap="round"
-			strokeDasharray={dashed ? "2 12" : undefined}
-			initial={{ pathLength: 0, opacity: 0 }}
-			animate={{ pathLength: 1, opacity: 1 }}
-			transition={{
-				pathLength: { duration: 1.6, ease: "easeInOut", delay },
-				opacity: { duration: 0.2, delay },
-			}}
-		/>
-	);
-}
-
-function Plant({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
-	return (
-		<g transform={`translate(${x} ${y}) scale(${scale})`} {...ink}>
-			<path d="M26 0 Q4 -40 14 -76 Q34 -46 26 0 Z" fill={leaf} />
-			<path d="M28 0 Q48 -42 64 -54 Q58 -18 28 0 Z" fill={leaf} />
-			<path d="M24 0 Q-8 -24 -16 -46 Q14 -38 24 0 Z" fill={leaf} />
-			<path d="M0 0 H52 L46 46 H6 Z" fill={warm} />
-		</g>
-	);
-}
-
-function Svg({
-	label,
-	children,
-}: {
-	label: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<svg
-			viewBox="0 0 480 400"
-			role="img"
-			aria-label={label}
-			className="h-auto w-full overflow-visible text-foreground"
-		>
-			{children}
-		</svg>
-	);
-}
+import {
+	accent,
+	dark,
+	ink,
+	leaf,
+	Plant,
+	paper,
+	Squiggle,
+	Svg,
+	soft,
+	warm,
+} from "./primitives";
 
 /** Sign in: the therapist settled in the armchair, notebook on the lap. */
 export function ArmchairDoodle() {

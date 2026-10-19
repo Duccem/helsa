@@ -4,4 +4,37 @@
 	--font-display: var(--font-outfit), ui-sans-serif, sans-serif;
 	--font-landing: var(--font-figtree), ui-sans-serif, sans-serif;
 	--color-night: oklch(0.2 0.06 287);
+
+	/* Landing chapters: one flat field per part of the therapist's day. */
+	--color-chapter-violet: color-mix(in oklch, var(--primary), black 18%);
+	--color-chapter-lilac: color-mix(
+		in oklch,
+		var(--primary) 16%,
+		var(--background)
+	);
+	--color-chapter-lilac-deep: color-mix(
+		in oklch,
+		var(--primary) 26%,
+		var(--background)
+	);
+	--color-chapter-teal: color-mix(
+		in oklch,
+		var(--chart-2) 26%,
+		var(--background)
+	);
+	--color-chapter-teal-deep: color-mix(
+		in oklch,
+		var(--chart-2) 38%,
+		var(--background)
+	);
+	--color-chapter-peach: color-mix(
+		in oklch,
+		var(--chart-3) 22%,
+		var(--background)
+	);
+	--color-chapter-peach-deep: color-mix(
+		in oklch,
+		var(--chart-3) 32%,
+		var(--background)
+	);
 }

@@ -19,7 +19,8 @@ import { professionOptions } from "./content";
 import { EASE_OUT } from "./motion/reveal";
 import { type WaitlistInput, waitlistSchema } from "./waitlist-schema";
 
-const inputClassName = "h-11 rounded-xl px-3.5 text-sm md:text-sm";
+const inputClassName =
+	"h-12 rounded-full bg-background px-5 text-[15px] md:text-[15px] dark:bg-input/30";
 
 function FieldErrors({
 	errors,
@@ -33,7 +34,7 @@ function FieldErrors({
 			key={message}
 			initial={{ opacity: 0, y: -4 }}
 			animate={{ opacity: 1, y: 0 }}
-			className="text-destructive text-xs"
+			className="px-5 text-destructive text-sm"
 		>
 			{message}
 		</m.p>
@@ -80,12 +81,15 @@ export function WaitlistForm() {
 						delay: 0.15,
 					}}
 				>
-					<CircleCheck aria-hidden="true" className="size-8 text-primary" />
+					<CircleCheck
+						aria-hidden="true"
+						className="size-8 text-chapter-violet dark:text-primary"
+					/>
 				</m.span>
 				<h3 className="font-display font-medium text-xl">
 					¡Tu lugar está reservado!
 				</h3>
-				<p className="text-muted-foreground text-sm leading-relaxed">
+				<p className="text-[15px] text-muted-foreground leading-relaxed">
 					Te escribiremos a{" "}
 					<span className="font-medium text-foreground">{joinedEmail}</span>{" "}
 					cuando abramos tu grupo.
@@ -104,14 +108,19 @@ export function WaitlistForm() {
 			}}
 			className="space-y-4"
 		>
-			<h3 className="font-display font-medium text-xl">
+			<h3 className="font-display font-medium text-2xl">
 				Únete a la lista de espera
 			</h3>
 
 			<form.Field name="name">
 				{(field) => (
 					<div className="space-y-1.5">
-						<Label htmlFor={field.name}>Nombre y apellido</Label>
+						<Label
+							htmlFor={field.name}
+							className="px-5 font-medium text-[15px]"
+						>
+							Nombre y apellido
+						</Label>
 						<Input
 							id={field.name}
 							name={field.name}
@@ -131,7 +140,12 @@ export function WaitlistForm() {
 			<form.Field name="email">
 				{(field) => (
 					<div className="space-y-1.5">
-						<Label htmlFor={field.name}>Correo electrónico</Label>
+						<Label
+							htmlFor={field.name}
+							className="px-5 font-medium text-[15px]"
+						>
+							Correo electrónico
+						</Label>
 						<Input
 							id={field.name}
 							name={field.name}
@@ -153,11 +167,16 @@ export function WaitlistForm() {
 				<form.Field name="profession">
 					{(field) => (
 						<div className="space-y-1.5">
-							<Label htmlFor={field.name}>Trabajas como</Label>
+							<Label
+								htmlFor={field.name}
+								className="px-5 font-medium text-[15px]"
+							>
+								Trabajas como
+							</Label>
 							<NativeSelect
 								id={field.name}
 								name={field.name}
-								className="w-full [&_select]:h-11 [&_select]:rounded-xl [&_select]:pl-3.5 [&_select]:text-sm"
+								className="w-full [&_select]:h-12 [&_select]:rounded-full [&_select]:pl-5 [&_select]:text-[15px]"
 								value={field.state.value}
 								onBlur={field.handleBlur}
 								onChange={(event) => field.handleChange(event.target.value)}
@@ -176,7 +195,12 @@ export function WaitlistForm() {
 				<form.Field name="city">
 					{(field) => (
 						<div className="space-y-1.5">
-							<Label htmlFor={field.name}>Ciudad</Label>
+							<Label
+								htmlFor={field.name}
+								className="px-5 font-medium text-[15px]"
+							>
+								Ciudad
+							</Label>
 							<Input
 								id={field.name}
 								name={field.name}
@@ -199,14 +223,14 @@ export function WaitlistForm() {
 					<Button
 						type="submit"
 						disabled={isSubmitting}
-						className="mt-2 h-12 w-full rounded-full text-sm text-white hover:bg-primary/90"
+						className="mt-2 h-12 w-full rounded-full bg-chapter-violet font-semibold text-[15px] text-white transition-[background-color,transform] hover:bg-chapter-violet/90 active:scale-[0.98]"
 					>
 						{isSubmitting ? "Reservando…" : "Reservar mi lugar"}
 					</Button>
 				)}
 			</form.Subscribe>
 
-			<p className="text-muted-foreground text-xs leading-relaxed">
+			<p className="text-[13px] text-muted-foreground leading-relaxed">
 				Solo te escribiremos sobre el lanzamiento de Helsa. Puedes salir de la
 				lista cuando quieras.
 			</p>

@@ -1,65 +1,61 @@
-import { Container } from "./container";
-import { earlyAccessPerks } from "./content";
-import { LogoMark } from "./logo";
+import { cn } from "@helsa/ui/lib/utils";
+
+import { Chapter, ChapterInner } from "./chapter";
+import { chapters } from "./content";
 import { fadeIn, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
 import { WaitlistForm } from "./waitlist-form";
 
+// The form is shown as the product's open dialog, so it casts the dialog's shadow.
+const dialogShadow = "shadow-[0_40px_80px_-40px_oklch(0.15_0.08_288/0.6)]"; // taste-skill-ignore
+
 export function WaitlistSection() {
+	const chapter = chapters.dia;
 	return (
-		<section id="lista" className="scroll-mt-16 py-10 lg:py-16">
-			<Container className="max-w-7xl px-3 sm:px-6">
+		<Chapter
+			id="lista"
+			aria-labelledby="lista-title"
+			className={cn(
+				"mt-3 py-16 lg:min-h-[90svh] lg:py-20",
+				chapter.field,
+				chapter.ink,
+			)}
+		>
+			<ChapterInner className="grid gap-12 lg:min-h-[calc(90svh-10rem)] lg:grid-cols-12 lg:gap-8">
+				<RevealGroup className="flex flex-col justify-end lg:col-span-5">
+					<RevealItem>
+						<h2
+							id="lista-title"
+							className="font-display font-medium text-[clamp(3.5rem,7vw,7rem)] leading-[0.92] tracking-[-0.04em]"
+						>
+							Reserva tu lugar.
+						</h2>
+					</RevealItem>
+					<RevealItem
+						as="p"
+						className="mt-6 max-w-[38ch] text-[17px] leading-relaxed"
+					>
+						Abrimos por grupos pequeños para acompañar a cada psicólogo en su
+						arranque. Quienes se anoten ahora entran primero, con precio de
+						fundador y voz en lo que construimos.
+					</RevealItem>
+				</RevealGroup>
+
 				<Reveal
 					variants={fadeIn}
-					className="grid gap-10 rounded-[2rem] bg-primary/[0.08] px-5 py-10 sm:px-10 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-16 lg:py-16"
+					delay={0.15}
+					className="self-center lg:col-span-5 lg:col-start-8"
 				>
-					<RevealGroup delay={0.2}>
-						<RevealItem>
-							<LogoMark className="h-12" />
-						</RevealItem>
-						<RevealItem>
-							<h2 className="mt-6 text-balance font-display font-medium text-4xl leading-[1.08] tracking-tight">
-								Sé de los primeros en usar Helsa.
-							</h2>
-						</RevealItem>
-						<RevealItem
-							as="p"
-							className="mt-4 max-w-md text-[15px] text-muted-foreground leading-relaxed"
-						>
-							Abriremos por grupos pequeños para acompañar a cada psicólogo en
-							su arranque. Quienes se anoten ahora tendrán:
-						</RevealItem>
-						<RevealGroup
-							as="ol"
-							trigger="inherit"
-							stagger={0.1}
-							className="mt-6 space-y-3"
-						>
-							{earlyAccessPerks.map((perk, index) => (
-								<RevealItem
-									as="li"
-									key={perk.title}
-									className="flex items-start gap-3 text-sm"
-								>
-									<span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-[11px] text-white">
-										{index + 1}
-									</span>
-									<span>
-										<span className="font-semibold">{perk.title}</span>{" "}
-										{perk.detail}
-									</span>
-								</RevealItem>
-							))}
-						</RevealGroup>
-					</RevealGroup>
-
-					<Reveal
-						delay={0.35}
-						className="rounded-[1.5rem] border border-border/70 bg-card p-6 shadow-[0_30px_80px_-30px_oklch(0.45_0.15_288/0.35)] sm:p-8"
+					<div
+						data-ui
+						className={cn(
+							"rounded-[1.75rem] bg-background p-6 text-foreground sm:p-8",
+							dialogShadow,
+						)}
 					>
 						<WaitlistForm />
-					</Reveal>
+					</div>
 				</Reveal>
-			</Container>
-		</section>
+			</ChapterInner>
+		</Chapter>
 	);
 }
