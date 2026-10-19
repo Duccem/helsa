@@ -1,16 +1,5 @@
-import { Figtree, Outfit } from "next/font/google";
-
 import { MotionProvider } from "@/components/landing/motion/motion-provider";
-
-const outfit = Outfit({
-	variable: "--font-outfit",
-	subsets: ["latin"],
-});
-
-const figtree = Figtree({
-	variable: "--font-figtree",
-	subsets: ["latin"],
-});
+import { figtree, outfit } from "@/lib/fonts";
 
 export default function LandingLayout({
 	children,
