@@ -6,22 +6,33 @@ export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 // `custom` carries an optional delay in seconds.
 export const fadeUp: Variants = {
-	hidden: { opacity: 0, y: 16 },
+	hidden: { opacity: 0, y: 36 },
 	show: (delay = 0) => ({
 		opacity: 1,
 		y: 0,
-		transition: { duration: 0.6, ease: EASE_OUT, delay },
+		transition: { duration: 0.8, ease: EASE_OUT, delay },
 	}),
 };
 
 export const fadeIn: Variants = {
-	hidden: { opacity: 0, y: 24, scale: 0.97 },
+	hidden: { opacity: 0, y: 56, scale: 0.94 },
 	show: (delay = 0) => ({
 		opacity: 1,
 		y: 0,
 		scale: 1,
-		transition: { duration: 0.8, ease: EASE_OUT, delay },
+		transition: { duration: 1, ease: EASE_OUT, delay },
 	}),
+};
+
+/** For tiles on a board: they rise and settle with a little spring. */
+export const tileIn: Variants = {
+	hidden: { opacity: 0, y: 48, scale: 0.92 },
+	show: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: { type: "spring", stiffness: 140, damping: 20, mass: 0.9 },
+	},
 };
 
 export const growUp: Variants = {
@@ -32,7 +43,7 @@ export const growUp: Variants = {
 	}),
 };
 
-const VIEWPORT = { once: true, amount: 0.2 } as const;
+const VIEWPORT = { once: true, amount: 0.15 } as const;
 
 type Tag = "div" | "ul" | "ol" | "li" | "dl" | "span" | "p";
 

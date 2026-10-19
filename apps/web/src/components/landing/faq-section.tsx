@@ -3,6 +3,7 @@ import { cn } from "@helsa/ui/lib/utils";
 import { Chapter, ChapterInner } from "./chapter";
 import { faqs } from "./content";
 import { Reveal, RevealGroup, RevealItem } from "./motion/reveal";
+import { SplitWords } from "./motion/scroll";
 
 export function FaqSection() {
 	return (
@@ -14,7 +15,7 @@ export function FaqSection() {
 							id="preguntas-title"
 							className="font-display font-medium text-[clamp(2.75rem,7vw,7rem)] leading-[0.92] tracking-[-0.04em]"
 						>
-							Lo que nos preguntan
+							<SplitWords text="Lo que nos preguntan" />
 						</h2>
 					</Reveal>
 				</ChapterInner>

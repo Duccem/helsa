@@ -3,6 +3,7 @@ import { cn } from "@helsa/ui/lib/utils";
 import { Chapter, ChapterInner } from "./chapter";
 import { chapters } from "./content";
 import { fadeIn, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
+import { SplitWords } from "./motion/scroll";
 import { WaitlistForm } from "./waitlist-form";
 
 // The form is shown as the product's open dialog, so it casts the dialog's shadow.
@@ -27,7 +28,7 @@ export function WaitlistSection() {
 							id="lista-title"
 							className="font-display font-medium text-[clamp(3.5rem,7vw,7rem)] leading-[0.92] tracking-[-0.04em]"
 						>
-							Reserva tu lugar.
+							<SplitWords text="Reserva tu lugar." />
 						</h2>
 					</RevealItem>
 					<RevealItem

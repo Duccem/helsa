@@ -3,11 +3,16 @@
 import { cn } from "@helsa/ui/lib/utils";
 import { CheckCheck, Lock } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Chapter, ChapterInner } from "./chapter";
 import { chapters, moodWeek } from "./content";
-import { EASE_OUT, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
+import {
+	AutoProgress,
+	AutoplayToggle,
+	useAutoAdvance,
+} from "./motion/auto-advance";
+import { fadeIn, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
 
 /* Each document is built at true size, the way it looks inside Helsa. */
 
@@ -210,17 +215,30 @@ const documents = [
 
 export function DocumentsSection() {
 	const chapter = chapters.documentos;
-	const [selected, setSelected] = useState(0);
+	const auto = useAutoAdvance(documents.length, 4500);
+	const selected = auto.index;
 	const { Sheet } = documents[selected];
+	const listRef = useRef<HTMLDivElement>(null);
+
+	// On phones the names scroll sideways: keep the current one in view.
+	useEffect(() => {
+		const list = listRef.current?.querySelector("ul");
+		const button = list?.querySelector<HTMLElement>(`[data-doc="${selected}"]`);
+		if (!list || !button || list.scrollWidth <= list.clientWidth) return;
+		const offset =
+			button.getBoundingClientRect().left - list.getBoundingClientRect().left;
+		list.scrollTo({ left: list.scrollLeft + offset - 20, behavior: "smooth" });
+	}, [selected]);
 
 	return (
 		<Chapter
 			id="documentos"
 			aria-labelledby="documentos-title"
 			className={cn("mt-3 py-16 lg:py-24", chapter.field, chapter.ink)}
+			{...auto.holdProps}
 		>
 			<ChapterInner className="grid gap-10 lg:grid-cols-12 lg:gap-8">
-				<div className="lg:col-span-5 lg:pt-10">
+				<div ref={listRef} className="lg:col-span-5 lg:pt-10">
 					<h2 id="documentos-title" className="sr-only">
 						Lo que deja cada sesión
 					</h2>
@@ -236,20 +254,32 @@ export function DocumentsSection() {
 							>
 								<button
 									type="button"
+									data-doc={index}
 									aria-pressed={selected === index}
-									onClick={() => setSelected(index)}
+									onClick={() => auto.select(index)}
 									onPointerEnter={(event) => {
-										if (event.pointerType === "mouse") setSelected(index);
+										if (event.pointerType === "mouse") auto.select(index);
 									}}
-									onFocus={() => setSelected(index)}
+									onFocus={() => auto.select(index)}
 									className={cn(
-										"rounded-lg text-left font-display font-medium text-[1.375rem] leading-[1.15] tracking-[-0.025em] outline-none transition-[color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] lg:text-[clamp(2.25rem,3.6vw,3.5rem)]",
+										"rounded-lg text-left font-display font-medium text-[1.375rem] leading-[1.15] tracking-[-0.025em] outline-none transition-[color,transform] duration-300 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] lg:text-[clamp(2.25rem,3.6vw,3.5rem)]",
 										selected === index
 											? "text-foreground"
 											: "text-foreground/45 hover:text-foreground/70",
 									)}
 								>
 									{document.name}
+									<AutoProgress
+										running={selected === index && auto.running}
+										interval={auto.interval}
+										stepKey={auto.stepKey}
+										className={cn(
+											"mt-1 w-full transition-opacity lg:mt-1.5 lg:max-w-[12rem]",
+											selected === index && auto.canAutoplay
+												? "opacity-100"
+												: "opacity-0",
+										)}
+									/>
 								</button>
 							</RevealItem>
 						))}
@@ -262,17 +292,30 @@ export function DocumentsSection() {
 						Cada sesión deja papeles. Helsa los escribe contigo, los guarda
 						cifrados y los envía por WhatsApp.
 					</Reveal>
+					{auto.canAutoplay ? (
+						<Reveal delay={0.4} className="mt-6">
+							<AutoplayToggle
+								paused={auto.paused}
+								onToggle={auto.togglePaused}
+								label="documentos"
+							/>
+						</Reveal>
+					) : null}
 				</div>
 
-				<Reveal className="relative h-[70svh] overflow-hidden rounded-[2rem] bg-chapter-teal-deep lg:col-span-7 lg:h-[40rem]">
-					<AnimatePresence mode="wait" initial={false}>
+				<Reveal
+					variants={fadeIn}
+					className="relative h-[70svh] overflow-hidden rounded-[2rem] bg-chapter-teal-deep lg:col-span-7 lg:h-[40rem]"
+				>
+					<AnimatePresence initial={false}>
 						<m.div
 							key={selected}
-							className="absolute top-4 left-4 sm:top-[4.5rem] sm:left-16"
-							initial={{ opacity: 0, y: 16 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.22, ease: EASE_OUT }}
+							aria-live={auto.running ? "off" : "polite"}
+							className="absolute top-4 left-4 origin-bottom-left sm:top-[4.5rem] sm:left-16"
+							initial={{ opacity: 0, y: 140, rotate: 5 }}
+							animate={{ opacity: 1, y: 0, rotate: 0 }}
+							exit={{ opacity: 0, y: -48, rotate: -4, scale: 0.94 }}
+							transition={{ type: "spring", stiffness: 120, damping: 20 }}
 						>
 							<Sheet />
 						</m.div>

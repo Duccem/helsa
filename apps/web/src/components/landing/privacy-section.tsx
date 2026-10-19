@@ -3,6 +3,7 @@ import { SessionDoorDoodle } from "@/components/doodles/landing-scenes";
 import { Chapter, ChapterInner } from "./chapter";
 import { privacyPoints } from "./content";
 import { fadeIn, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
+import { Parallax, SplitWords } from "./motion/scroll";
 
 export function PrivacySection() {
 	return (
@@ -18,7 +19,7 @@ export function PrivacySection() {
 							id="privacidad-title"
 							className="max-w-[16ch] font-display font-medium text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.98] tracking-[-0.035em]"
 						>
-							Lo que se dice en sesión, se queda ahí.
+							<SplitWords text="Lo que se dice en sesión, se queda ahí." />
 						</h2>
 					</Reveal>
 					<Reveal
@@ -52,7 +53,9 @@ export function PrivacySection() {
 					variants={fadeIn}
 					className="mx-auto w-full max-w-[28rem] lg:col-span-5"
 				>
-					<SessionDoorDoodle />
+					<Parallax speed={44}>
+						<SessionDoorDoodle />
+					</Parallax>
 				</Reveal>
 			</ChapterInner>
 		</Chapter>

@@ -25,7 +25,7 @@ export function CtaLink({
 	return (
 		<a
 			className={cn(
-				"inline-flex items-center justify-center whitespace-nowrap rounded-full font-semibold outline-none transition-[background-color,transform] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.97]",
+				"inline-flex items-center justify-center whitespace-nowrap rounded-full font-semibold outline-none transition-[background-color,transform] duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.97]",
 				variants[variant],
 				sizes[size],
 				className,

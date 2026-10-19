@@ -2,12 +2,19 @@
 
 import { cn } from "@helsa/ui/lib/utils";
 import { Mic, RefreshCw, Video } from "lucide-react";
-import { AnimatePresence, m } from "motion/react";
-import { useId, useState } from "react";
+import {
+	AnimatePresence,
+	m,
+	useMotionValue,
+	useSpring,
+	useTransform,
+} from "motion/react";
+import { useEffect, useId, useState } from "react";
 
 import { Chapter, ChapterInner } from "./chapter";
 import { chapters } from "./content";
 import { EASE_OUT, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
+import { Parallax, SplitWords } from "./motion/scroll";
 import { SessionTimer } from "./session-timer";
 
 /** The product's own thresholds: video from 150 kbps, audio below, reconnect at zero. */
@@ -99,6 +106,13 @@ function CallCard({ mode }: { mode: Mode }) {
 export function SignalSection() {
 	const chapter = chapters.senal;
 	const [kbps, setKbps] = useState(400);
+	// The big figure rolls to the new value instead of jumping.
+	const target = useMotionValue(kbps);
+	const rolling = useSpring(target, { stiffness: 90, damping: 22 });
+	const shown = useTransform(rolling, (value) => Math.round(value));
+	useEffect(() => {
+		target.set(kbps);
+	}, [kbps, target]);
 	const id = useId();
 	const mode = modeFor(kbps);
 
@@ -119,7 +133,7 @@ export function SignalSection() {
 							id="senal-title"
 							className="font-display font-medium text-[clamp(2rem,3vw,2.75rem)] leading-tight tracking-[-0.025em]"
 						>
-							¿Cuánta señal tienes hoy?
+							<SplitWords text="¿Cuánta señal tienes hoy?" />
 						</h2>
 					</RevealItem>
 					<RevealItem data-ui className="mt-7 w-full max-w-[25rem]">
@@ -148,7 +162,9 @@ export function SignalSection() {
 				</RevealGroup>
 
 				<Reveal delay={0.2} className="lg:col-span-5 lg:col-start-8">
-					<CallCard mode={mode} />
+					<Parallax speed={-28}>
+						<CallCard mode={mode} />
+					</Parallax>
 				</Reveal>
 			</ChapterInner>
 
@@ -157,7 +173,7 @@ export function SignalSection() {
 					aria-hidden="true"
 					className="font-display font-semibold text-[30vw] tabular-nums leading-[0.8] tracking-[-0.05em] lg:col-span-8 lg:text-[clamp(8.75rem,17vw,16rem)]"
 				>
-					{kbps}
+					<m.span>{shown}</m.span>
 					<span className="ml-[0.08em] text-[0.22em] tracking-normal">
 						kbps
 					</span>

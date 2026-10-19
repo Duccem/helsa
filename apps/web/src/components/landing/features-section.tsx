@@ -7,9 +7,10 @@ import {
 	VideoDoodle,
 } from "@/components/doodles/landing-scenes";
 
-import { Chapter, ChapterInner } from "./chapter";
+import { Chapter } from "./chapter";
 import { chapters } from "./content";
-import { RevealGroup, RevealItem } from "./motion/reveal";
+import { RevealGroup, RevealItem, tileIn } from "./motion/reveal";
+import { Parallax, SplitWords } from "./motion/scroll";
 
 function Tile({
 	className,
@@ -27,6 +28,7 @@ function Tile({
 	return (
 		<RevealItem
 			as="li"
+			variants={tileIn}
 			className={cn(
 				"group relative flex flex-col justify-end overflow-hidden rounded-[2rem] p-5 sm:p-6",
 				dark ? "text-white" : "text-foreground",
@@ -68,7 +70,7 @@ function TileDoodle({
 				className,
 			)}
 		>
-			{children}
+			<Parallax speed={18}>{children}</Parallax>
 		</div>
 	);
 }
@@ -94,7 +96,7 @@ export function FeaturesSection() {
 						id="incluye-title"
 						className="font-display font-medium text-[clamp(2.5rem,5vw,4.5rem)] leading-[0.95] tracking-[-0.035em]"
 					>
-						Todo en su sitio
+						<SplitWords text="Todo en su sitio" />
 					</h2>
 				</RevealItem>
 
@@ -173,7 +175,7 @@ export function FeaturesSection() {
 					<span
 						data-ui
 						aria-hidden="true"
-						className="absolute top-5 -right-16 flex gap-[0.3em] font-display font-medium text-[2.25rem] sm:top-6"
+						className="absolute top-5 -right-10 flex gap-[0.3em] font-display font-medium text-[1.25rem] sm:top-6 sm:-right-16 sm:text-[2.25rem]"
 					>
 						{[5, 6, 7, 8, 9, 10].map((value) => (
 							<span

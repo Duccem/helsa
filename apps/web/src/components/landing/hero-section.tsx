@@ -1,5 +1,16 @@
+"use client";
+
 import { cn } from "@helsa/ui/lib/utils";
 import { Video } from "lucide-react";
+import {
+	type MotionValue,
+	m,
+	useReducedMotion,
+	useScroll,
+	useTransform,
+	type Variants,
+} from "motion/react";
+import { useRef } from "react";
 
 import {
 	ChatChip,
@@ -17,6 +28,7 @@ import {
 } from "./content";
 import { CtaLink } from "./cta-link";
 import { fadeIn, Reveal, RevealGroup, RevealItem } from "./motion/reveal";
+import { Parallax, SplitWords } from "./motion/scroll";
 
 /* The folder stack: one patient file per chapter, the front one open. */
 
@@ -52,19 +64,63 @@ function FolderTab({
 	);
 }
 
-export function HeroSection() {
+/** Folders slide up into the stack, back to front, like files dropped on a desk. */
+const folderIn: Variants = {
+	hidden: { y: 140, opacity: 0 },
+	show: {
+		y: 0,
+		opacity: 1,
+		transition: { type: "spring", stiffness: 110, damping: 18, mass: 1 },
+	},
+};
+
+function BackFolder({
+	chapter,
+	tab,
+	index,
+	progress,
+}: {
+	chapter: ChapterInfo;
+	tab: string;
+	index: number;
+	progress: MotionValue<number>;
+}) {
+	const reduce = useReducedMotion();
+	// As the page scrolls, the folders further back rise more: the stack fans open.
+	const lift = reduce ? 0 : (backFolders.length - index) * 26;
+	const y = useTransform(progress, [0, 0.7], [0, -lift]);
+
 	return (
-		<section aria-labelledby="hero-title" className="relative">
+		<RevealItem
+			variants={folderIn}
+			className="absolute inset-x-2 sm:inset-x-3"
+			style={{ top: `calc(${index} * var(--strip) + var(--tab))` }}
+		>
+			<m.div style={{ y }}>
+				<div className={cn("h-64 rounded-t-[2rem]", chapter.field)} />
+				<FolderTab chapter={chapter} className={cn("-top-8 sm:-top-10", tab)} />
+			</m.div>
+		</RevealItem>
+	);
+}
+
+export function HeroSection() {
+	const ref = useRef<HTMLElement>(null);
+	const { scrollYProgress } = useScroll({
+		target: ref,
+		offset: ["start start", "end start"],
+	});
+
+	return (
+		<section ref={ref} aria-labelledby="hero-title" className="relative">
 			<ChapterInner className="pt-10 pb-12 text-center sm:pt-14 lg:pt-14">
-				<RevealGroup trigger="mount" stagger={0.1}>
-					<RevealItem>
-						<h1
-							id="hero-title"
-							className="text-balance font-display font-medium text-[clamp(3.25rem,8vw,8.25rem)] leading-[0.95] tracking-[-0.04em]"
-						>
-							Tu consulta, en orden.
-						</h1>
-					</RevealItem>
+				<RevealGroup trigger="mount" delay={0.35} stagger={0.1}>
+					<h1
+						id="hero-title"
+						className="text-balance font-display font-medium text-[clamp(3.25rem,8vw,8.25rem)] leading-[0.95] tracking-[-0.04em]"
+					>
+						<SplitWords text="Tu consulta, en orden." onMount />
+					</h1>
 					<RevealItem
 						as="p"
 						className="mx-auto mt-7 max-w-[46ch] text-pretty text-lg leading-relaxed sm:text-xl"
@@ -80,19 +136,15 @@ export function HeroSection() {
 				aria-label="Capítulos"
 				className="relative h-[calc(4*var(--strip)+var(--tab))] [--strip:2.75rem] [--tab:2rem] sm:[--strip:3.5rem] sm:[--tab:2.5rem]"
 			>
-				<RevealGroup trigger="mount" delay={0.35} stagger={0.08}>
+				<RevealGroup trigger="mount" delay={0.45} stagger={0.1}>
 					{backFolders.map(({ chapter, tab }, index) => (
-						<RevealItem
+						<BackFolder
 							key={chapter.href}
-							className="absolute inset-x-2 sm:inset-x-3"
-							style={{ top: `calc(${index} * var(--strip) + var(--tab))` }}
-						>
-							<div className={cn("h-48 rounded-t-[2rem]", chapter.field)} />
-							<FolderTab
-								chapter={chapter}
-								className={cn("-top-8 sm:-top-10", tab)}
-							/>
-						</RevealItem>
+							chapter={chapter}
+							tab={tab}
+							index={index}
+							progress={scrollYProgress}
+						/>
 					))}
 				</RevealGroup>
 			</nav>
@@ -159,6 +211,7 @@ export function IntroSection() {
 				className="-top-8 left-[calc(0.5rem+5%)] sm:-top-10 sm:left-[calc(0.75rem+4%)]"
 			/>
 			<Chapter
+				still
 				id="dia"
 				aria-label="Tu día"
 				className={cn(
@@ -184,14 +237,18 @@ export function IntroSection() {
 
 					<div className="relative lg:col-span-7">
 						<Reveal onMount variants={fadeIn} delay={0.6}>
-							<DeskDoodle />
+							<Parallax speed={36}>
+								<DeskDoodle />
+							</Parallax>
 						</Reveal>
 						<Reveal
 							onMount
 							delay={1.1}
 							className="absolute -bottom-10 left-0 hidden sm:block lg:-left-10"
 						>
-							<TodayCard />
+							<Parallax speed={-56}>
+								<TodayCard />
+							</Parallax>
 						</Reveal>
 					</div>
 				</ChapterInner>
