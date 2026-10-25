@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { setAccountPassword } from "@/app/(client)/(dashboard)/dashboard/profile/actions";
 import { PasswordField, PasswordStrength } from "@/components/auth/form-parts";
+import { useSetAccountPassword } from "@/lib/api/mutations";
 import { authClient } from "@/lib/auth-client";
 
 import { ActionButton, ProfileSection } from "./parts";
@@ -50,6 +50,7 @@ const empty = { current: "", password: "", confirm: "", signOutOthers: true };
 export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
 	const router = useRouter();
 	const [currentError, setCurrentError] = useState<string>();
+	const setPassword = useSetAccountPassword();
 
 	const form = useForm({
 		defaultValues: empty,
@@ -58,9 +59,10 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
 			setCurrentError(undefined);
 
 			if (!hasPassword) {
-				const result = await setAccountPassword(value.password);
-				if (!result.ok) {
-					toast.error(result.error);
+				try {
+					await setPassword.mutateAsync(value.password);
+				} catch (error) {
+					toast.error((error as Error).message);
 					return;
 				}
 				formApi.reset(empty);

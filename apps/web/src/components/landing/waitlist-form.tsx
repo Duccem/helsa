@@ -13,7 +13,7 @@ import { m } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { joinWaitlist } from "@/app/(client)/(landing)/actions";
+import { useJoinWaitlist } from "@/lib/api/mutations";
 
 import { professionOptions } from "./content";
 import { EASE_OUT } from "./motion/reveal";
@@ -44,6 +44,8 @@ function FieldErrors({
 export function WaitlistForm() {
 	const [joinedEmail, setJoinedEmail] = useState<string | null>(null);
 
+	const joinWaitlist = useJoinWaitlist();
+
 	const form = useForm({
 		defaultValues: {
 			name: "",
@@ -53,9 +55,10 @@ export function WaitlistForm() {
 		} as WaitlistInput,
 		validators: { onSubmit: waitlistSchema },
 		onSubmit: async ({ value }) => {
-			const result = await joinWaitlist(value);
-			if (!result.ok) {
-				toast.error(result.error);
+			try {
+				await joinWaitlist.mutateAsync(value);
+			} catch (error) {
+				toast.error((error as Error).message);
 				return;
 			}
 			setJoinedEmail(value.email);

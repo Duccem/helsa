@@ -1,15 +1,8 @@
-"use server";
-
 import { APIError } from "better-auth/api";
-import { headers } from "next/headers";
 
-import {
-	type SignUpInput,
-	signUpSchema,
-} from "@/components/auth/sign-up-schema";
+import { signUpSchema } from "@/components/auth/sign-up-schema";
+import { fail, ok, readJson } from "@/lib/api/server";
 import { auth } from "@/services";
-
-export type PatientSignUpResult = { ok: true } | { ok: false; error: string };
 
 const ALREADY_EXISTS = new Set([
 	"USER_ALREADY_EXISTS",
@@ -20,12 +13,10 @@ const ALREADY_EXISTS = new Set([
  * Creates the account on the server so the role never comes from the browser:
  * whoever signs up here is a patient, everyone else defaults to therapist.
  */
-export async function signUpPatient(
-	input: SignUpInput,
-): Promise<PatientSignUpResult> {
-	const parsed = signUpSchema.safeParse(input);
+export async function POST(request: Request) {
+	const parsed = signUpSchema.safeParse(await readJson(request));
 	if (!parsed.success) {
-		return { ok: false, error: "Revisa los datos del formulario." };
+		return fail("Revisa los datos del formulario.", 400);
 	}
 
 	try {
@@ -35,7 +26,7 @@ export async function signUpPatient(
 				email: parsed.data.email,
 				password: parsed.data.password,
 			},
-			headers: await headers(),
+			headers: request.headers,
 		});
 		const context = await auth.$context;
 		await context.internalAdapter.updateUser(user.id, { role: "patient" });
@@ -44,17 +35,11 @@ export async function signUpPatient(
 			error instanceof APIError &&
 			ALREADY_EXISTS.has(error.body?.code ?? "")
 		) {
-			return {
-				ok: false,
-				error: "Ya existe una cuenta con ese correo. Prueba a entrar.",
-			};
+			return fail("Ya existe una cuenta con ese correo. Prueba a entrar.", 409);
 		}
-		console.error("signUpPatient failed", error);
-		return {
-			ok: false,
-			error: "No pudimos crear tu cuenta. Intenta de nuevo.",
-		};
+		console.error("POST /api/sign-up/patient failed", error);
+		return fail("No pudimos crear tu cuenta. Intenta de nuevo.", 500);
 	}
 
-	return { ok: true };
+	return ok();
 }

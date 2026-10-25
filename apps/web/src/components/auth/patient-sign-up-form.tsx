@@ -4,9 +4,8 @@ import { useForm } from "@tanstack/react-form";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-import { signUpPatient } from "@/app/(client)/(auth)/sign-up/patient/actions";
 import { RevealGroup, RevealItem } from "@/components/landing/motion/reveal";
+import { useSignUpPatient } from "@/lib/api/mutations";
 
 import {
 	AuthHeader,
@@ -31,17 +30,20 @@ export function PatientSignUpForm({
 	const destination = redirectTo ?? "/dashboard";
 	const query = redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
+	const signUp = useSignUpPatient();
+
 	const form = useForm({
 		defaultValues: { name: "", email: "", password: "" },
 		validators: { onSubmit: signUpSchema },
 		onSubmit: async ({ value }) => {
-			const result = await signUpPatient({
-				name: value.name.trim(),
-				email: value.email,
-				password: value.password,
-			});
-			if (!result.ok) {
-				toast.error(result.error);
+			try {
+				await signUp.mutateAsync({
+					name: value.name.trim(),
+					email: value.email,
+					password: value.password,
+				});
+			} catch (error) {
+				toast.error((error as Error).message);
 				return;
 			}
 			router.push(destination as Route);
