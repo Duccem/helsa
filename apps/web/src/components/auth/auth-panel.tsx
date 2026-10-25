@@ -1,11 +1,12 @@
 "use client";
 
 import { cn } from "@helsa/ui/lib/utils";
-import { Check, Mail, ShieldCheck, Video } from "lucide-react";
+import { BellRing, Check, Mail, ShieldCheck, Video } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { usePathname } from "next/navigation";
 import {
 	ArmchairDoodle,
+	CalendarDoodle,
 	CandleKeyDoodle,
 	OpenDoorDoodle,
 	SessionDoodle,
@@ -105,6 +106,29 @@ function SessionsClosedCard() {
 	);
 }
 
+function NextSessionCard() {
+	return (
+		<div className="w-72 rounded-2xl bg-background p-4">
+			<p className="font-display font-medium text-base">Tu próxima sesión</p>
+			<div className="mt-3 flex items-center gap-3 text-sm">
+				<span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-white">
+					<Video aria-hidden="true" className="size-4" />
+				</span>
+				<span className="min-w-0">
+					<span className="block font-medium">Jueves, 4:00 pm</span>
+					<span className="block text-[13px] text-muted-foreground">
+						Videoconsulta · 50 minutos
+					</span>
+				</span>
+			</div>
+			<p className="mt-3 flex items-center gap-2 text-[13px] text-muted-foreground">
+				<BellRing aria-hidden="true" className="size-3.5 text-primary" />
+				Te avisamos por WhatsApp un día antes
+			</p>
+		</div>
+	);
+}
+
 type Scene = {
 	Doodle: () => React.ReactNode;
 	Card: () => React.ReactNode;
@@ -129,6 +153,13 @@ const scenes: Record<string, Scene> = {
 		title: "Agenda, expedientes y cobros, juntos.",
 		description:
 			"Pensado para psicólogos y terapeutas que atienden en Venezuela.",
+	},
+	"/sign-up/patient": {
+		Doodle: CalendarDoodle,
+		Card: NextSessionCard,
+		title: "Tu terapeuta y tus citas, en un solo lugar.",
+		description:
+			"Eliges el horario, te recordamos la sesión y pagas en USD o Bs.",
 	},
 	"/forgot-password": {
 		Doodle: CandleKeyDoodle,

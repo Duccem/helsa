@@ -3,6 +3,7 @@
 import {
 	accent,
 	dark,
+	Heart,
 	ink,
 	leaf,
 	Plant,
@@ -234,6 +235,65 @@ export function OpenDoorDoodle() {
 				d="M30 382 C80 352 50 318 100 314 C146 312 136 360 186 348"
 				dashed
 			/>
+		</Svg>
+	);
+}
+
+/** Patient sign up: someone picks a day on the calendar from their phone. */
+export function CalendarDoodle() {
+	const days = [0, 1, 2, 3, 4];
+	const weeks = [0, 1, 2];
+	return (
+		<Svg label="Dibujo de una persona sentada mirando su teléfono frente a un calendario con un día marcado con un corazón">
+			<ellipse cx="240" cy="340" rx="200" ry="14" fill={soft} />
+
+			<SidePerson
+				body={leaf}
+				hair="M108 184 Q100 150 132 150 Q160 150 156 170 Q140 162 128 168 Q116 172 108 184 Z"
+			/>
+
+			<g {...ink}>
+				{/* Phone in hand */}
+				<rect
+					x="166"
+					y="196"
+					width="26"
+					height="44"
+					rx="6"
+					fill={dark}
+					transform="rotate(-14 179 218)"
+				/>
+				<circle cx="176" cy="238" r="8" fill={paper} />
+
+				{/* Wall calendar */}
+				<rect x="248" y="64" width="190" height="196" rx="18" fill={paper} />
+				<path
+					d="M248 112 V82 Q248 64 266 64 H420 Q438 64 438 82 V112 Z"
+					fill={accent}
+				/>
+				<path d="M290 52 V76 M396 52 V76" />
+			</g>
+
+			<g fill={soft}>
+				{weeks.map((week) =>
+					days.map((day) =>
+						week === 1 && day === 3 ? null : (
+							<rect
+								key={`${week}-${day}`}
+								x={266 + day * 34}
+								y={130 + week * 40}
+								width="24"
+								height="24"
+								rx="7"
+							/>
+						),
+					),
+				)}
+			</g>
+			<Heart x={380} y={180} scale={1.35} />
+
+			<Squiggle d="M198 192 C210 146 226 186 240 168" dashed delay={0.8} />
+			<Plant x={398} y={292} scale={0.8} />
 		</Svg>
 	);
 }

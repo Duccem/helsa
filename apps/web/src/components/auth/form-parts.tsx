@@ -6,6 +6,7 @@ import { Label } from "@helsa/ui/components/label";
 import { cn } from "@helsa/ui/lib/utils";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { m } from "motion/react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -217,7 +218,16 @@ function GoogleMark() {
 	);
 }
 
-export function GoogleButton({ label }: { label: string }) {
+export function GoogleButton({
+	label,
+	callbackURL = "/dashboard",
+	newUserCallbackURL,
+}: {
+	label: string;
+	callbackURL?: string;
+	/** Where Better Auth sends an account created by this click. */
+	newUserCallbackURL?: string;
+}) {
 	const [pending, setPending] = useState(false);
 	return (
 		<button
@@ -227,7 +237,8 @@ export function GoogleButton({ label }: { label: string }) {
 				setPending(true);
 				const { error } = await authClient.signIn.social({
 					provider: "google",
-					callbackURL: "/dashboard",
+					callbackURL,
+					newUserCallbackURL,
 				});
 				if (error) {
 					toast.error(error.message || "No pudimos conectar con Google.");
@@ -252,7 +263,7 @@ export function AuthSwitch({
 	label,
 }: {
 	prompt: string;
-	href: "/sign-in" | "/sign-up" | "/forgot-password";
+	href: Route;
 	label: string;
 }) {
 	return (

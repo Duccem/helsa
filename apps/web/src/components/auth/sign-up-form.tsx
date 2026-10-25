@@ -3,7 +3,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import z from "zod";
 
 import { RevealGroup, RevealItem } from "@/components/landing/motion/reveal";
 import { authClient } from "@/lib/auth-client";
@@ -17,19 +16,14 @@ import {
 	SubmitButton,
 	TextField,
 } from "./form-parts";
-
-const schema = z.object({
-	name: z.string().trim().min(2, "Escribe tu nombre y apellido."),
-	email: z.email("Escribe un correo válido, como ana@correo.com."),
-	password: z.string().min(8, "Usa al menos 8 caracteres."),
-});
+import { signUpSchema } from "./sign-up-schema";
 
 export function SignUpForm() {
 	const router = useRouter();
 
 	const form = useForm({
 		defaultValues: { name: "", email: "", password: "" },
-		validators: { onSubmit: schema },
+		validators: { onSubmit: signUpSchema },
 		onSubmit: async ({ value }) => {
 			const { error } = await authClient.signUp.email({
 				name: value.name.trim(),
@@ -136,11 +130,18 @@ export function SignUpForm() {
 				<GoogleButton label="Registrarme con Google" />
 			</RevealItem>
 
-			<AuthSwitch
-				prompt="¿Ya tienes cuenta?"
-				href="/sign-in"
-				label="Entra aquí"
-			/>
+			<div className="space-y-2">
+				<AuthSwitch
+					prompt="¿Ya tienes cuenta?"
+					href="/sign-in"
+					label="Entra aquí"
+				/>
+				<AuthSwitch
+					prompt="¿Buscas terapia?"
+					href="/sign-up/patient"
+					label="Crea tu cuenta de paciente"
+				/>
+			</div>
 		</RevealGroup>
 	);
 }

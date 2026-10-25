@@ -37,4 +37,5 @@ export const configAdminPlugin = admin({
   ac,
   roles,
   adminRoles: ["administrator"],
+  defaultRole: "therapist",
 })
