@@ -38,3 +38,29 @@
 		var(--background)
 	);
 }
+
+/*
+ * Dashboard ground: a faint lilac step under white panels in light mode.
+ * In dark mode the page itself is the ground and panels sit one step lighter.
+ */
+:root {
+	--dash-ground: color-mix(in oklch, var(--primary) 6%, oklch(0.975 0.003 287));
+	/* Violet, red and teal text that pass 4.5:1 on panels in each mode. */
+	--dash-link: color-mix(in oklch, var(--primary), black 18%);
+	--dash-alert: color-mix(in oklch, var(--destructive), black 14%);
+	--dash-good: color-mix(in oklch, var(--chart-2), black 30%);
+}
+
+.dark {
+	--dash-ground: var(--background);
+	--dash-link: color-mix(in oklch, var(--primary), white 42%);
+	--dash-alert: color-mix(in oklch, var(--destructive), white 34%);
+	--dash-good: color-mix(in oklch, var(--chart-2), white 30%);
+}
+
+@theme inline {
+	--color-dash-ground: var(--dash-ground);
+	--color-dash-link: var(--dash-link);
+	--color-dash-alert: var(--dash-alert);
+	--color-dash-good: var(--dash-good);
+}
