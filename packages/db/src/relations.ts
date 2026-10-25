@@ -22,6 +22,10 @@ export const appRelations = defineRelationsPart(schema, (r) => ({
       from: r.therapist.user_id,
       to: r.availability_block.therapist_id,
     }),
+    rates: r.many.therapist_rate({
+      from: r.therapist.user_id,
+      to: r.therapist_rate.therapist_id,
+    }),
     patients: r.many.patient({
       from: r.therapist.user_id,
       to: r.patient.therapist_id,
@@ -46,6 +50,13 @@ export const appRelations = defineRelationsPart(schema, (r) => ({
   availability_rule: {
     therapist: r.one.therapist({
       from: r.availability_rule.therapist_id,
+      to: r.therapist.user_id,
+      optional: false,
+    }),
+  },
+  therapist_rate: {
+    therapist: r.one.therapist({
+      from: r.therapist_rate.therapist_id,
       to: r.therapist.user_id,
       optional: false,
     }),

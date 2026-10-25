@@ -1,5 +1,34 @@
-import { SectionPending } from "@/components/dashboard/section-pending";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-	return <SectionPending title="Configuración" />;
+import { toDashboardRole } from "@/components/dashboard/navigation";
+import {
+	PatientSettingsPage,
+	TherapistSettingsPage,
+} from "@/components/dashboard/settings/settings-page";
+import { loadPreferences, loadTherapistSettings } from "@/lib/settings";
+import { auth } from "@/services";
+
+export const metadata: Metadata = { title: "Configuración" };
+
+export default async function Page() {
+	const session = await auth.api.getSession({ headers: await headers() });
+
+	if (!session?.user) {
+		redirect("/sign-in");
+	}
+
+	const { user } = session;
+
+	if (toDashboardRole(user.role) === "patient") {
+		return <PatientSettingsPage preferences={await loadPreferences(user.id)} />;
+	}
+
+	const settings = await loadTherapistSettings({
+		id: user.id,
+		name: user.name,
+		email: user.email,
+	});
+	return <TherapistSettingsPage settings={settings} />;
 }

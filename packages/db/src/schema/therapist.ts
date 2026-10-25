@@ -32,6 +32,17 @@ export const therapist = pgTable(
     default_price_usd: t.numeric({ precision: 12, scale: 2 }),
     booking_notice_hours: t.smallint().notNull().default(12),
     reminders_enabled: t.boolean().notNull().default(true),
+    // Public profile shown on the booking page.
+    bio: t.text(),
+    years_experience: t.smallint(),
+    specialties: t.text().array().notNull().default([]),
+    languages: t.text().array().notNull().default(["es"]),
+    modalities: appointment_modality().array().notNull().default(["video"]),
+    office_address: t.text(), // in-person sessions only
+    // Payments: methods are `payment_method` values (text to avoid a circular import).
+    payment_methods: t.text().array().notNull().default([]),
+    payment_instructions: t.text(),
+    cancellation_notice_hours: t.smallint().notNull().default(24),
     enc_key_version: t.smallint().notNull().default(1),
     onboarded_at: t.timestamp({ withTimezone: true }),
     created_at: t.timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -73,5 +84,29 @@ export const availability_block = pgTable(
     ends_at: t.timestamp({ withTimezone: true }).notNull(),
     reason: t.text(),
     created_at: t.timestamp({ withTimezone: true }).notNull().defaultNow(),
+  })
+);
+
+// The therapist's price list (individual, couples, first consultation...).
+export const therapist_rate = pgTable(
+  "therapist_rate",
+  (t) => ({
+    id: t.uuid().primaryKey().$defaultFn(v7),
+    therapist_id: t
+      .uuid()
+      .notNull()
+      .references(() => therapist.user_id, { onDelete: "cascade" }),
+    name: t.text().notNull(),
+    duration_minutes: t.smallint().notNull(),
+    price_usd: t.numeric({ precision: 12, scale: 2 }).notNull(),
+    modality: appointment_modality(), // NULL = any
+    position: t.smallint().notNull().default(0),
+    is_active: t.boolean().notNull().default(true),
+    created_at: t.timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updated_at: t
+      .timestamp({ withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   })
 );

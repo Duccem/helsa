@@ -5,6 +5,7 @@ export * from "./consent";
 export * from "./note";
 export * from "./patient";
 export * from "./payment";
+export * from "./settings";
 export * from "./task";
 export * from "./therapist";
 export * from "./video";

@@ -1,10 +1,9 @@
 "use client";
 
-import { cn } from "@helsa/ui/lib/utils";
 import { m } from "motion/react";
-import { useEffect, useState } from "react";
 
 import { roleLabels } from "../navigation";
+import { SectionIndex } from "../section-index";
 import { itemIn, panelIn, stagger } from "../therapist/parts";
 import { AvatarPicker } from "./avatar-picker";
 import { DeleteAccount } from "./delete-account";
@@ -26,62 +25,6 @@ const monthYear = new Intl.DateTimeFormat("es", {
 	month: "long",
 	year: "numeric",
 });
-
-/** Highlights the section that holds the middle of the screen. */
-function useActiveSection() {
-	const [active, setActive] = useState<string>(sections[0].id);
-	useEffect(() => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) setActive(entry.target.id);
-				}
-			},
-			{ rootMargin: "-45% 0px -50% 0px" },
-		);
-		for (const { id } of sections) {
-			const element = document.getElementById(id);
-			if (element) observer.observe(element);
-		}
-		return () => observer.disconnect();
-	}, []);
-	return active;
-}
-
-function SectionIndex() {
-	const active = useActiveSection();
-	return (
-		<nav aria-label="Partes del perfil" className="sticky top-24">
-			<ul className="grid gap-1">
-				{sections.map((section) => {
-					const current = active === section.id;
-					return (
-						<li key={section.id}>
-							<a
-								href={`#${section.id}`}
-								aria-current={current ? "location" : undefined}
-								className={cn(
-									"relative flex h-11 items-center rounded-full px-4 font-medium text-[15px] outline-none transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
-									current ? "text-foreground" : "text-foreground/65",
-								)}
-							>
-								{current ? (
-									<m.span
-										layoutId="profile-index"
-										aria-hidden="true"
-										className="absolute inset-0 rounded-full bg-card"
-										transition={{ type: "spring", stiffness: 420, damping: 34 }}
-									/>
-								) : null}
-								<span className="relative">{section.label}</span>
-							</a>
-						</li>
-					);
-				})}
-			</ul>
-		</nav>
-	);
-}
 
 export function ProfilePage({
 	user,
@@ -186,7 +129,11 @@ export function ProfilePage({
 
 			<div className="mt-4 grid gap-4 xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-8">
 				<m.aside variants={itemIn} className="hidden xl:block">
-					<SectionIndex />
+					<SectionIndex
+						label="Partes del perfil"
+						sections={sections}
+						layoutId="profile-index"
+					/>
 				</m.aside>
 
 				<div className="grid min-w-0 gap-4">
