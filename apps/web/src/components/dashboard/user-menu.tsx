@@ -31,7 +31,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { type DashboardUser, initials, roleLabels } from "./navigation";
 import { useNotifications } from "./notifications";

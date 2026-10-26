@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { GoogleMark } from "@/components/auth/form-parts";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { ActionButton, formatShortDate, ProfileSection } from "./parts";
 import type { ProfileAccount } from "./types";

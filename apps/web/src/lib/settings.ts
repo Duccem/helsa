@@ -24,7 +24,7 @@ import {
 } from "@/components/dashboard/settings/schema";
 import { db } from "@/services";
 
-import { addDays, zonedDay } from "./zoned-time";
+import { addDays, zonedDay } from "./utils/zoned-time";
 
 /** The database counts weekdays from Sunday; the app counts from Monday. */
 export const toAppWeekday = (weekday: number) => (weekday + 6) % 7;
@@ -148,24 +148,24 @@ export async function loadTherapistSettings(user: {
 			rates:
 				rates.length > 0
 					? rates.map((row) => ({
-							id: row.id,
-							name: row.name,
-							durationMinutes: row.duration_minutes,
-							priceUsd: Number(row.price_usd),
-							modality: row.modality as Modality | null,
-							isActive: row.is_active,
-						}))
+						id: row.id,
+						name: row.name,
+						durationMinutes: row.duration_minutes,
+						priceUsd: Number(row.price_usd),
+						modality: row.modality as Modality | null,
+						isActive: row.is_active,
+					}))
 					: [
-							{
-								name: "Sesión individual",
-								durationMinutes: sessionMinutes,
-								priceUsd: profile?.default_price_usd
-									? Number(profile.default_price_usd)
-									: 40,
-								modality: null,
-								isActive: true,
-							},
-						],
+						{
+							name: "Sesión individual",
+							durationMinutes: sessionMinutes,
+							priceUsd: profile?.default_price_usd
+								? Number(profile.default_price_usd)
+								: 40,
+							modality: null,
+							isActive: true,
+						},
+					],
 			paymentMethods: (profile?.payment_methods ?? []).filter(
 				(method): method is PaymentMethod =>
 					(paymentMethods as readonly string[]).includes(method),

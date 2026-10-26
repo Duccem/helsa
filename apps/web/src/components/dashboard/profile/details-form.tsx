@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { TextField } from "@/components/auth/form-parts";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { EASE_OUT } from "../therapist/parts";
 import { ActionButton, ProfileSection } from "./parts";

@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { PatientSignUpForm } from "@/components/auth/patient-sign-up-form";
-import { safeRedirect } from "@/lib/safe-redirect";
+import { safeRedirect } from "@/lib/utils/safe-redirect";
 import { auth, db } from "@/services";
 
 export const metadata: Metadata = {

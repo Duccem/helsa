@@ -6,13 +6,13 @@ import { AnimatePresence, m } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 import {
 	AVATAR_TYPES,
 	AvatarUploadUnavailableError,
 	uploadAvatar,
 	validateAvatar,
-} from "@/lib/avatar-upload";
+} from "@/lib/utils/avatar-upload";
 
 import { EASE_OUT } from "../therapist/parts";
 import { UserAvatar } from "../user-menu";

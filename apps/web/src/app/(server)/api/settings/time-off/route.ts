@@ -6,7 +6,7 @@ import { timeOffSchema } from "@/components/dashboard/settings/schema";
 import { fail, ok, readJson } from "@/lib/api/server";
 import { requireUser } from "@/lib/api/session";
 import { ensureTherapist } from "@/lib/settings";
-import { addDays, startOfZonedDay } from "@/lib/zoned-time";
+import { addDays, startOfZonedDay } from "@/lib/utils/zoned-time";
 import { db } from "@/services";
 
 /**

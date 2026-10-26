@@ -12,7 +12,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EASE_OUT, RevealItem } from "@/components/landing/motion/reveal";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 const inputClassName =
 	"h-12 rounded-full bg-background px-5 text-[15px] md:text-[15px] dark:bg-input/30";

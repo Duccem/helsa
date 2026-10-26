@@ -12,7 +12,7 @@ import {
 	RevealGroup,
 	RevealItem,
 } from "@/components/landing/motion/reveal";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { AuthHeader, AuthSwitch, SubmitButton, TextField } from "./form-parts";
 

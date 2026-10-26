@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { safeRedirect } from "@/lib/safe-redirect";
+import { safeRedirect } from "@/lib/utils/safe-redirect";
 import { auth, db } from "@/services";
 
 /**

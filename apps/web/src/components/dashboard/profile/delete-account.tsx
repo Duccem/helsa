@@ -11,7 +11,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { PasswordField, TextField } from "@/components/auth/form-parts";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import type { DashboardRole } from "../navigation";
 import { ActionButton, ProfileSection } from "./parts";

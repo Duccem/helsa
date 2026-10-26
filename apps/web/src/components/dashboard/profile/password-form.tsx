@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import z from "zod";
 import { PasswordField, PasswordStrength } from "@/components/auth/form-parts";
 import { useSetAccountPassword } from "@/lib/api/mutations";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { ActionButton, ProfileSection } from "./parts";
 

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { EASE_OUT } from "../therapist/parts";
 import { ActionButton, ProfileSection, timeAgo } from "./parts";

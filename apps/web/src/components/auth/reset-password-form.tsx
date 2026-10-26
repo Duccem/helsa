@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { RevealGroup, RevealItem } from "@/components/landing/motion/reveal";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth/auth-client";
 
 import {
 	AuthHeader,
