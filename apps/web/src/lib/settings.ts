@@ -17,7 +17,6 @@ import {
 	languages,
 	type Modality,
 	type PaymentMethod,
-	type PreferencesInput,
 	paymentMethods,
 	type TherapistSettings,
 	withDefaults,
@@ -32,27 +31,6 @@ export const toDbWeekday = (weekday: number) => (weekday + 1) % 7;
 
 const hhmm = (time: string) => time.slice(0, 5);
 
-/**
- * Therapists get their professional row the first time they save anything,
- * named after their account until they change it.
- */
-export async function ensureTherapist(user: { id: string; name: string }) {
-	await db
-		.insert(therapist)
-		.values({ user_id: user.id, display_name: user.name })
-		.onConflictDoNothing({ target: therapist.user_id });
-}
-
-export async function loadPreferences(
-	userId: string,
-): Promise<PreferencesInput> {
-	const [row] = await db
-		.select({ preferences: user_settings.preferences })
-		.from(user_settings)
-		.where(eq(user_settings.user_id, userId))
-		.limit(1);
-	return withDefaults(defaultPreferences, row?.preferences);
-}
 
 export async function loadTherapistSettings(user: {
 	id: string;
@@ -188,15 +166,3 @@ export async function loadTherapistSettings(user: {
 	};
 }
 
-/** Saves one part of `user_settings` without touching the other. */
-export async function saveUserSettings(
-	userId: string,
-	patch: Partial<
-		Pick<typeof user_settings.$inferInsert, "preferences" | "notifications">
-	>,
-) {
-	await db
-		.insert(user_settings)
-		.values({ user_id: userId, ...patch })
-		.onConflictDoUpdate({ target: user_settings.user_id, set: patch });
-}
