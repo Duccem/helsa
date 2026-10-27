@@ -8,6 +8,10 @@ export function ok<T extends object>(_data?: T) {
 	return new NextResponse(null, { status: 200 });
 }
 
+export function created() {
+	return NextResponse.json({ message: "saved" }, { status: 201 })
+}
+
 export function fail(error: string, status: number) {
 	return NextResponse.json({ ok: false, error }, { status });
 }

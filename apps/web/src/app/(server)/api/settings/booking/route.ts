@@ -1,56 +1,29 @@
-import { and, eq, ne } from "@helsa/db/operators";
-import { therapist } from "@helsa/db/schema/therapist";
-
+import type { NextRequest } from "next/server";
 import { bookingSchema } from "@/components/dashboard/settings/schema";
-import { fail, ok, readJson } from "@/lib/api/server";
-import { requireUser } from "@/lib/api/session";
-import { ensureTherapist } from "@/lib/settings";
-import { db } from "@/services";
+import { domainError, internalServerError, ok, readJson } from "@/lib/api/server";
+import { type AuthContext, withAuth } from "@/lib/auth/with-auth";
+import { SlugAlreadyTaken, TherapistNotFound } from "@/lib/core/therapist/domain/errors";
+import { SaveBookingInfo } from "@/lib/core/therapist/use-cases/save-booking-info";
 
-const TAKEN = "Ese enlace ya lo usa otra persona. Prueba con otro.";
+const saveBooking = new SaveBookingInfo();
 
-export async function PUT(request: Request) {
-	const { user, error } = await requireUser(request, { therapist: true });
-	if (error) return error;
+export const PUT = withAuth(
+	async (request: NextRequest, _, ctx: AuthContext) => {
+		const user = ctx.user;
+		const parsed = bookingSchema.parse(await readJson(request));
 
-	const parsed = bookingSchema.safeParse(await readJson(request));
-	if (!parsed.success) {
-		return fail(parsed.error.issues[0]?.message ?? "Revisa tus reservas.", 400);
-	}
-	const value = parsed.data;
-	const slug = value.slug || null;
+		await saveBooking.execute(parsed, user);
 
-	try {
-		await ensureTherapist(user);
-		if (slug) {
-			const [owner] = await db
-				.select({ user_id: therapist.user_id })
-				.from(therapist)
-				.where(
-					and(eq(therapist.booking_slug, slug), ne(therapist.user_id, user.id)),
-				)
-				.limit(1);
-			if (owner) return fail(TAKEN, 409);
+		return ok()
+	},
+	(error: TherapistNotFound | SlugAlreadyTaken) => {
+		switch (true) {
+			case error instanceof TherapistNotFound:
+				return domainError(error, 404);
+			case error instanceof SlugAlreadyTaken:
+				return domainError(error, 400)
+			default:
+				return internalServerError();
 		}
-		await db
-			.update(therapist)
-			.set({
-				booking_enabled: value.enabled,
-				booking_slug: slug,
-				modalities: value.modalities,
-				office_address: value.officeAddress,
-				booking_notice_hours: value.noticeHours,
-				cancellation_notice_hours: value.cancellationHours,
-			})
-			.where(eq(therapist.user_id, user.id));
-	} catch (cause) {
-		// Two people saving the same link at once: the unique index decides.
-		if ((cause as { code?: string } | null)?.code === "23505") {
-			return fail(TAKEN, 409);
-		}
-		console.error("PUT /api/settings/booking failed", cause);
-		return fail("No pudimos guardar tus reservas. Intenta de nuevo.", 500);
 	}
-
-	return ok();
-}
+)

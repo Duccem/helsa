@@ -7,7 +7,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { PasswordField, PasswordStrength } from "@/components/auth/form-parts";
-import { useSetAccountPassword } from "@/lib/api/mutations";
 import { authClient } from "@/lib/auth/auth-client";
 
 import { ActionButton, ProfileSection } from "./parts";
@@ -49,8 +48,8 @@ const empty = { current: "", password: "", confirm: "", signOutOthers: true };
 
 export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
 	const router = useRouter();
+	const { data } = authClient.useSession();
 	const [currentError, setCurrentError] = useState<string>();
-	const setPassword = useSetAccountPassword();
 
 	const form = useForm({
 		defaultValues: empty,
@@ -59,10 +58,18 @@ export function PasswordForm({ hasPassword }: { hasPassword: boolean }) {
 			setCurrentError(undefined);
 
 			if (!hasPassword) {
-				try {
-					await setPassword.mutateAsync(value.password);
-				} catch (error) {
-					toast.error((error as Error).message);
+				const { error } = await authClient.admin.setUserPassword({
+					userId: data?.user.id ?? "",
+					newPassword: value.password,
+				});
+				if (error) {
+					if (error.code === "PASSWORD_ALREADY_SET") {
+						setCurrentError(
+							"Tu cuenta ya tiene contraseña. Recarga la página.",
+						);
+						return;
+					}
+					setCurrentError("Error al establecer contraseña.");
 					return;
 				}
 				formApi.reset(empty);

@@ -5,8 +5,7 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { RevealGroup, RevealItem } from "@/components/landing/motion/reveal";
-import { useSignUpPatient } from "@/lib/api/mutations";
-
+import { authClient } from "@/lib/auth/auth-client";
 import {
 	AuthHeader,
 	AuthSwitch,
@@ -30,18 +29,23 @@ export function PatientSignUpForm({
 	const destination = redirectTo ?? "/dashboard";
 	const query = redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
-	const signUp = useSignUpPatient();
-
 	const form = useForm({
 		defaultValues: { name: "", email: "", password: "" },
 		validators: { onSubmit: signUpSchema },
 		onSubmit: async ({ value }) => {
 			try {
-				await signUp.mutateAsync({
-					name: value.name.trim(),
+				const { error, data } = await authClient.signUp.email({
 					email: value.email,
+					name: value.name,
 					password: value.password,
 				});
+
+				if (data && !error) {
+					await authClient.admin.updateUser({
+						data: { role: "patient" },
+						userId: data.user.id,
+					});
+				}
 			} catch (error) {
 				toast.error((error as Error).message);
 				return;

@@ -2,7 +2,6 @@
 
 import { useMutation } from "@tanstack/react-query";
 
-import type { SignUpInput } from "@/components/auth/sign-up-schema";
 import type { TimeOffInput } from "@/components/dashboard/settings/schema";
 import type { WaitlistInput } from "@/components/landing/waitlist-schema";
 
@@ -15,22 +14,6 @@ export function useJoinWaitlist() {
 	});
 }
 
-export function useSignUpPatient() {
-	return useMutation({
-		mutationFn: (input: SignUpInput) =>
-			apiFetch("/api/sign-up/patient", { method: "POST", body: input }),
-	});
-}
-
-export function useSetAccountPassword() {
-	return useMutation({
-		mutationFn: (newPassword: string) =>
-			apiFetch("/api/account/password", {
-				method: "POST",
-				body: { newPassword },
-			}),
-	});
-}
 
 export type SettingsSection =
 	| "professional"

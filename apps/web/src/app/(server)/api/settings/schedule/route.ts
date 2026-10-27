@@ -1,52 +1,57 @@
-import { eq } from "@helsa/db/operators";
-import { availability_rule, therapist } from "@helsa/db/schema/therapist";
+import type { NextRequest } from "next/server";
+import z from "zod";
+import { domainError, internalServerError, ok, readJson } from "@/lib/api/server";
+import { type AuthContext, withAuth } from "@/lib/auth/with-auth";
+import { TherapistNotFound } from "@/lib/core/therapist/domain/errors";
+import { SaveAvailabilityRules } from "@/lib/core/therapist/use-cases/save-availability-rules";
 
-import { scheduleSchema } from "@/components/dashboard/settings/schema";
-import { fail, ok, readJson } from "@/lib/api/server";
-import { requireUser } from "@/lib/api/session";
-import { ensureTherapist, toDbWeekday } from "@/lib/settings";
-import { db } from "@/services";
-
-/** Replaces the whole weekly schedule; it is small and always edited as one. */
-export async function PUT(request: Request) {
-	const { user, error } = await requireUser(request, { therapist: true });
-	if (error) return error;
-
-	const parsed = scheduleSchema.safeParse(await readJson(request));
-	if (!parsed.success) {
-		return fail(parsed.error.issues[0]?.message ?? "Revisa tu horario.", 400);
-	}
-	const value = parsed.data;
-
-	try {
-		await ensureTherapist(user);
-		await db.transaction(async (tx) => {
-			await tx
-				.update(therapist)
-				.set({
-					timezone: value.timezone,
-					default_session_minutes: value.sessionMinutes,
-					default_buffer_minutes: value.bufferMinutes,
-				})
-				.where(eq(therapist.user_id, user.id));
-			await tx
-				.delete(availability_rule)
-				.where(eq(availability_rule.therapist_id, user.id));
-			if (value.ranges.length > 0) {
-				await tx.insert(availability_rule).values(
-					value.ranges.map((range) => ({
-						therapist_id: user.id,
-						weekday: toDbWeekday(range.weekday),
-						start_time: `${range.start}:00`,
-						end_time: `${range.end}:00`,
-					})),
-				);
+const saveAvailabilityRules = new SaveAvailabilityRules();
+export const availabilityRangeSchema = z
+	.object({
+		/** 0 = Monday … 6 = Sunday (the database counts from Sunday). */
+		weekday: z.number().int().min(0).max(6),
+		start: z.string(),
+		end: z.string(),
+		id: z.string(),
+		modality: z.enum(["in_person", "video", "phone"]).nullable()
+	});
+const scheduleSchema = z
+	.object({
+		timezone: z.string().refine((zone) => {
+			try {
+				new Intl.DateTimeFormat("en-US", { timeZone: zone });
+				return true;
+			} catch {
+				return false;
 			}
-		});
-	} catch (cause) {
-		console.error("PUT /api/settings/schedule failed", cause);
-		return fail("No pudimos guardar tu horario. Intenta de nuevo.", 500);
-	}
+		}, "Elige una zona horaria de la lista."),
+		sessionMinutes: z
+			.number()
+			.int()
+			.min(15, "Una sesión dura 15 minutos o más.")
+			.max(180, "Una sesión dura 3 horas o menos."),
+		bufferMinutes: z
+			.number()
+			.int()
+			.min(0, "La pausa no puede ser negativa.")
+			.max(60, "Usa una pausa de una hora o menos."),
+		ranges: z.array(availabilityRangeSchema).max(40, "Son demasiadas franjas."),
+	})
 
-	return ok();
-}
+export const PUT = withAuth(
+	async (request: NextRequest, _, ctx: AuthContext) => {
+		const parsed = scheduleSchema.parse(await readJson(request));
+
+		await saveAvailabilityRules.execute(parsed, ctx.user);
+
+		return ok();
+	},
+	(error: TherapistNotFound) => {
+		switch (true) {
+			case error instanceof TherapistNotFound:
+				return domainError(error, 404);
+			default:
+				return internalServerError();
+		}
+	}
+)

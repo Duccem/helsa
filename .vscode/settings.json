@@ -20,8 +20,12 @@
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "cSpell.words": [
+    "binance",
     "evlog",
-    "Evlog"
+    "Evlog",
+    "movil",
+    "usdt",
+    "zelle"
   ]
 }
 
