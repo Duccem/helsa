@@ -1,7 +1,7 @@
-import { eq, } from "@helsa/db/operators";
-import { availability_rule, therapist, therapist_rate } from "@helsa/db/schema/therapist";
+import { and, eq, } from "@helsa/db/operators";
+import { availability_block, availability_rule, therapist, therapist_rate } from "@helsa/db/schema/therapist";
 import { db } from "@/services";
-import type { Therapist, TherapistAvailabilityRule, TherapistRate } from "../domain/types";
+import type { Therapist, TherapistAvailabilityRule, TherapistRate, } from "../domain/types";
 
 export class TherapistRepository {
   async getBySlug(slug: string) {
@@ -35,5 +35,25 @@ export class TherapistRepository {
   async saveRules(data: TherapistAvailabilityRule[], user_id: string) {
     await db.delete(availability_rule).where(eq(therapist_rate.therapist_id, user_id));
     await db.insert(availability_rule).values(data)
+  }
+
+  async saveTimeOff(data: { starts_at: Date, ends_at: Date, reason: string }, user_id: string) {
+    await db.insert(availability_block).values({
+      therapist_id: user_id,
+      starts_at: data.starts_at,
+      ends_at: data.ends_at,
+      reason: data.reason,
+    })
+  }
+
+  async deleteTimeOff(block_id: string, user_id: string) {
+    await db
+      .delete(availability_block)
+      .where(
+        and(
+          eq(availability_block.id, block_id),
+          eq(availability_block.therapist_id, user_id),
+        ),
+      )
   }
 }
