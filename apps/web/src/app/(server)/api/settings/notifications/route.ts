@@ -1,35 +1,26 @@
-import { eq } from "@helsa/db/operators";
-import { therapist } from "@helsa/db/schema/therapist";
-
+import type { NextRequest } from "next/server";
 import { notificationsSchema } from "@/components/dashboard/settings/schema";
-import { fail, ok, readJson } from "@/lib/api/server";
-import { requireUser } from "@/lib/api/session";
-import { ensureTherapist, saveUserSettings } from "@/lib/settings";
-import { db } from "@/services";
+import { domainError, internalServerError, ok, readJson } from "@/lib/api/server";
+import { type AuthContext, withAuth } from "@/lib/auth/with-auth";
+import { SaveNotificationsSettings } from "@/lib/core/settings/use-cases/save-notifications";
+import { TherapistNotFound } from "@/lib/core/therapist/domain/errors";
 
-export async function PUT(request: Request) {
-	const { user, error } = await requireUser(request, { therapist: true });
-	if (error) return error;
+const saveNotificationsSettings = new SaveNotificationsSettings();
 
-	const parsed = notificationsSchema.safeParse(await readJson(request));
-	if (!parsed.success) {
-		return fail(parsed.error.issues[0]?.message ?? "Revisa tus avisos.", 400);
+export const PUT = withAuth(
+	async (request: NextRequest, _, ctx: AuthContext) => {
+		const parsed = notificationsSchema.parse(await readJson(request));
+
+		await saveNotificationsSettings.execute(parsed, ctx.user);
+		return ok()
+	},
+	(error: TherapistNotFound) => {
+		switch (true) {
+			case error instanceof TherapistNotFound:
+				return domainError(error, 404);
+			default:
+				return internalServerError();
+		}
 	}
-	const { remindersEnabled, ...notifications } = parsed.data;
+)
 
-	try {
-		await ensureTherapist(user);
-		await Promise.all([
-			db
-				.update(therapist)
-				.set({ reminders_enabled: remindersEnabled })
-				.where(eq(therapist.user_id, user.id)),
-			saveUserSettings(user.id, { notifications }),
-		]);
-	} catch (cause) {
-		console.error("PUT /api/settings/notifications failed", cause);
-		return fail("No pudimos guardar tus avisos. Intenta de nuevo.", 500);
-	}
-
-	return ok();
-}

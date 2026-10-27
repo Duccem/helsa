@@ -1,27 +1,15 @@
+import type { NextRequest } from "next/server";
 import { preferencesSchema } from "@/components/dashboard/settings/schema";
-import { fail, ok, readJson } from "@/lib/api/server";
-import { requireUser } from "@/lib/api/session";
-import { saveUserSettings } from "@/lib/settings";
+import { ok, readJson } from "@/lib/api/server";
+import { type AuthContext, withAuth } from "@/lib/auth/with-auth";
+import { SavePreferences } from "@/lib/core/settings/use-cases/save-preferences";
 
-/** Open to every role: patients have app preferences too. */
-export async function PUT(request: Request) {
-	const { user, error } = await requireUser(request);
-	if (error) return error;
+const savePreferences = new SavePreferences();
 
-	const parsed = preferencesSchema.safeParse(await readJson(request));
-	if (!parsed.success) {
-		return fail(
-			parsed.error.issues[0]?.message ?? "Revisa tus preferencias.",
-			400,
-		);
-	}
+export const PUT = withAuth(async (request: NextRequest, _, ctx: AuthContext) => {
+	const parsed = preferencesSchema.parse(await readJson(request));
 
-	try {
-		await saveUserSettings(user.id, { preferences: parsed.data });
-	} catch (cause) {
-		console.error("PUT /api/settings/preferences failed", cause);
-		return fail("No pudimos guardar tus preferencias. Intenta de nuevo.", 500);
-	}
-
+	await savePreferences.execute(parsed, ctx.user);
 	return ok();
-}
+})
+
