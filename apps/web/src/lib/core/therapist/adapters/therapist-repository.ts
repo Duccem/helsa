@@ -1,4 +1,4 @@
-import { and, eq, } from "@helsa/db/operators";
+import { and, asc, eq, } from "@helsa/db/operators";
 import { availability_block, availability_rule, therapist, therapist_rate } from "@helsa/db/schema/therapist";
 import { db } from "@/services";
 import type { Therapist, TherapistAvailabilityRule, TherapistRate, } from "../domain/types";
@@ -55,5 +55,35 @@ export class TherapistRepository {
           eq(availability_block.therapist_id, user_id),
         ),
       )
+  }
+
+  async getRates(user_id: string) {
+    const rates = await db
+      .select()
+      .from(therapist_rate)
+      .where(eq(therapist_rate.therapist_id, user_id))
+      .orderBy(asc(therapist_rate.position), asc(therapist_rate.created_at))
+    return rates;
+  }
+
+  async getRules(user_id: string) {
+    const rules = await db
+      .select()
+      .from(availability_rule)
+      .where(eq(availability_rule.therapist_id, user_id))
+      .orderBy(
+        asc(availability_rule.weekday),
+        asc(availability_rule.start_time),
+      );
+    return rules;
+  }
+
+  async getTimeOffs(user_id: string) {
+    const blocks = await db
+      .select()
+      .from(availability_block)
+      .where(eq(availability_block.therapist_id, user_id))
+      .orderBy(asc(availability_block.starts_at))
+    return blocks;
   }
 }

@@ -3,17 +3,21 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { toDashboardRole } from "@/components/dashboard/navigation";
-import type { PreferencesInput } from "@/components/dashboard/settings/schema";
+import type {
+	PreferencesInput,
+	TherapistSettings,
+} from "@/components/dashboard/settings/schema";
 import {
 	PatientSettingsPage,
 	TherapistSettingsPage,
 } from "@/components/dashboard/settings/settings-page";
 import { LoadPreferences } from "@/lib/core/settings/use-cases/load-preferences";
-import { loadTherapistSettings } from "@/lib/settings";
+import { LoadTherapistSettings } from "@/lib/core/settings/use-cases/load-therapist-settings";
 import { auth } from "@/services";
 
 export const metadata: Metadata = { title: "Configuración" };
 const loadPreferences = new LoadPreferences();
+const loadTherapistSettings = new LoadTherapistSettings();
 
 export default async function Page() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -34,10 +38,6 @@ export default async function Page() {
 		);
 	}
 
-	const settings = await loadTherapistSettings({
-		id: user.id,
-		name: user.name,
-		email: user.email,
-	});
-	return <TherapistSettingsPage settings={settings} />;
+	const settings = await loadTherapistSettings.execute(user);
+	return <TherapistSettingsPage settings={settings as TherapistSettings} />;
 }
