@@ -9,7 +9,7 @@ export function ok<T extends object>(_data?: T) {
 }
 
 export function created() {
-	return NextResponse.json({ message: "saved" }, { status: 201 })
+	return NextResponse.json({ message: "saved" }, { status: 201 });
 }
 
 export function fail(error: string, status: number) {
@@ -61,7 +61,8 @@ export const withError = <T = any>(
 		async (req: NextRequest, { params }: { params: Promise<T> }) => {
 			const log = useLogger();
 			try {
-				return closure(req, params);
+				// Awaited so errors thrown by the async handler land in the catch below.
+				return await closure(req, params);
 			} catch (error) {
 				log.error(error as Error);
 				switch (true) {

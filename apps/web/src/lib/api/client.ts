@@ -33,7 +33,10 @@ export async function apiFetch<T = void>(
 
 	const data = await response.json().catch(() => null);
 	if (!response.ok || data?.ok === false) {
-		throw new ApiError(data?.error ?? FALLBACK, response.status);
+		throw new ApiError(
+			data?.error ?? data?.message ?? FALLBACK,
+			response.status,
+		);
 	}
 	return data as T;
 }

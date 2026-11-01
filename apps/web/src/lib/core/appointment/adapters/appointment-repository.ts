@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, gte, inArray, lt, sql } from "@helsa/db/operators";
+import { and, asc, desc, eq, gt, gte, inArray, lt, sql } from "@helsa/db/operators";
 import { appointment } from "@helsa/db/schema/appointment";
 import { patient } from "@helsa/db/schema/patient";
 import { db } from "@/services";
@@ -78,5 +78,19 @@ export class AppointmentRepository {
       );
 
     return response?.count ?? 0;
+  }
+
+  /** Every appointment of one patient, newest first. */
+  async getByPatient(patient_id: string, therapist_id: string) {
+    return db
+      .select()
+      .from(appointment)
+      .where(
+        and(
+          eq(appointment.patient_id, patient_id),
+          eq(appointment.therapist_id, therapist_id),
+        ),
+      )
+      .orderBy(desc(appointment.starts_at));
   }
 }
