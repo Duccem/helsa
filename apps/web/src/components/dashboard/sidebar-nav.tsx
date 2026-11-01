@@ -16,6 +16,7 @@ import { Logo, LogoMark } from "@/components/landing/logo";
 import {
 	type DashboardUser,
 	isActive,
+	type NavBadges,
 	type NavItem,
 	navByRole,
 	settingsItem,
@@ -49,10 +50,12 @@ function WithTooltip({
 function NavLink({
 	item,
 	collapsed,
+	badge = item.badge,
 	onNavigate,
 }: {
 	item: NavItem;
 	collapsed: boolean;
+	badge?: number;
 	onNavigate?: () => void;
 }) {
 	const pathname = usePathname();
@@ -83,15 +86,15 @@ function NavLink({
 				<span className={collapsed ? "sr-only" : "flex-1 truncate"}>
 					{item.label}
 				</span>
-				{item.badge ? (
+				{badge ? (
 					collapsed ? (
 						<span className="absolute top-2 right-2 size-2 rounded-full bg-chapter-violet ring-2 ring-dash-ground dark:bg-primary">
-							<span className="sr-only">, {item.badge} pendientes</span>
+							<span className="sr-only">, {badge} pendientes</span>
 						</span>
 					) : (
 						<span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-chapter-lilac px-2 font-semibold text-[13px] text-chapter-violet tabular-nums dark:text-foreground">
 							<span className="sr-only">, </span>
-							{item.badge}
+							{badge}
 							<span className="sr-only"> pendientes</span>
 						</span>
 					)
@@ -180,10 +183,12 @@ function BookingLink({
 
 export function SidebarNav({
 	user,
+	badges,
 	collapsed = false,
 	onNavigate,
 }: {
 	user: DashboardUser;
+	badges?: NavBadges;
 	collapsed?: boolean;
 	onNavigate?: () => void;
 }) {
@@ -219,6 +224,7 @@ export function SidebarNav({
 							<NavLink
 								item={item}
 								collapsed={collapsed}
+								badge={badges?.[item.href] ?? item.badge}
 								onNavigate={onNavigate}
 							/>
 						</li>

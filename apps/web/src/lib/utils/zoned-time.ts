@@ -46,6 +46,16 @@ export function addDays(day: string, amount: number) {
 		.slice(0, 10);
 }
 
+/** The wall-clock time ("09:30") of an instant in `timeZone`. */
+export function zonedTime(instant: Date, timeZone: string) {
+	return new Intl.DateTimeFormat("en-GB", {
+		timeZone,
+		hourCycle: "h23",
+		hour: "2-digit",
+		minute: "2-digit",
+	}).format(instant);
+}
+
 /** The calendar day ("2026-12-24") an instant falls on in `timeZone`. */
 export function zonedDay(instant: Date, timeZone: string) {
 	return new Intl.DateTimeFormat("en-CA", {

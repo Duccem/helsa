@@ -5,7 +5,7 @@ import { Menu, PanelLeftClose, PanelLeftOpen, Search } from "lucide-react";
 import { domMax, LazyMotion, MotionConfig } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
-import type { DashboardUser } from "./navigation";
+import type { DashboardUser, NavBadges } from "./navigation";
 import { NotificationsButton, NotificationsProvider } from "./notifications";
 import { SidebarNav } from "./sidebar-nav";
 import { SIDEBAR_COOKIE } from "./sidebar-state";
@@ -35,10 +35,12 @@ function SearchField() {
 
 export function DashboardShell({
 	user,
+	badges,
 	defaultCollapsed = false,
 	children,
 }: {
 	user: DashboardUser;
+	badges?: NavBadges;
 	/** Read from the cookie on the server, so the first paint has the right width. */
 	defaultCollapsed?: boolean;
 	children: React.ReactNode;
@@ -82,7 +84,7 @@ export function DashboardShell({
 							id="dashboard-sidebar"
 							className="sticky top-0 hidden h-svh overflow-hidden lg:block"
 						>
-							<SidebarNav user={user} collapsed={collapsed} />
+							<SidebarNav user={user} badges={badges} collapsed={collapsed} />
 						</aside>
 
 						<Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -92,7 +94,11 @@ export function DashboardShell({
 								className="w-[18rem] border-r-0 bg-dash-ground p-0 text-foreground"
 							>
 								<SheetTitle className="sr-only">Menú</SheetTitle>
-								<SidebarNav user={user} onNavigate={() => setMenuOpen(false)} />
+								<SidebarNav
+									user={user}
+									badges={badges}
+									onNavigate={() => setMenuOpen(false)}
+								/>
 							</SheetContent>
 						</Sheet>
 

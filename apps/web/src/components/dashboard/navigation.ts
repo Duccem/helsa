@@ -10,13 +10,16 @@ import {
 } from "lucide-react";
 import type { Route } from "next";
 
+/** Live counts for the sidebar, keyed by the item's href. */
+export type NavBadges = Partial<Record<string, number>>;
+
 export type DashboardRole = "therapist" | "patient";
 
 export type NavItem = {
 	href: Route;
 	label: string;
 	icon: LucideIcon;
-	/** Sample count shown next to the label until real data is wired. */
+	/** Static count shown next to the label; `badges` from the server win over it. */
 	badge?: number;
 };
 
@@ -48,7 +51,6 @@ const therapistNav: NavItem[] = [
 		href: "/dashboard/schedule",
 		label: "Agenda",
 		icon: CalendarDays,
-		badge: 3,
 	},
 	{ href: "/dashboard/patients", label: "Pacientes", icon: Users },
 	{ href: "/dashboard/notes", label: "Notas clínicas", icon: NotebookPen },

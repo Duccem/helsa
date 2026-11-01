@@ -4,11 +4,24 @@ import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import {
 	type DashboardUser,
+	type NavBadges,
 	toDashboardRole,
 } from "@/components/dashboard/navigation";
 import { SIDEBAR_COOKIE } from "@/components/dashboard/sidebar-state";
+import { CountPendingAppointments } from "@/lib/core/appointment/use-cases/count-pending-appointments";
 import { figtree, outfit } from "@/lib/fonts";
 import { auth } from "@/services";
+
+const countPendingAppointments = new CountPendingAppointments();
+
+/** Live counts for the therapist sidebar. A failed count hides the badge instead of the dashboard. */
+async function loadBadges(user: DashboardUser & { id: string }) {
+	if (user.role !== "therapist") return undefined;
+	const pending = await countPendingAppointments
+		.execute(user.id)
+		.catch(() => undefined);
+	return { "/dashboard/schedule": pending } satisfies NavBadges;
+}
 
 export default async function DashboardLayout({
 	children,
@@ -31,9 +44,15 @@ export default async function DashboardLayout({
 		role: toDashboardRole(session.user.role),
 	};
 
+	const badges = await loadBadges({ ...user, id: session.user.id });
+
 	return (
 		<div className={`${outfit.variable} ${figtree.variable} font-landing`}>
-			<DashboardShell user={user} defaultCollapsed={sidebarCollapsed}>
+			<DashboardShell
+				user={user}
+				badges={badges}
+				defaultCollapsed={sidebarCollapsed}
+			>
 				{children}
 			</DashboardShell>
 		</div>
