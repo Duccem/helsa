@@ -20,14 +20,16 @@ export class SaveBookingInfo {
   async execute(data: SaveBookingInfoInput, user: BetterUser) {
     await this.ensurer.execute(user);
 
-    const therapist = await this.repository.getBySlug(data.slug);
+    const slugOwner = await this.repository.getBySlug(data.slug);
+
+    if (slugOwner && slugOwner.user_id !== user.id) {
+      throw new SlugAlreadyTaken(data.slug);
+    }
+
+    const therapist = await this.repository.getById(user.id);
 
     if (!therapist) {
       throw new TherapistNotFound();
-    }
-
-    if (therapist.user_id !== user.id) {
-      throw new SlugAlreadyTaken(data.slug);
     }
 
     const updatedTherapist = this.updateBooking(data, therapist);

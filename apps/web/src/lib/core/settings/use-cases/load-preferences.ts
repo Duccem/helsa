@@ -14,6 +14,6 @@ export class LoadPreferences {
   async execute(user_id: string) {
     const row = await this.repository.getSettings(user_id);
 
-    return withDefaults(defaultPreferences, row.preferences);
+    return withDefaults(defaultPreferences, row?.preferences);
   }
 }

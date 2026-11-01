@@ -52,7 +52,7 @@ export class LoadTherapistSettings {
         yearsExperience: profile?.years_experience ?? null,
         bio: profile?.bio ?? "",
         specialties: profile?.specialties ?? [],
-        languages: profile.languages ?? [],
+        languages: profile?.languages ?? [],
         phone: profile?.phone_e164 ?? "",
         countryCode: profile?.country_code ?? "VE",
       },
@@ -110,7 +110,7 @@ export class LoadTherapistSettings {
       },
       notifications: {
         remindersEnabled: profile?.reminders_enabled ?? true,
-        ...withDefaults(defaultNotifications, settings.notifications),
+        ...withDefaults(defaultNotifications, settings?.notifications),
       },
       preferences: withDefaults(defaultPreferences, settings?.preferences),
     }

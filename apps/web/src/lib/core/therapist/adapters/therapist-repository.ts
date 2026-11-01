@@ -33,7 +33,7 @@ export class TherapistRepository {
   }
 
   async saveRules(data: TherapistAvailabilityRule[], user_id: string) {
-    await db.delete(availability_rule).where(eq(therapist_rate.therapist_id, user_id));
+    await db.delete(availability_rule).where(eq(availability_rule.therapist_id, user_id));
     await db.insert(availability_rule).values(data)
   }
 
