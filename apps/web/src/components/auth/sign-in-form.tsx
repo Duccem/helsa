@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -24,8 +25,10 @@ const schema = z.object({
 	password: z.string().min(1, "Escribe tu contraseña."),
 });
 
-export function SignInForm() {
+export function SignInForm({ redirectTo }: { redirectTo?: string } = {}) {
 	const router = useRouter();
+	const destination = redirectTo ?? "/dashboard";
+	const query = redirectTo ? `?redirect=${encodeURIComponent(redirectTo)}` : "";
 
 	const form = useForm({
 		defaultValues: { email: "", password: "" },
@@ -44,7 +47,7 @@ export function SignInForm() {
 				);
 				return;
 			}
-			router.push("/dashboard");
+			router.push(destination as Route);
 		},
 	});
 
@@ -114,12 +117,19 @@ export function SignInForm() {
 			</RevealItem>
 
 			<RevealItem className="space-y-4">
-				<GoogleButton label="Entrar con Google" />
+				<GoogleButton
+					label="Entrar con Google"
+					callbackURL={destination}
+					// Someone coming back to a booking who has no account yet becomes a patient.
+					newUserCallbackURL={
+						redirectTo ? `/sign-up/patient/complete${query}` : undefined
+					}
+				/>
 			</RevealItem>
 
 			<AuthSwitch
 				prompt="¿Aún no tienes cuenta?"
-				href="/sign-up"
+				href={(redirectTo ? `/sign-up/patient${query}` : "/sign-up") as Route}
 				label="Crea la tuya"
 			/>
 		</RevealGroup>

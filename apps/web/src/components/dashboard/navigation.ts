@@ -28,6 +28,8 @@ export type DashboardUser = {
 	email: string;
 	image: string | null;
 	role: DashboardRole;
+	/** Therapists only: the public booking slug, when the link is on. */
+	bookingSlug?: string | null;
 };
 
 /**

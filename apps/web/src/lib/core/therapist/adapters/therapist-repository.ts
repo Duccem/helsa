@@ -1,5 +1,6 @@
 import { and, asc, eq, } from "@helsa/db/operators";
 import { availability_block, availability_rule, therapist, therapist_rate } from "@helsa/db/schema/therapist";
+import { user } from "@helsa/db/schema/auth";
 import { db } from "@/services";
 import type { Therapist, TherapistAvailabilityRule, TherapistRate, } from "../domain/types";
 
@@ -85,5 +86,16 @@ export class TherapistRepository {
       .where(eq(availability_block.therapist_id, user_id))
       .orderBy(asc(availability_block.starts_at))
     return blocks;
+  }
+
+  /** The account photo, shown on the public booking page. */
+  async getAccountImage(user_id: string) {
+    const [response] = await db
+      .select({ image: user.image })
+      .from(user)
+      .where(eq(user.id, user_id))
+      .limit(1);
+
+    return response?.image ?? null;
   }
 }

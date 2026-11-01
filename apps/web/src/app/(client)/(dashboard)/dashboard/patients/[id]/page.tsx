@@ -6,7 +6,6 @@ import { toDashboardRole } from "@/components/dashboard/navigation";
 import {
 	PatientProfileView,
 	type ProfileTab,
-	profileTabs,
 } from "@/components/dashboard/patients/patient-profile";
 import { PatientNotFound } from "@/lib/core/patient/domain/errors";
 import { LoadPatientProfile } from "@/lib/core/patient/use-cases/load-patient-profile";
@@ -41,7 +40,13 @@ export default async function Page({
 			throw error;
 		});
 
-	const initialTab = profileTabs.includes(tab as ProfileTab)
+	const initialTab = [
+		"resumen",
+		"notas",
+		"tareas",
+		"archivos",
+		"historial",
+	].includes(tab as ProfileTab)
 		? (tab as ProfileTab)
 		: "resumen";
 

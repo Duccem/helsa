@@ -91,4 +91,49 @@ export class PatientRepository {
       .set(data)
       .where(and(eq(patient.id, data.id), eq(patient.therapist_id, data.therapist_id)));
   }
+
+  async findByUser(therapist_id: string, user_id: string) {
+    const [response] = await db
+      .select()
+      .from(patient)
+      .where(
+        and(
+          eq(patient.therapist_id, therapist_id),
+          eq(patient.user_id, user_id),
+          isNull(patient.deleted_at),
+        ),
+      )
+      .limit(1);
+
+    return response;
+  }
+
+  /** A record the therapist created by hand, not linked to an account yet. */
+  async findUnlinkedByEmail(therapist_id: string, email: string) {
+    const [response] = await db
+      .select()
+      .from(patient)
+      .where(
+        and(
+          eq(patient.therapist_id, therapist_id),
+          isNull(patient.user_id),
+          isNull(patient.deleted_at),
+          sql`lower(${patient.email}) = ${email.toLowerCase()}`,
+        ),
+      )
+      .limit(1);
+
+    return response;
+  }
+
+  /** `patient.user_id` is unique: an account links to one record at most. */
+  async isUserLinked(user_id: string) {
+    const [response] = await db
+      .select({ id: patient.id })
+      .from(patient)
+      .where(eq(patient.user_id, user_id))
+      .limit(1);
+
+    return Boolean(response);
+  }
 }

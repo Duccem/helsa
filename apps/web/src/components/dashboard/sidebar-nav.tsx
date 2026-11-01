@@ -6,10 +6,11 @@ import {
 	TooltipTrigger,
 } from "@helsa/ui/components/tooltip";
 import { cn } from "@helsa/ui/lib/utils";
-import { Check, Copy, Link2 } from "lucide-react";
+import { Check, Copy, ExternalLink, Link2 } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Logo, LogoMark } from "@/components/landing/logo";
 
@@ -104,34 +105,62 @@ function NavLink({
 	);
 }
 
-function toSlug(name: string) {
-	return name
-		.normalize("NFD")
-		.replace(/[̀-ͯ]/g, "")
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-|-$/g, "");
-}
-
-/** The therapist's public booking link (sample until `booking_slug` is wired). */
+/** The therapist's public booking link, or a nudge to turn it on. */
 function BookingLink({
-	name,
+	slug,
 	collapsed,
+	onNavigate,
 }: {
-	name: string;
+	slug: string | null;
 	collapsed: boolean;
+	onNavigate?: () => void;
 }) {
 	const [copied, setCopied] = useState(false);
-	const link = `helsa.app/r/${toSlug(name) || "tu-nombre"}`;
+	// The real host is only known in the browser; the server renders the brand one.
+	const [host, setHost] = useState("helsa.app");
+	useEffect(() => setHost(window.location.host), []);
+	const path = `/r/${slug}`;
 
 	async function copy() {
 		try {
-			await navigator.clipboard.writeText(`https://${link}`);
+			await navigator.clipboard.writeText(`${window.location.origin}${path}`);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1800);
 		} catch {
 			setCopied(false);
 		}
+	}
+
+	if (!slug) {
+		const href = "/dashboard/settings#reservas" as Route;
+		return collapsed ? (
+			<WithTooltip label="Activa tu enlace de reservas" enabled>
+				<Link
+					href={href}
+					onClick={onNavigate}
+					aria-label="Activa tu enlace de reservas"
+					className="inline-flex size-11 items-center justify-center rounded-full bg-chapter-lilac text-chapter-violet outline-none transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring dark:text-foreground"
+				>
+					<Link2 aria-hidden="true" className="size-[1.15rem]" />
+				</Link>
+			</WithTooltip>
+		) : (
+			<div className="rounded-3xl bg-chapter-lilac p-5">
+				<p className="font-display font-medium text-lg leading-tight">
+					Activa tu enlace de reservas
+				</p>
+				<p className="mt-1.5 text-[14px] text-foreground/80 leading-snug">
+					Tus pacientes eligen su hora sin escribirte.
+				</p>
+				<Link
+					href={href}
+					onClick={onNavigate}
+					className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-full bg-chapter-violet font-semibold text-[14px] text-white outline-none transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+				>
+					Configurar
+				</Link>
+			</div>
+		);
 	}
 
 	if (collapsed) {
@@ -164,7 +193,19 @@ function BookingLink({
 			<p className="mt-1.5 text-[14px] text-white/85 leading-snug">
 				Compártelo por WhatsApp y tus pacientes eligen su hora.
 			</p>
-			<p className="mt-3 truncate font-semibold text-[14px]">{link}</p>
+			<a
+				href={path}
+				target="_blank"
+				rel="noopener"
+				className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-sm font-semibold text-[14px] underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-white"
+			>
+				<span className="truncate">
+					{host}
+					{path}
+				</span>
+				<ExternalLink aria-hidden="true" className="size-3.5 shrink-0" />
+				<span className="sr-only">(abre en otra pestaña)</span>
+			</a>
 			<button
 				type="button"
 				onClick={copy}
@@ -236,7 +277,11 @@ export function SidebarNav({
 				className={cn("flex flex-col gap-4", collapsed ? "items-center" : "")}
 			>
 				{user.role === "therapist" ? (
-					<BookingLink name={user.name} collapsed={collapsed} />
+					<BookingLink
+						slug={user.bookingSlug ?? null}
+						collapsed={collapsed}
+						onNavigate={onNavigate}
+					/>
 				) : null}
 				<NavLink
 					item={settingsItem}

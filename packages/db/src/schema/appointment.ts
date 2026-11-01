@@ -78,6 +78,8 @@ export const appointment = pgTable(
     status: appointment_status().notNull().default("scheduled"),
     booked_via: booking_source().notNull().default("therapist"),
     price_usd: t.numeric({ precision: 12, scale: 2 }), // price frozen at booking time
+    // How the patient said they will pay (a `payment_method` value; text to avoid a circular import).
+    payment_method: t.text(),
     location: t.text(), // in person only
     confirmed_at: t.timestamp({ withTimezone: true }),
     cancelled_at: t.timestamp({ withTimezone: true }),

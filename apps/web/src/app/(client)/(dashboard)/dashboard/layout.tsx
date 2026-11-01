@@ -9,10 +9,12 @@ import {
 } from "@/components/dashboard/navigation";
 import { SIDEBAR_COOKIE } from "@/components/dashboard/sidebar-state";
 import { CountPendingAppointments } from "@/lib/core/appointment/use-cases/count-pending-appointments";
+import { LoadBookingLink } from "@/lib/core/therapist/use-cases/load-booking-link";
 import { figtree, outfit } from "@/lib/fonts";
 import { auth } from "@/services";
 
 const countPendingAppointments = new CountPendingAppointments();
+const loadBookingLink = new LoadBookingLink();
 
 /** Live counts for the therapist sidebar. A failed count hides the badge instead of the dashboard. */
 async function loadBadges(user: DashboardUser & { id: string }) {
@@ -44,7 +46,13 @@ export default async function DashboardLayout({
 		role: toDashboardRole(session.user.role),
 	};
 
-	const badges = await loadBadges({ ...user, id: session.user.id });
+	const [badges, bookingLink] = await Promise.all([
+		loadBadges({ ...user, id: session.user.id }),
+		user.role === "therapist"
+			? loadBookingLink.execute(session.user.id).catch(() => null)
+			: null,
+	]);
+	user.bookingSlug = bookingLink?.enabled ? bookingLink.slug : null;
 
 	return (
 		<div className={`${outfit.variable} ${figtree.variable} font-landing`}>
