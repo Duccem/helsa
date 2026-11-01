@@ -5,6 +5,8 @@ import { AnimatePresence, m } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { authClient } from "@/lib/auth/auth-client";
+
 import { ChapterInner } from "./chapter";
 import { navLinks } from "./content";
 import { CtaLink } from "./cta-link";
@@ -17,6 +19,8 @@ const linkClassName =
 export function SiteNav() {
 	const [open, setOpen] = useState(false);
 	const close = () => setOpen(false);
+	const { data: session, isPending } = authClient.useSession();
+	const signedIn = Boolean(session?.user);
 
 	return (
 		<header className="sticky top-0 z-50 bg-background">
@@ -42,12 +46,32 @@ export function SiteNav() {
 				</nav>
 
 				<div className="flex items-center gap-5">
-					<Link href="/sign-in" className={`${linkClassName} hidden sm:inline`}>
-						Entrar
-					</Link>
-					<CtaLink href="#lista" size="sm" className="hidden sm:inline-flex">
-						Quiero acceso
-					</CtaLink>
+					{!isPending &&
+						(signedIn ? (
+							<CtaLink
+								href="/dashboard"
+								size="sm"
+								className="hidden sm:inline-flex"
+							>
+								Ir al dashboard
+							</CtaLink>
+						) : (
+							<>
+								<Link
+									href="/sign-in"
+									className={`${linkClassName} hidden sm:inline`}
+								>
+									Entrar
+								</Link>
+								<CtaLink
+									href="#lista"
+									size="sm"
+									className="hidden sm:inline-flex"
+								>
+									Quiero acceso
+								</CtaLink>
+							</>
+						))}
 					<button
 						type="button"
 						className="inline-flex size-11 items-center justify-center rounded-full text-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:scale-95 md:hidden"
@@ -84,19 +108,34 @@ export function SiteNav() {
 									</a>
 								</li>
 							))}
-							<li>
-								<Link
-									href="/sign-in"
-									className="block py-3 font-display text-2xl"
-								>
-									Entrar
-								</Link>
-							</li>
-							<li className="pt-3">
-								<CtaLink href="#lista" onClick={close} className="w-full">
-									Quiero acceso anticipado
-								</CtaLink>
-							</li>
+							{!isPending &&
+								(signedIn ? (
+									<li className="pt-3">
+										<CtaLink
+											href="/dashboard"
+											onClick={close}
+											className="w-full"
+										>
+											Ir al dashboard
+										</CtaLink>
+									</li>
+								) : (
+									<>
+										<li>
+											<Link
+												href="/sign-in"
+												className="block py-3 font-display text-2xl"
+											>
+												Entrar
+											</Link>
+										</li>
+										<li className="pt-3">
+											<CtaLink href="#lista" onClick={close} className="w-full">
+												Quiero acceso anticipado
+											</CtaLink>
+										</li>
+									</>
+								))}
 						</ul>
 					</m.nav>
 				)}
