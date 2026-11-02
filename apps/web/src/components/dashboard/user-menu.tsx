@@ -18,6 +18,7 @@ import { cn } from "@helsa/ui/lib/utils";
 import {
 	BellRing,
 	ChevronDown,
+	House,
 	LogOut,
 	Monitor,
 	Moon,
@@ -154,6 +155,13 @@ export function UserMenu({ user }: { user: DashboardUser }) {
 					>
 						<Settings />
 						Configuración
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						className={itemClass}
+						render={<Link href="/" />}
+					>
+						<House />
+						Ir al inicio
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 
