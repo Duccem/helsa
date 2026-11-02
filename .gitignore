@@ -57,3 +57,6 @@ coverage
 .cache
 tmp
 temp
+
+# Jitsi local config (docker/jitsi)
+.jitsi-meet-cfg

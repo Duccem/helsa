@@ -229,3 +229,31 @@ export function useSendReminder() {
 			}),
 	});
 }
+
+// ─── Video sessions ──────────────────────────────────────────────────────────
+
+/** The patient's join link for a video appointment (creates the room if needed). */
+export function useGuestLink() {
+	return useMutation({
+		mutationFn: (appointmentId: string) =>
+			apiFetch<{ url: string }>(`/api/video/${appointmentId}/link`, {
+				method: "POST",
+			}),
+	});
+}
+
+export function useStartVideoSession() {
+	return useMutation({
+		mutationFn: (appointmentId: string) =>
+			apiFetch(`/api/video/${appointmentId}/start`, { method: "POST" }),
+	});
+}
+
+export function useEndVideoSession() {
+	return useMutation({
+		mutationFn: (appointmentId: string) =>
+			apiFetch<{ completed: boolean }>(`/api/video/${appointmentId}/end`, {
+				method: "POST",
+			}),
+	});
+}

@@ -14,6 +14,7 @@ import {
 } from "@helsa/db/operators";
 import { appointment } from "@helsa/db/schema/appointment";
 import { patient } from "@helsa/db/schema/patient";
+import { therapist } from "@helsa/db/schema/therapist";
 import { db } from "@/services";
 import type { AppointmentStatus, NewAppointment } from "../domain/types";
 
@@ -146,6 +147,52 @@ export class AppointmentRepository {
       )
       .orderBy(desc(appointment.starts_at))
       .limit(limit);
+  }
+
+  /**
+   * One appointment with what the video room needs to know about both sides.
+   * Not scoped to a therapist: the caller decides who may see it.
+   */
+  async getForVideo(id: string) {
+    const [response] = await db
+      .select({
+        id: appointment.id,
+        therapist_id: appointment.therapist_id,
+        patient_id: appointment.patient_id,
+        starts_at: appointment.starts_at,
+        ends_at: appointment.ends_at,
+        modality: appointment.modality,
+        status: appointment.status,
+        patient_user_id: patient.user_id,
+        first_name: patient.first_name,
+        last_name: patient.last_name,
+        preferred_name: patient.preferred_name,
+        patient_timezone: patient.timezone,
+        therapist_name: therapist.display_name,
+        therapist_title: therapist.professional_title,
+        therapist_timezone: therapist.timezone,
+      })
+      .from(appointment)
+      .innerJoin(patient, eq(patient.id, appointment.patient_id))
+      .innerJoin(therapist, eq(therapist.user_id, appointment.therapist_id))
+      .where(and(eq(appointment.id, id), isNull(patient.deleted_at)))
+      .limit(1);
+
+    return response;
+  }
+
+  /** Closes a scheduled or confirmed appointment as completed. */
+  async markCompleted(id: string, therapist_id: string, at: Date) {
+    await db
+      .update(appointment)
+      .set({ status: "completed", completed_at: at })
+      .where(
+        and(
+          eq(appointment.id, id),
+          eq(appointment.therapist_id, therapist_id),
+          inArray(appointment.status, ["scheduled", "confirmed"]),
+        ),
+      );
   }
 
   /** Time taken by active appointments that overlap [from, to). */

@@ -1,0 +1,165 @@
+# Local Jitsi Meet for Helsa video sessions.
+#
+# Based on the official docker-jitsi-meet setup (https://github.com/jitsi/docker-jitsi-meet),
+# trimmed to the four core services and configured for:
+#   - JWT auth: Helsa signs a token per user (HS256 with JWT_APP_SECRET).
+#   - Guests: a patient with no account joins anonymously, as a plain participant.
+#   - Roles from the token: `context.user.moderator: true` makes the therapist the
+#     moderator (kick, mute others, lobby, end the session). Everyone else is a member.
+#
+# Usage (from this folder):
+#   cp .env.example .env   # then fill in the secrets
+#   docker compose up -d
+#   open https://localhost:8443 once and accept the self-signed certificate
+
+name: helsa-jitsi
+
+services:
+  # Frontend: nginx + the Jitsi Meet web app (also serves /external_api.js)
+  web:
+    image: jitsi/web:${JITSI_IMAGE_VERSION:-unstable}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /run:size=16M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    ports:
+      - "${HTTP_PORT:-8000}:8000"
+      - "${HTTPS_PORT:-8443}:8443"
+    volumes:
+      - ${CONFIG:-./.jitsi-meet-cfg}/web:/config:Z
+      - ${CONFIG:-./.jitsi-meet-cfg}/storage/web:/storage:Z
+    environment:
+      - TZ=${TZ:-UTC}
+      - PUBLIC_URL=${PUBLIC_URL:-https://localhost:8443}
+      - ENABLE_LETSENCRYPT=0
+      - ENABLE_HTTP_REDIRECT=0
+      - ENABLE_XMPP_WEBSOCKET=1
+      # Auth: token users on meet.jitsi, guests on guest.meet.jitsi
+      - ENABLE_AUTH=1
+      - ENABLE_GUESTS=1
+      - AUTH_TYPE=jwt
+      # Where the "I am the host" button sends someone who has no token
+      - TOKEN_AUTH_URL=${TOKEN_AUTH_URL:-}
+      # Embedded in Helsa: no Jitsi landing page, no app download prompt
+      - ENABLE_WELCOME_PAGE=0
+      - ENABLE_CLOSE_PAGE=0
+      - DISABLE_DEEP_LINKING=1
+      - ENABLE_PREJOIN_PAGE=1
+      - ENABLE_REQUIRE_DISPLAY_NAME=1
+      - DEFAULT_LANGUAGE=es
+      # Features a therapy session does not need
+      - ENABLE_RECORDING=0
+      - ENABLE_TRANSCRIPTIONS=0
+      - ENABLE_LIVESTREAMING=0
+      - ENABLE_BREAKOUT_ROOMS=0
+      - ENABLE_CALENDAR=0
+      - DISABLE_POLLS=1
+      - DISABLE_PRIVATE_CHAT=1
+      - DISABLE_LOCAL_RECORDING=1
+      - DISABLE_PROFILE=1
+    networks:
+      meet.jitsi:
+    depends_on:
+      - jvb
+
+  # XMPP server: checks the JWT, holds rooms, lobby and roles
+  prosody:
+    image: jitsi/prosody:${JITSI_IMAGE_VERSION:-unstable}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /run:size=16M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    expose:
+      - "5222"
+      - "5347"
+      - "5280"
+    # Docker volumes, not host folders: Prosody runs as a non-root user and must own
+    # /var/lib/prosody to write its TLS certificates, which a Windows bind mount can't allow.
+    volumes:
+      - prosody-config:/config
+      - prosody-plugins:/prosody-plugins-custom
+      - prosody-data:/var/lib/prosody
+    environment:
+      - TZ=${TZ:-UTC}
+      - PUBLIC_URL=${PUBLIC_URL:-https://localhost:8443}
+      - ENABLE_XMPP_WEBSOCKET=1
+      - ENABLE_AUTH=1
+      - ENABLE_GUESTS=1
+      - AUTH_TYPE=jwt
+      - JWT_APP_ID=${JWT_APP_ID:?set JWT_APP_ID in .env}
+      - JWT_APP_SECRET=${JWT_APP_SECRET:?set JWT_APP_SECRET in .env}
+      - JWT_ACCEPTED_ISSUERS=${JWT_ACCEPTED_ISSUERS:-}
+      - JWT_ACCEPTED_AUDIENCES=${JWT_ACCEPTED_AUDIENCES:-}
+      # A token is required on meet.jitsi; people without one use the guest domain
+      - JWT_ALLOW_EMPTY=0
+      # Owner (moderator) only when the token says so: context.user.moderator = true.
+      # Every other token user becomes a member; guests stay participants.
+      - XMPP_MUC_MODULES=token_affiliation
+      # Lobby (waiting room), end-for-all, and moderator mute controls
+      - ENABLE_LOBBY=1
+      - ENABLE_END_CONFERENCE=1
+      - ENABLE_AV_MODERATION=1
+      - ENABLE_BREAKOUT_ROOMS=0
+      - DISABLE_POLLS=1
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD:?set JICOFO_AUTH_PASSWORD in .env}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD:?set JVB_AUTH_PASSWORD in .env}
+    networks:
+      meet.jitsi:
+        aliases:
+          - xmpp.meet.jitsi
+
+  # Conference focus: allocates the bridge and starts rooms
+  jicofo:
+    image: jitsi/jicofo:${JITSI_IMAGE_VERSION:-unstable}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /run:size=32M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    volumes:
+      - ${CONFIG:-./.jitsi-meet-cfg}/jicofo:/config:Z
+    environment:
+      - TZ=${TZ:-UTC}
+      - ENABLE_AUTH=1
+      - AUTH_TYPE=jwt
+      # Don't make the first person in the room a moderator: roles come from the token
+      - ENABLE_AUTO_OWNER=0
+      - JICOFO_AUTH_PASSWORD=${JICOFO_AUTH_PASSWORD:?set JICOFO_AUTH_PASSWORD in .env}
+    depends_on:
+      - prosody
+    networks:
+      meet.jitsi:
+
+  # Video bridge: relays the media streams (UDP 10000)
+  jvb:
+    image: jitsi/jvb:${JITSI_IMAGE_VERSION:-unstable}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /run:size=32M,mode=1750,exec
+      - /tmp:size=16M,mode=1777,noexec
+    ports:
+      - "${JVB_PORT:-10000}:${JVB_PORT:-10000}/udp"
+    volumes:
+      - ${CONFIG:-./.jitsi-meet-cfg}/jvb:/config:Z
+    environment:
+      - TZ=${TZ:-UTC}
+      - PUBLIC_URL=${PUBLIC_URL:-https://localhost:8443}
+      - JVB_PORT=${JVB_PORT:-10000}
+      # IPs the bridge announces to browsers. Add your LAN IP to test from another device.
+      - JVB_ADVERTISE_IPS=${JVB_ADVERTISE_IPS:-127.0.0.1}
+      - JVB_AUTH_PASSWORD=${JVB_AUTH_PASSWORD:?set JVB_AUTH_PASSWORD in .env}
+    depends_on:
+      - prosody
+    networks:
+      meet.jitsi:
+
+networks:
+  meet.jitsi:
+
+volumes:
+  prosody-config:
+  prosody-plugins:
+  prosody-data:

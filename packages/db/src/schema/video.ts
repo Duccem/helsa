@@ -4,7 +4,7 @@ import { v7 } from "uuid";
 
 import { appointment } from "./appointment";
 
-export const video_provider = pgEnum("video_provider", ["livekit", "daily"]);
+export const video_provider = pgEnum("video_provider", ["livekit", "daily", "jitsi"]);
 export const participant_role = pgEnum("participant_role", ["therapist", "patient"]);
 
 export const video_room = pgTable(
@@ -16,7 +16,8 @@ export const video_room = pgTable(
       .notNull()
       .unique()
       .references(() => appointment.id, { onDelete: "cascade" }),
-    provider: video_provider().notNull().default("livekit"),
+    // No default: adding an enum value and using it in one migration fails in Postgres.
+    provider: video_provider().notNull(),
     room_name: t.text().notNull().unique(),
     patient_join_token_hash: bytea().unique(), // join link without login (hash only)
     opens_at: t.timestamp({ withTimezone: true }).notNull(), // e.g. 10 min before

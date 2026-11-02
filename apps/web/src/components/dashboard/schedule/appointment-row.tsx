@@ -3,6 +3,10 @@
 import { cn } from "@helsa/ui/lib/utils";
 import { Repeat } from "lucide-react";
 
+import {
+	CopyPatientLink,
+	JoinSessionLink,
+} from "@/components/video/session-actions";
 import type { ScheduleEntry } from "@/lib/core/appointment/use-cases/load-schedule";
 
 import { PatientAvatar } from "../therapist/parts";
@@ -30,6 +34,9 @@ export function AppointmentRow({
 	const Icon = modalityIcons[entry.modality];
 	const faded =
 		state === "completed" || state === "cancelled" || state === "no_show";
+	const callable =
+		entry.modality === "video" &&
+		(state === "scheduled" || state === "confirmed" || state === "live");
 	const where =
 		entry.modality === "in_person" && entry.location
 			? entry.location
@@ -83,6 +90,25 @@ export function AppointmentRow({
 			>
 				{stateLabels[state]}
 			</span>
+			{callable ? (
+				<div className="col-start-2 flex flex-wrap items-center gap-1 sm:col-span-2">
+					<JoinSessionLink
+						appointmentId={entry.id}
+						className={cn(
+							"h-9 px-3 text-[14px]",
+							state === "live"
+								? "bg-chapter-violet text-white hover:bg-chapter-violet/85"
+								: "text-dash-link hover:bg-chapter-lilac",
+						)}
+					>
+						Entrar
+					</JoinSessionLink>
+					<CopyPatientLink
+						appointmentId={entry.id}
+						className="h-9 px-3 text-[14px] text-muted-foreground hover:bg-chapter-lilac hover:text-foreground"
+					/>
+				</div>
+			) : null}
 		</li>
 	);
 }

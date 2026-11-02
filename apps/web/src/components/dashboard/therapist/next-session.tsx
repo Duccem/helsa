@@ -4,6 +4,10 @@ import { FileText, MapPin, Phone, Video } from "lucide-react";
 import { m } from "motion/react";
 import Link from "next/link";
 
+import {
+	CopyPatientLink,
+	JoinSessionLink,
+} from "@/components/video/session-actions";
 import type {
 	HomeNext,
 	TherapistHome,
@@ -171,22 +175,42 @@ export function NextSession({
 				</p>
 			</div>
 
-			<div className="mt-6 flex flex-wrap items-center gap-2 xl:mt-auto xl:pt-6">
-				<Link
-					href={`/dashboard/patients/${next.patientId}`}
-					className="inline-flex h-12 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white px-5 font-semibold text-[15px] text-chapter-violet outline-none transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-chapter-violet active:translate-y-0 active:scale-[0.97]"
-				>
-					<ActionIcon aria-hidden="true" className="size-4" />
-					Ver ficha del paciente
-				</Link>
-				<Link
-					href={`/dashboard/notes?new=${next.patientId}&session=${next.id}`}
-					className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-4 font-semibold text-[15px] text-white outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white"
-				>
-					<FileText aria-hidden="true" className="size-4" />
-					Nueva nota
-				</Link>
-			</div>
+			{next.modality === "video" ? (
+				<div className="mt-6 flex flex-wrap items-center gap-2 xl:mt-auto xl:pt-6">
+					<JoinSessionLink
+						appointmentId={next.id}
+						className="h-12 flex-1 bg-white px-5 text-[15px] text-chapter-violet hover:-translate-y-0.5 focus-visible:ring-white focus-visible:ring-offset-chapter-violet"
+					/>
+					<CopyPatientLink
+						appointmentId={next.id}
+						label="Enlace del paciente"
+						className="h-12 px-4 text-[15px] text-white hover:bg-white/12 focus-visible:ring-white"
+					/>
+					<Link
+						href={`/dashboard/patients/${next.patientId}`}
+						className="inline-flex h-12 items-center justify-center rounded-full px-4 font-semibold text-[15px] text-white outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white"
+					>
+						Ver ficha
+					</Link>
+				</div>
+			) : (
+				<div className="mt-6 flex flex-wrap items-center gap-2 xl:mt-auto xl:pt-6">
+					<Link
+						href={`/dashboard/patients/${next.patientId}`}
+						className="inline-flex h-12 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white px-5 font-semibold text-[15px] text-chapter-violet outline-none transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-chapter-violet active:translate-y-0 active:scale-[0.97]"
+					>
+						<ActionIcon aria-hidden="true" className="size-4" />
+						Ver ficha del paciente
+					</Link>
+					<Link
+						href={`/dashboard/notes?new=${next.patientId}&session=${next.id}`}
+						className="inline-flex h-12 items-center justify-center gap-2 rounded-full px-4 font-semibold text-[15px] text-white outline-none transition-colors hover:bg-white/12 focus-visible:ring-2 focus-visible:ring-white"
+					>
+						<FileText aria-hidden="true" className="size-4" />
+						Nueva nota
+					</Link>
+				</div>
+			)}
 		</m.section>
 	);
 }

@@ -78,6 +78,25 @@ export class NoteRepository {
     return response;
   }
 
+  /** The newest unsigned note of a session, to keep writing it during the call. */
+  async getDraftByAppointment(appointment_id: string, therapist_id: string) {
+    const [response] = await db
+      .select()
+      .from(session_note)
+      .where(
+        and(
+          eq(session_note.appointment_id, appointment_id),
+          eq(session_note.therapist_id, therapist_id),
+          isNull(session_note.deleted_at),
+          isNull(session_note.signed_at),
+        ),
+      )
+      .orderBy(desc(session_note.created_at))
+      .limit(1);
+
+    return response;
+  }
+
   async create(data: NewSessionNote) {
     await db.insert(session_note).values(data);
   }
