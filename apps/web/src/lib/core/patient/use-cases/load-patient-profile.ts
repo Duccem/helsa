@@ -1,5 +1,5 @@
 import type { BetterUser } from "@helsa/auth";
-import { decryptText, isEncryptionConfigured } from "@/lib/infra/clinical-cipher";
+import { isEncryptionConfigured, openText } from "@/lib/infra/clinical-cipher";
 import { isStorageConfigured } from "@/lib/infra/file-storage";
 import { zonedDay, zonedTime } from "@/lib/utils/zoned-time";
 import { AppointmentRepository } from "../../appointment/adapters/appointment-repository";
@@ -8,21 +8,12 @@ import { NoteRepository } from "../../note/adapters/note-repository";
 import { PaymentRepository } from "../../payment/adapters/payment-repository";
 import { LoadPreferences } from "../../settings/use-cases/load-preferences";
 import { TaskRepository } from "../../task/adapters/task-repository";
+import { adherence } from "../../task/domain/adherence";
 import { TherapistRepository } from "../../therapist/adapters/therapist-repository";
 import type { Patient } from "../domain/types";
 import { EnsurePatientAccess } from "./ensure-patient-access";
 
 const DEFAULT_TIMEZONE = "America/Caracas";
-
-/** Decrypted text, or `null` with `locked` when the key is missing or wrong. */
-function open(sealed: Buffer | null, therapist_id: string, version: number | null) {
-  if (!sealed || version === null) return { text: null, locked: false };
-  try {
-    return { text: decryptText(sealed, therapist_id, version), locked: false };
-  } catch {
-    return { text: null, locked: true };
-  }
-}
 
 function age(birthDate: string | null, today: string) {
   if (!birthDate) return null;
@@ -96,7 +87,7 @@ export class LoadPatientProfile {
         location: item.location,
       })),
       notes: notes.map((note) => {
-        const body = open(note.content_enc, user.id, note.enc_key_version);
+        const body = openText(note.content_enc, user.id, note.enc_key_version);
         return {
           id: note.id,
           title: note.title,
@@ -108,21 +99,11 @@ export class LoadPatientProfile {
           updatedAt: note.updated_at.toISOString(),
         };
       }),
-      tasks: tasks.map((task) => ({
-        id: task.id,
-        title: task.title,
-        instructions: task.instructions,
-        frequency: task.frequency,
-        startsOn: task.starts_on,
-        dueOn: task.due_on,
-        asksMood: task.asks_mood,
-        status: task.status,
-        completedAt: task.completed_at?.toISOString() ?? null,
-        createdAt: task.created_at.toISOString(),
-        entries: entries
+      tasks: tasks.map((task) => {
+        const own = entries
           .filter((entry) => entry.task_id === task.id)
           .map((entry) => {
-            const body = open(entry.content_enc, user.id, entry.enc_key_version);
+            const body = openText(entry.content_enc, user.id, entry.enc_key_version);
             return {
               id: entry.id,
               entryDate: entry.entry_date,
@@ -131,8 +112,35 @@ export class LoadPatientProfile {
               locked: body.locked,
               seen: entry.seen_by_therapist_at !== null,
             };
-          }),
-      })),
+          });
+        const endedAt =
+          task.status === "completed"
+            ? (task.completed_at ?? task.updated_at)
+            : task.status === "cancelled"
+              ? task.updated_at
+              : null;
+        return {
+          id: task.id,
+          title: task.title,
+          instructions: task.instructions,
+          frequency: task.frequency,
+          startsOn: task.starts_on,
+          dueOn: task.due_on,
+          asksMood: task.asks_mood,
+          status: task.status,
+          completedAt: task.completed_at?.toISOString() ?? null,
+          createdAt: task.created_at.toISOString(),
+          overdue: task.status === "assigned" && task.due_on !== null && task.due_on < today,
+          upcoming: task.status === "assigned" && task.starts_on > today,
+          unseen: own.filter((entry) => !entry.seen).length,
+          adherence: adherence(
+            { ...task, ended_on: endedAt ? zonedDay(endedAt, timezone) : null },
+            own.map((entry) => entry.entryDate),
+            today,
+          ),
+          entries: own,
+        };
+      }),
       files: files.map((file) => ({
         id: file.id,
         name: file.original_name,
@@ -151,7 +159,7 @@ export class LoadPatientProfile {
   }
 
   private toPatient(patient: Patient, therapist_id: string, today: string) {
-    const intake = open(patient.intake_reason_enc, therapist_id, patient.enc_key_version);
+    const intake = openText(patient.intake_reason_enc, therapist_id, patient.enc_key_version);
     return {
       id: patient.id,
       firstName: patient.first_name,

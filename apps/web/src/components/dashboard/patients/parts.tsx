@@ -67,6 +67,11 @@ export function formatDay(day: string) {
 	}).format(new Date(`${day}T00:00:00Z`));
 }
 
+/** Lowercase and without accents, so "jose" finds "José". */
+export function normalize(text: string) {
+	return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
 export function formatUsd(amount: number) {
 	return `$${new Intl.NumberFormat("es-VE", { maximumFractionDigits: 2 }).format(amount)}`;
 }

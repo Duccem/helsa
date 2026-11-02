@@ -162,6 +162,8 @@ export const noteSchema = z.object({
 		.trim()
 		.min(1, "La nota está vacía.")
 		.max(20000, "Máximo 20 000 caracteres."),
+	/** The session the note is about. Only read when the note is created. */
+	appointmentId: z.uuid().nullish(),
 });
 export type NoteInput = z.infer<typeof noteSchema>;
 

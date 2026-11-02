@@ -1,4 +1,17 @@
-import { and, asc, desc, eq, gt, gte, inArray, lt, sql } from "@helsa/db/operators";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNull,
+  lt,
+  lte,
+  notInArray,
+  sql,
+} from "@helsa/db/operators";
 import { appointment } from "@helsa/db/schema/appointment";
 import { patient } from "@helsa/db/schema/patient";
 import { db } from "@/services";
@@ -92,6 +105,45 @@ export class AppointmentRepository {
         ),
       )
       .orderBy(desc(appointment.starts_at));
+  }
+
+  /** One appointment of the therapist, any status. */
+  async getById(id: string, therapist_id: string) {
+    const [response] = await db
+      .select()
+      .from(appointment)
+      .where(and(eq(appointment.id, id), eq(appointment.therapist_id, therapist_id)))
+      .limit(1);
+
+    return response;
+  }
+
+  /**
+   * Sessions that already happened in [from, to) and have no note yet,
+   * newest first. Cancelled and no-show appointments don't need one.
+   */
+  async getEndedWithoutNote(therapist_id: string, from: Date, to: Date, limit: number) {
+    return db
+      .select(withPatient)
+      .from(appointment)
+      .innerJoin(patient, eq(patient.id, appointment.patient_id))
+      .where(
+        and(
+          eq(appointment.therapist_id, therapist_id),
+          gte(appointment.starts_at, from),
+          lte(appointment.ends_at, to),
+          notInArray(appointment.status, ["cancelled", "no_show"]),
+          isNull(patient.deleted_at),
+          // Explicit alias: inside sql`` drizzle drops the table from column names.
+          sql`not exists (
+            select 1 from session_note n
+            where n.appointment_id = "appointment"."id"
+              and n.deleted_at is null
+          )`,
+        ),
+      )
+      .orderBy(desc(appointment.starts_at))
+      .limit(limit);
   }
 
   /** Time taken by active appointments that overlap [from, to). */

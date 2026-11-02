@@ -1,5 +1,9 @@
 import { FileNotFound, FileRejected } from "@/lib/core/file/domain/errors";
-import { NoteAlreadySigned, NoteNotFound } from "@/lib/core/note/domain/errors";
+import {
+	NoteAlreadySigned,
+	NoteNotFound,
+	NoteSessionMismatch,
+} from "@/lib/core/note/domain/errors";
 import { PatientNotFound } from "@/lib/core/patient/domain/errors";
 import { TaskNotActive, TaskNotFound } from "@/lib/core/task/domain/errors";
 import {
@@ -28,6 +32,7 @@ export function patientErrors(error: CommonError) {
 		case error instanceof TaskNotActive:
 			return domainError(error, 409);
 		case error instanceof FileRejected:
+		case error instanceof NoteSessionMismatch:
 			return domainError(error, 400);
 		case error instanceof StorageRequestFailed:
 			return domainError(error, 502);

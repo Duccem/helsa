@@ -10,7 +10,7 @@ import type { PatientList } from "@/lib/core/patient/use-cases/list-patients";
 
 import { Segmented } from "../settings/fields";
 import { itemIn, Panel, PatientAvatar, stagger } from "../therapist/parts";
-import { EmptyState, formatDate, StatusBadge } from "./parts";
+import { EmptyState, formatDate, normalize, StatusBadge } from "./parts";
 import { type PatientStatus, patientStatuses } from "./schema";
 
 type Filter = "all" | PatientStatus;
@@ -21,10 +21,6 @@ const plural: Record<PatientStatus, string> = {
 	inactive: "Inactivos",
 	discharged: "De alta",
 };
-
-function normalize(text: string) {
-	return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-}
 
 function tasksLabel(open: number, unseen: number) {
 	if (unseen > 0)

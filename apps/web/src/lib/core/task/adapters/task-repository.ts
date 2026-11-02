@@ -1,4 +1,5 @@
-import { and, desc, eq, inArray, isNull } from "@helsa/db/operators";
+import { and, desc, eq, inArray, isNull, sql } from "@helsa/db/operators";
+import { patient } from "@helsa/db/schema/patient";
 import { patient_task, task_entry } from "@helsa/db/schema/task";
 import { db } from "@/services";
 import type { NewPatientTask, PatientTask } from "../domain/types";
@@ -10,6 +11,39 @@ export class TaskRepository {
       .from(patient_task)
       .where(and(eq(patient_task.patient_id, patient_id), eq(patient_task.therapist_id, therapist_id)))
       .orderBy(desc(patient_task.created_at));
+  }
+
+  /** Every task of the therapist, newest first, with its patient's name. */
+  async listByTherapist(therapist_id: string) {
+    return db
+      .select({
+        task: patient_task,
+        first_name: patient.first_name,
+        last_name: patient.last_name,
+        preferred_name: patient.preferred_name,
+      })
+      .from(patient_task)
+      .innerJoin(patient, eq(patient.id, patient_task.patient_id))
+      .where(and(eq(patient_task.therapist_id, therapist_id), isNull(patient.deleted_at)))
+      .orderBy(desc(patient_task.created_at));
+  }
+
+  /** Patient answers the therapist hasn't read yet, for the sidebar badge. */
+  async countUnseenEntries(therapist_id: string) {
+    const [response] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(task_entry)
+      .innerJoin(patient_task, eq(patient_task.id, task_entry.task_id))
+      .innerJoin(patient, eq(patient.id, patient_task.patient_id))
+      .where(
+        and(
+          eq(patient_task.therapist_id, therapist_id),
+          isNull(task_entry.seen_by_therapist_at),
+          isNull(patient.deleted_at),
+        ),
+      );
+
+    return response?.count ?? 0;
   }
 
   async getEntries(task_ids: string[]) {

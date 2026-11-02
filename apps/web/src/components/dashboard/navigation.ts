@@ -56,7 +56,7 @@ const therapistNav: NavItem[] = [
 	},
 	{ href: "/dashboard/patients", label: "Pacientes", icon: Users },
 	{ href: "/dashboard/notes", label: "Notas clínicas", icon: NotebookPen },
-	{ href: "/dashboard/tasks", label: "Tareas", icon: ListChecks, badge: 3 },
+	{ href: "/dashboard/tasks", label: "Tareas", icon: ListChecks },
 	{ href: "/dashboard/payments", label: "Cobros", icon: Wallet },
 ];
 

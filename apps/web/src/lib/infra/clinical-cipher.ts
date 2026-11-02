@@ -112,3 +112,20 @@ export function decryptText(
 export function sha256(data: Buffer) {
 	return createHash("sha256").update(data).digest();
 }
+
+/**
+ * Decrypted text for the UI, or `null` with `locked` when the key is missing
+ * or wrong, so one unreadable value doesn't break the whole page.
+ */
+export function openText(
+	sealed: Buffer | null,
+	therapistId: string,
+	version: number | null,
+) {
+	if (!sealed || version === null) return { text: null, locked: false };
+	try {
+		return { text: decryptText(sealed, therapistId, version), locked: false };
+	} catch {
+		return { text: null, locked: true };
+	}
+}

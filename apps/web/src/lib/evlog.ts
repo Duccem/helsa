@@ -9,4 +9,7 @@ export const { withEvlog, useLogger, log, createError } = createEvlog({
 
 export const { register, onRequestError } = createInstrumentation({
   service: "helsa-web",
+  captureOutput: process.env.NODE_ENV !== "production",
+  drain: process.env.NODE_ENV === "production" ? undefined : createFsDrain(),
+  minLevel: process.env.NODE_ENV === "production" ? "info" : "debug",
 });

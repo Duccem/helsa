@@ -71,57 +71,72 @@ export function useUpdatePatient(patientId: string) {
 	});
 }
 
-export function useSaveNote(patientId: string) {
+type NoteRef = { patientId: string; noteId: string };
+
+/** Creates a note (no `noteId`) or replaces a draft. */
+export function useSaveNote() {
 	return useMutation({
-		mutationFn: ({ noteId, ...input }: NoteInput & { noteId?: string }) =>
-			noteId
-				? apiFetch(`/api/patients/${patientId}/notes/${noteId}`, {
-						method: "PUT",
-						body: input,
-					})
-				: apiFetch(`/api/patients/${patientId}/notes`, {
-						method: "POST",
-						body: input,
-					}),
+		mutationFn: ({
+			patientId,
+			noteId,
+			...input
+		}: NoteInput & { patientId: string; noteId?: string }) =>
+			apiFetch<{ id?: string }>(
+				noteId
+					? `/api/patients/${patientId}/notes/${noteId}`
+					: `/api/patients/${patientId}/notes`,
+				{ method: noteId ? "PUT" : "POST", body: input },
+			),
 	});
 }
 
-export function useSignNote(patientId: string) {
+export function useSignNote() {
 	return useMutation({
-		mutationFn: (noteId: string) =>
+		mutationFn: ({ patientId, noteId }: NoteRef) =>
 			apiFetch(`/api/patients/${patientId}/notes/${noteId}/sign`, {
 				method: "POST",
 			}),
 	});
 }
 
-export function useDeleteNote(patientId: string) {
+export function useDeleteNote() {
 	return useMutation({
-		mutationFn: (noteId: string) =>
+		mutationFn: ({ patientId, noteId }: NoteRef) =>
 			apiFetch(`/api/patients/${patientId}/notes/${noteId}`, {
 				method: "DELETE",
 			}),
 	});
 }
 
-export function useAssignTask(patientId: string) {
+/** Assigns a new task (no `taskId`) or changes an active one. */
+export function useSaveTask() {
 	return useMutation({
-		mutationFn: (input: TaskInput) =>
-			apiFetch(`/api/patients/${patientId}/tasks`, {
-				method: "POST",
-				body: input,
-			}),
+		mutationFn: ({
+			patientId,
+			taskId,
+			...input
+		}: TaskInput & { patientId: string; taskId?: string }) =>
+			apiFetch<{ id?: string }>(
+				taskId
+					? `/api/patients/${patientId}/tasks/${taskId}`
+					: `/api/patients/${patientId}/tasks`,
+				{ method: taskId ? "PUT" : "POST", body: input },
+			),
 	});
 }
 
-export function useTaskAction(patientId: string) {
+export type TaskAction = "cancel" | "complete" | "seen";
+
+export function useTaskAction() {
 	return useMutation({
 		mutationFn: ({
+			patientId,
 			taskId,
 			action,
 		}: {
+			patientId: string;
 			taskId: string;
-			action: "cancel" | "seen";
+			action: TaskAction;
 		}) =>
 			apiFetch(`/api/patients/${patientId}/tasks/${taskId}/${action}`, {
 				method: "POST",
