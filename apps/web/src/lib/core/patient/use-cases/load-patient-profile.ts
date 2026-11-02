@@ -72,7 +72,9 @@ export class LoadPatientProfile {
         cancelled: appointments.filter((item) => item.status === "cancelled").length,
         nextAppointmentAt: upcoming[0]?.starts_at.toISOString() ?? null,
         lastSessionAt: attended[0]?.starts_at.toISOString() ?? null,
-        paidUsd: payments.reduce((sum, item) => sum + Number(item.amount_usd), 0),
+        paidUsd: payments
+          .filter((item) => item.status === "verified")
+          .reduce((sum, item) => sum + Number(item.amount_usd), 0),
         openTasks: tasks.filter((task) => task.status === "assigned").length,
       },
       appointments: appointments.map((item) => ({
@@ -154,6 +156,7 @@ export class LoadPatientProfile {
         method: payment.method,
         amountUsd: Number(payment.amount_usd),
         reference: payment.reference,
+        status: payment.status,
       })),
     };
   }

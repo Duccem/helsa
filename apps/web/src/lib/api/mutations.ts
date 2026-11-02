@@ -7,6 +7,11 @@ import type {
 	PatientInput,
 	TaskInput,
 } from "@/components/dashboard/patients/schema";
+import type {
+	RecordPaymentInput,
+	ReviewPaymentInput,
+	SendReminderInput,
+} from "@/components/dashboard/payments/schema";
 import type { TimeOffInput } from "@/components/dashboard/settings/schema";
 import type { WaitlistInput } from "@/components/landing/waitlist-schema";
 
@@ -175,6 +180,52 @@ export function useDeleteFile(patientId: string) {
 		mutationFn: (fileId: string) =>
 			apiFetch(`/api/patients/${patientId}/files/${fileId}`, {
 				method: "DELETE",
+			}),
+	});
+}
+
+// ─── Payments ────────────────────────────────────────────────────────────────
+
+export function useRecordPayment() {
+	return useMutation({
+		mutationFn: (input: RecordPaymentInput) =>
+			apiFetch<{ count: number }>("/api/payments", {
+				method: "POST",
+				body: input,
+			}),
+	});
+}
+
+export function useReviewPayment() {
+	return useMutation({
+		mutationFn: ({
+			paymentId,
+			...input
+		}: ReviewPaymentInput & { paymentId: string }) =>
+			apiFetch(`/api/payments/${paymentId}/review`, {
+				method: "POST",
+				body: input,
+			}),
+	});
+}
+
+export function useDeletePayment() {
+	return useMutation({
+		mutationFn: (paymentId: string) =>
+			apiFetch(`/api/payments/${paymentId}`, { method: "DELETE" }),
+	});
+}
+
+export type ReminderDelivery =
+	| { status: "sent"; provider: string }
+	| { status: "handoff"; provider: string; url: string };
+
+export function useSendReminder() {
+	return useMutation({
+		mutationFn: (input: SendReminderInput) =>
+			apiFetch<ReminderDelivery>("/api/payments/reminders", {
+				method: "POST",
+				body: input,
 			}),
 	});
 }

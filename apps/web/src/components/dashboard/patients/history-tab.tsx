@@ -4,7 +4,7 @@ import { cn } from "@helsa/ui/lib/utils";
 import { CalendarDays, Wallet } from "lucide-react";
 
 import type { PatientProfile } from "@/lib/core/patient/use-cases/load-patient-profile";
-
+import { paymentStatusLabels } from "../payments/format";
 import {
 	type DisplayState,
 	formatClock,
@@ -32,7 +32,9 @@ function stateOf(item: Appointment, now: number): DisplayState {
 export function HistoryTab({ profile }: { profile: PatientProfile }) {
 	const { appointments, payments, timeFormat, timezone } = profile;
 	const now = Date.parse(profile.nowIso);
-	const total = payments.reduce((sum, payment) => sum + payment.amountUsd, 0);
+	const total = payments
+		.filter((payment) => payment.status === "verified")
+		.reduce((sum, payment) => sum + payment.amountUsd, 0);
 
 	return (
 		<div className="grid gap-4 xl:grid-cols-12">
@@ -99,7 +101,7 @@ export function HistoryTab({ profile }: { profile: PatientProfile }) {
 			>
 				<PanelHeading id="payments-title" title="Pagos">
 					<p className="text-[15px] text-muted-foreground">
-						{payments.length ? `${formatUsd(total)} en total` : "Ninguno"}
+						{payments.length ? `${formatUsd(total)} verificados` : "Ninguno"}
 					</p>
 				</PanelHeading>
 				<div className="mt-4">
@@ -120,6 +122,9 @@ export function HistoryTab({ profile }: { profile: PatientProfile }) {
 										<p className="truncate text-[14px] text-muted-foreground">
 											{formatDate(payment.paidAt, timezone)}
 											{payment.reference ? ` · Ref. ${payment.reference}` : ""}
+											{payment.status === "verified"
+												? ""
+												: ` · ${paymentStatusLabels[payment.status]}`}
 										</p>
 									</div>
 									<p className="font-semibold text-[16px] tabular-nums">
