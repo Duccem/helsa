@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import { toDashboardRole } from "@/components/dashboard/navigation";
 import { SectionPending } from "@/components/dashboard/section-pending";
 import { TherapistDashboard } from "@/components/dashboard/therapist/therapist-dashboard";
+import { LoadTherapistHome } from "@/lib/core/therapist/use-cases/load-therapist-home";
 import { auth } from "@/services";
+
+const loadTherapistHome = new LoadTherapistHome();
 
 export default async function DashboardPage() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -22,11 +25,8 @@ export default async function DashboardPage() {
 		);
 	}
 
-	// Rendered on the server so both sides start from the same clock.
-	return (
-		<TherapistDashboard
-			name={session.user.name}
-			nowIso={new Date().toISOString()}
-		/>
-	);
+	// Loaded on the server; `home.nowIso` keeps both sides on the same clock.
+	const home = await loadTherapistHome.execute(session.user);
+
+	return <TherapistDashboard name={session.user.name} home={home} />;
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { CalendarPlus, Wallet } from "lucide-react";
+import { CalendarPlus, EyeOff, Wallet } from "lucide-react";
 import { m } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+import type { TherapistHome } from "@/lib/core/therapist/use-cases/load-therapist-home";
 
 import { AttentionList } from "./attention-list";
 import {
@@ -12,16 +14,7 @@ import {
 	formatTime,
 	greeting,
 	monthNames,
-	toMinutes,
 } from "./clinic-time";
-import {
-	findUpcoming,
-	monthByMethod,
-	pendingPayments,
-	practiceStats,
-	weekStats,
-	weekTemplate,
-} from "./mock-data";
 import { MoodBoard } from "./mood-board";
 import { NextSession } from "./next-session";
 import { itemIn, Panel, stagger, usd } from "./parts";
@@ -30,20 +23,24 @@ import { WeekAgenda } from "./week-agenda";
 
 /** Starts from the server's clock, then follows the real one every 30 s. */
 function useNow(initialIso: string) {
-	const [now, setNow] = useState(() => new Date(initialIso));
+	const [now, setNow] = useState(() => Date.parse(initialIso));
 	useEffect(() => {
-		setNow(new Date());
-		const id = window.setInterval(() => setNow(new Date()), 30_000);
+		setNow(Date.now());
+		const id = window.setInterval(() => setNow(Date.now()), 30_000);
 		return () => window.clearInterval(id);
 	}, []);
 	return now;
 }
 
-function todaySummary(weekday: number, minutes: number) {
-	const sessions = weekTemplate[weekday] ?? [];
+function todaySummary(home: TherapistHome, now: number) {
+	const sessions = home.week.appointments.filter(
+		(item) => item.day === home.today && item.status !== "cancelled",
+	);
 	if (sessions.length === 0) return "Hoy no tienes sesiones.";
 	const left = sessions.filter(
-		(session) => toMinutes(session.time) + session.minutes > minutes,
+		(item) =>
+			Date.parse(item.endsAt) > now &&
+			(item.status === "scheduled" || item.status === "confirmed"),
 	);
 	if (left.length === 0) return "Ya terminaste las sesiones de hoy.";
 	const count =
@@ -55,41 +52,46 @@ function todaySummary(weekday: number, minutes: number) {
 
 export function TherapistDashboard({
 	name,
-	nowIso,
+	home,
 }: {
 	name: string;
-	nowIso: string;
+	home: TherapistHome;
 }) {
-	const date = useNow(nowIso);
-	const now = clinicNow(date);
+	const now = useNow(home.nowIso);
+	const clock = clinicNow(new Date(now), home.timezone);
 	const firstName = name.split(" ")[0] ?? name;
-	const upcoming = findUpcoming(now);
-	const week = weekStats(now);
-	const collected = monthByMethod.reduce((sum, entry) => sum + entry.usd, 0);
-	const owed = pendingPayments.reduce((sum, entry) => sum + entry.usd, 0);
+	const { stats } = home;
 
 	const overview = [
 		{
-			value: String(week.total),
+			value: String(stats.weekSessions),
 			label: "sesiones esta semana",
-			note: week.unconfirmed
-				? `${week.unconfirmed} sin confirmar`
+			note: stats.weekUnconfirmed
+				? `${stats.weekUnconfirmed} sin confirmar`
 				: "Todas confirmadas",
 		},
 		{
-			value: String(practiceStats.activePatients),
+			value: String(stats.activePatients),
 			label: "pacientes activos",
-			note: `${practiceStats.newThisMonth} nuevos este mes`,
+			note:
+				stats.newPatientsThisMonth === 1
+					? "1 nuevo este mes"
+					: `${stats.newPatientsThisMonth} nuevos este mes`,
 		},
 		{
-			value: usd(collected),
-			label: `cobrados en ${monthNames[now.month - 1]}`,
-			note: `${usd(owed)} por cobrar`,
+			value: usd(stats.collectedMonthUsd),
+			label: `cobrados en ${monthNames[clock.month - 1]}`,
+			note: `${usd(stats.owedUsd)} por cobrar`,
 		},
 		{
-			value: `${practiceStats.tasksAnswered} de ${practiceStats.tasksAssigned}`,
-			label: "tareas respondidas",
-			note: "3 respuestas sin revisar",
+			value: `${stats.answeredTasks} de ${stats.activeTasks}`,
+			label: "tareas con respuesta esta semana",
+			note:
+				stats.unseenEntries === 0
+					? "Todas las respuestas revisadas"
+					: stats.unseenEntries === 1
+						? "1 respuesta sin revisar"
+						: `${stats.unseenEntries} respuestas sin revisar`,
 		},
 	];
 
@@ -106,12 +108,18 @@ export function TherapistDashboard({
 			>
 				<div>
 					<h1 className="font-display font-medium text-[clamp(2.25rem,4vw,3.5rem)] leading-[1] tracking-[-0.03em]">
-						{greeting(now.minutes)}, {firstName}
+						{greeting(clock.minutes)}, {firstName}
 					</h1>
 					<p className="mt-3 text-[17px] leading-relaxed">
-						{dayNames[now.weekday]} {now.day} de {monthNames[now.month - 1]}.{" "}
-						{todaySummary(now.weekday, now.minutes)}
+						{dayNames[clock.weekday]} {clock.day} de{" "}
+						{monthNames[clock.month - 1]}. {todaySummary(home, now)}
 					</p>
+					{home.privateMode ? (
+						<p className="mt-2 inline-flex items-center gap-2 text-[14px] text-muted-foreground">
+							<EyeOff aria-hidden="true" className="size-4" />
+							Modo privado: solo se muestran iniciales.
+						</p>
+					) : null}
 				</div>
 				<div className="flex flex-wrap gap-2">
 					<Link
@@ -122,7 +130,7 @@ export function TherapistDashboard({
 						Nueva cita
 					</Link>
 					<Link
-						href="/dashboard/payments"
+						href="/dashboard/payments?record=1"
 						className="inline-flex h-12 items-center gap-2 rounded-full bg-card px-6 font-semibold text-[15px] outline-none transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-chapter-lilac focus-visible:ring-2 focus-visible:ring-ring active:translate-y-0 active:scale-[0.97]"
 					>
 						<Wallet aria-hidden="true" className="size-4" />
@@ -155,16 +163,21 @@ export function TherapistDashboard({
 					</m.dl>
 				</Panel>
 
-				<WeekAgenda now={now} />
-				<NextSession upcoming={upcoming} />
-				<AttentionList />
-				<MoodBoard now={now} />
-				<PaymentsPanel now={now} />
+				<WeekAgenda week={home.week} today={home.today} now={now} />
+				<NextSession
+					next={home.next}
+					today={home.today}
+					timezone={home.timezone}
+					now={now}
+				/>
+				<AttentionList attention={home.attention} />
+				<MoodBoard moods={home.moods} today={home.today} />
+				<PaymentsPanel
+					payments={home.payments}
+					today={home.today}
+					timezone={home.timezone}
+				/>
 			</div>
-
-			<p className="mt-6 px-1 text-[14px] text-foreground/75">
-				Datos de ejemplo. Aún no están conectados a tu consulta.
-			</p>
 		</m.div>
 	);
 }

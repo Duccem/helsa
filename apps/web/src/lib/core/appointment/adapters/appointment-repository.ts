@@ -30,6 +30,8 @@ const withPatient = {
   first_name: patient.first_name,
   last_name: patient.last_name,
   preferred_name: patient.preferred_name,
+  patient_city: patient.city,
+  patient_timezone: patient.timezone,
 };
 
 export class AppointmentRepository {

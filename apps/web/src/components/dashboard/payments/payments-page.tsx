@@ -25,6 +25,14 @@ import {
 } from "./record-payment-dialog";
 import { ReviewDialog, ReviewQueue } from "./review";
 
+/** Drops a one-shot param so a refresh doesn't reopen the dialog. */
+function forgetParam(name: string) {
+	const url = new URL(window.location.href);
+	if (!url.searchParams.has(name)) return;
+	url.searchParams.delete(name);
+	window.history.replaceState(window.history.state, "", url);
+}
+
 function headline({ summary }: PaymentsOverview) {
 	const parts: string[] = [];
 	if (summary.inReviewCount > 0) {
@@ -39,10 +47,25 @@ function headline({ summary }: PaymentsOverview) {
 	return parts.join(" ");
 }
 
-export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
+export function PaymentsPage({
+	overview,
+	initialRemind,
+	initialRecord = false,
+}: {
+	overview: PaymentsOverview;
+	/** Patient id whose reminder opens on arrival. */
+	initialRemind?: string;
+	initialRecord?: boolean;
+}) {
 	const { period, today } = overview;
-	const [record, setRecord] = useState<RecordTarget | null>(null);
-	const [remind, setRemind] = useState<PatientBalance | null>(null);
+	const [record, setRecord] = useState<RecordTarget | null>(
+		initialRecord ? {} : null,
+	);
+	const [remind, setRemind] = useState<PatientBalance | null>(
+		() =>
+			overview.balances.patients.find((item) => item.id === initialRemind) ??
+			null,
+	);
 	const [review, setReview] = useState<OverviewPayment | null>(null);
 	const [chargeFilter, setChargeFilter] = useState<ChargeStatus | "all">("all");
 
@@ -119,12 +142,18 @@ export function PaymentsPage({ overview }: { overview: PaymentsOverview }) {
 			<RecordPaymentDialog
 				overview={overview}
 				target={record}
-				onClose={() => setRecord(null)}
+				onClose={() => {
+					setRecord(null);
+					forgetParam("record");
+				}}
 			/>
 			<ReminderDialog
 				patient={remind}
 				overview={overview}
-				onClose={() => setRemind(null)}
+				onClose={() => {
+					setRemind(null);
+					forgetParam("remind");
+				}}
 			/>
 			<ReviewDialog
 				payment={review}

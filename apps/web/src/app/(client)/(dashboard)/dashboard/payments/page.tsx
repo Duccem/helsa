@@ -20,7 +20,9 @@ const single = (value: Param) =>
 export default async function Page({
 	searchParams,
 }: {
-	searchParams: Promise<Partial<Record<"preset" | "from" | "to", Param>>>;
+	searchParams: Promise<
+		Partial<Record<"preset" | "from" | "to" | "remind" | "record", Param>>
+	>;
 }) {
 	const session = await auth.api.getSession({ headers: await headers() });
 
@@ -43,5 +45,17 @@ export default async function Page({
 		session.user,
 	);
 
-	return <PaymentsPage overview={overview} />;
+	// Links from the home screen open a dialog right away.
+	const remind = single(params.remind);
+	return (
+		<PaymentsPage
+			overview={overview}
+			initialRemind={
+				overview.balances.patients.some((item) => item.id === remind)
+					? remind
+					: undefined
+			}
+			initialRecord={single(params.record) === "1"}
+		/>
+	);
 }

@@ -4,7 +4,7 @@
  * browser render the same week, greeting and countdown.
  */
 
-// `therapist.timezone` defaults to this; it becomes per-user once data is wired.
+// Fallback when the therapist has no time zone yet (`therapist.timezone` defaults to it).
 export const CLINIC_TZ = "America/Caracas";
 
 export const dayNames = [
@@ -63,20 +63,31 @@ export type ClinicNow = {
 	minutes: number;
 };
 
-const partsFormatter = new Intl.DateTimeFormat("en-US", {
-	timeZone: CLINIC_TZ,
-	year: "numeric",
-	month: "numeric",
-	day: "numeric",
-	weekday: "short",
-	hour: "numeric",
-	minute: "numeric",
-	hourCycle: "h23",
-});
+const formatters = new Map<string, Intl.DateTimeFormat>();
 
-export function clinicNow(date: Date): ClinicNow {
+function partsFormatter(timeZone: string) {
+	let formatter = formatters.get(timeZone);
+	if (!formatter) {
+		formatter = new Intl.DateTimeFormat("en-US", {
+			timeZone,
+			year: "numeric",
+			month: "numeric",
+			day: "numeric",
+			weekday: "short",
+			hour: "numeric",
+			minute: "numeric",
+			hourCycle: "h23",
+		});
+		formatters.set(timeZone, formatter);
+	}
+	return formatter;
+}
+
+export function clinicNow(date: Date, timeZone: string = CLINIC_TZ): ClinicNow {
 	const parts = Object.fromEntries(
-		partsFormatter.formatToParts(date).map((part) => [part.type, part.value]),
+		partsFormatter(timeZone)
+			.formatToParts(date)
+			.map((part) => [part.type, part.value]),
 	);
 	return {
 		year: Number(parts.year),
@@ -85,6 +96,11 @@ export function clinicNow(date: Date): ClinicNow {
 		weekday: weekdayIndex[parts.weekday] ?? 0,
 		minutes: Number(parts.hour) * 60 + Number(parts.minute),
 	};
+}
+
+/** "2026-11-03" for `now`, to compare with the days the server sends. */
+export function isoDay(now: ClinicNow) {
+	return `${now.year}-${String(now.month).padStart(2, "0")}-${String(now.day).padStart(2, "0")}`;
 }
 
 export type CalendarDay = {

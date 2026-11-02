@@ -42,7 +42,10 @@ export const modalityIcons: Record<ScheduleEntry["modality"], typeof Video> = {
 	phone: Phone,
 };
 
-export function displayState(entry: ScheduleEntry, now: number): DisplayState {
+export function displayState(
+	entry: Pick<ScheduleEntry, "status" | "startsAt" | "endsAt">,
+	now: number,
+): DisplayState {
 	if (entry.status !== "scheduled" && entry.status !== "confirmed") {
 		return entry.status;
 	}
