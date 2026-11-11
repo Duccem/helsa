@@ -10,6 +10,7 @@ import {
   lt,
   lte,
   notInArray,
+  or,
   sql,
 } from "@helsa/db/operators";
 import { appointment } from "@helsa/db/schema/appointment";
@@ -108,6 +109,104 @@ export class AppointmentRepository {
         ),
       )
       .orderBy(desc(appointment.starts_at));
+  }
+
+  /** A patient's appointments not finished yet at `from`, soonest first, with their therapist. */
+  async getUpcomingForPatient(patient_id: string, from: Date, limit: number) {
+    return db
+      .select({
+        id: appointment.id,
+        starts_at: appointment.starts_at,
+        ends_at: appointment.ends_at,
+        modality: appointment.modality,
+        status: appointment.status,
+        location: appointment.location,
+        series_id: appointment.series_id,
+        therapist_name: therapist.display_name,
+        therapist_title: therapist.professional_title,
+        office_address: therapist.office_address,
+      })
+      .from(appointment)
+      .innerJoin(therapist, eq(therapist.user_id, appointment.therapist_id))
+      .where(
+        and(
+          eq(appointment.patient_id, patient_id),
+          gt(appointment.ends_at, from),
+          inArray(appointment.status, ["scheduled", "confirmed"]),
+        ),
+      )
+      .orderBy(asc(appointment.starts_at))
+      .limit(limit);
+  }
+
+  /** A patient's past or cancelled appointments, newest first. */
+  async getHistoryForPatient(patient_id: string, now: Date, limit: number) {
+    return db
+      .select({
+        id: appointment.id,
+        starts_at: appointment.starts_at,
+        ends_at: appointment.ends_at,
+        modality: appointment.modality,
+        status: appointment.status,
+        cancelled_by: appointment.cancelled_by,
+      })
+      .from(appointment)
+      .where(
+        and(
+          eq(appointment.patient_id, patient_id),
+          or(
+            lte(appointment.ends_at, now),
+            notInArray(appointment.status, ["scheduled", "confirmed"]),
+          ),
+        ),
+      )
+      .orderBy(desc(appointment.starts_at))
+      .limit(limit);
+  }
+
+  /** One appointment of the patient, any status. */
+  async getForPatient(id: string, patient_id: string) {
+    const [response] = await db
+      .select()
+      .from(appointment)
+      .where(and(eq(appointment.id, id), eq(appointment.patient_id, patient_id)))
+      .limit(1);
+
+    return response;
+  }
+
+  /** The patient confirms they'll attend. Only a scheduled appointment changes. */
+  async confirmByPatient(id: string, patient_id: string, at: Date) {
+    const rows = await db
+      .update(appointment)
+      .set({ status: "confirmed", confirmed_at: at })
+      .where(
+        and(
+          eq(appointment.id, id),
+          eq(appointment.patient_id, patient_id),
+          eq(appointment.status, "scheduled"),
+        ),
+      )
+      .returning({ id: appointment.id });
+
+    return rows.length > 0;
+  }
+
+  /** The patient cancels a scheduled or confirmed appointment. */
+  async cancelByPatient(id: string, patient_id: string, at: Date, reason: string | null) {
+    const rows = await db
+      .update(appointment)
+      .set({ status: "cancelled", cancelled_at: at, cancelled_by: "patient", cancel_reason: reason })
+      .where(
+        and(
+          eq(appointment.id, id),
+          eq(appointment.patient_id, patient_id),
+          inArray(appointment.status, ["scheduled", "confirmed"]),
+        ),
+      )
+      .returning({ id: appointment.id });
+
+    return rows.length > 0;
   }
 
   /** One appointment of the therapist, any status. */

@@ -3,6 +3,11 @@
 import { useMutation } from "@tanstack/react-query";
 
 import type {
+	CancelAppointmentInput,
+	ReportPaymentInput,
+	TaskEntryInput,
+} from "@/components/dashboard/patient/schema";
+import type {
 	NoteInput,
 	PatientInput,
 	TaskInput,
@@ -255,5 +260,70 @@ export function useEndVideoSession() {
 			apiFetch<{ completed: boolean }>(`/api/video/${appointmentId}/end`, {
 				method: "POST",
 			}),
+	});
+}
+
+// ─── Patient portal ──────────────────────────────────────────────────────────
+
+export function useAnswerTask() {
+	return useMutation({
+		mutationFn: ({ taskId, ...input }: TaskEntryInput & { taskId: string }) =>
+			apiFetch(`/api/portal/tasks/${taskId}/entries`, {
+				method: "POST",
+				body: input,
+			}),
+	});
+}
+
+export function useConfirmAppointment() {
+	return useMutation({
+		mutationFn: (appointmentId: string) =>
+			apiFetch(`/api/portal/appointments/${appointmentId}/confirm`, {
+				method: "POST",
+			}),
+	});
+}
+
+export function useCancelAppointment() {
+	return useMutation({
+		mutationFn: ({
+			appointmentId,
+			...input
+		}: CancelAppointmentInput & { appointmentId: string }) =>
+			apiFetch(`/api/portal/appointments/${appointmentId}/cancel`, {
+				method: "POST",
+				body: input,
+			}),
+	});
+}
+
+/** Sends the payment as JSON plus the receipt, if any, in one request. */
+export function useReportPayment() {
+	return useMutation({
+		mutationFn: async ({
+			proof,
+			...input
+		}: ReportPaymentInput & { proof: File | null }) => {
+			const form = new FormData();
+			form.append("data", JSON.stringify(input));
+			if (proof) form.append("proof", proof);
+			let response: Response;
+			try {
+				response = await fetch("/api/portal/payments", {
+					method: "POST",
+					body: form,
+				});
+			} catch {
+				throw new ApiError("Revisa tu conexión e intenta de nuevo.", 0);
+			}
+			const data = await response.json().catch(() => null);
+			if (!response.ok || data?.ok === false) {
+				throw new ApiError(
+					data?.error ?? data?.message ?? "No pudimos enviar el pago.",
+					response.status,
+				);
+			}
+			return data as { count: number };
+		},
 	});
 }

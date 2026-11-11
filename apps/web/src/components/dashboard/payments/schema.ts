@@ -22,51 +22,67 @@ const optionalText = (max: number) =>
 		.max(max, `Usa ${max} caracteres o menos.`)
 		.transform((value) => value || null);
 
+/** What any payment carries, whoever records it. */
+export const paymentFields = {
+	sessionIds: z.array(z.uuid()).max(30, "Elige hasta 30 sesiones."),
+	method: z.enum(paymentMethods, { error: "Elige cómo pagó." }),
+	currency: z.enum(["usd", "ves"]),
+	amountUsd: amount,
+	amountVes: amount,
+	vesPerUsd: z
+		.number({ error: "Escribe la tasa." })
+		.positive("La tasa debe ser mayor que cero.")
+		.max(1_000_000, "Revisa esa tasa.")
+		.nullable(),
+	paidOn: day,
+	reference: optionalText(80),
+	note: optionalText(500),
+};
+
+/** The amount must be in the chosen currency, with a rate for bolívares. */
+export function checkPaymentAmount(
+	value: {
+		currency: "usd" | "ves";
+		amountUsd: number | null;
+		amountVes: number | null;
+		vesPerUsd: number | null;
+	},
+	ctx: z.RefinementCtx,
+) {
+	if (value.currency === "usd" && value.amountUsd === null) {
+		ctx.addIssue({
+			code: "custom",
+			path: ["amountUsd"],
+			message: "Escribe el monto en dólares.",
+		});
+	}
+	if (value.currency === "ves") {
+		if (value.amountVes === null) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["amountVes"],
+				message: "Escribe el monto en bolívares.",
+			});
+		}
+		if (value.vesPerUsd === null) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["vesPerUsd"],
+				message: "Escribe la tasa usada.",
+			});
+		}
+	}
+}
+
 export const recordPaymentSchema = z
 	.object({
 		patientId: z.uuid("Elige un paciente."),
-		sessionIds: z.array(z.uuid()).max(30, "Elige hasta 30 sesiones."),
-		method: z.enum(paymentMethods, { error: "Elige cómo pagó." }),
-		currency: z.enum(["usd", "ves"]),
-		amountUsd: amount,
-		amountVes: amount,
-		vesPerUsd: z
-			.number({ error: "Escribe la tasa." })
-			.positive("La tasa debe ser mayor que cero.")
-			.max(1_000_000, "Revisa esa tasa.")
-			.nullable(),
-		paidOn: day,
-		reference: optionalText(80),
-		note: optionalText(500),
+		...paymentFields,
 		proofFileId: z.uuid().nullable(),
 		/** The therapist already checked it against their bank or wallet. */
 		verified: z.boolean(),
 	})
-	.superRefine((value, ctx) => {
-		if (value.currency === "usd" && value.amountUsd === null) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["amountUsd"],
-				message: "Escribe el monto en dólares.",
-			});
-		}
-		if (value.currency === "ves") {
-			if (value.amountVes === null) {
-				ctx.addIssue({
-					code: "custom",
-					path: ["amountVes"],
-					message: "Escribe el monto en bolívares.",
-				});
-			}
-			if (value.vesPerUsd === null) {
-				ctx.addIssue({
-					code: "custom",
-					path: ["vesPerUsd"],
-					message: "Escribe la tasa usada.",
-				});
-			}
-		}
-	});
+	.superRefine(checkPaymentAmount);
 export type RecordPaymentInput = z.input<typeof recordPaymentSchema>;
 export type RecordPaymentData = z.output<typeof recordPaymentSchema>;
 

@@ -2,12 +2,15 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { toDashboardRole } from "@/components/dashboard/navigation";
-import { SectionPending } from "@/components/dashboard/section-pending";
+import { NotLinked } from "@/components/dashboard/patient/not-linked";
+import { PatientDashboard } from "@/components/dashboard/patient/patient-dashboard";
 import { TherapistDashboard } from "@/components/dashboard/therapist/therapist-dashboard";
+import { LoadPatientHome } from "@/lib/core/patient/use-cases/load-patient-home";
 import { LoadTherapistHome } from "@/lib/core/therapist/use-cases/load-therapist-home";
 import { auth } from "@/services";
 
 const loadTherapistHome = new LoadTherapistHome();
+const loadPatientHome = new LoadPatientHome();
 
 export default async function DashboardPage() {
 	const session = await auth.api.getSession({ headers: await headers() });
@@ -17,12 +20,11 @@ export default async function DashboardPage() {
 	}
 
 	if (toDashboardRole(session.user.role) === "patient") {
-		return (
-			<SectionPending
-				title={`Hola, ${session.user.name.split(" ")[0]}`}
-				description="Aquí verás tus próximas citas, tus tareas y tus pagos. Estamos terminando esta parte."
-			/>
-		);
+		const patientHome = await loadPatientHome.execute(session.user);
+		if (!patientHome) {
+			return <NotLinked title={`Hola, ${session.user.name.split(" ")[0]}`} />;
+		}
+		return <PatientDashboard name={session.user.name} home={patientHome} />;
 	}
 
 	// Loaded on the server; `home.nowIso` keeps both sides on the same clock.

@@ -3,14 +3,20 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { toDashboardRole } from "@/components/dashboard/navigation";
+import { PatientAppointmentsPage } from "@/components/dashboard/patient/appointments-page";
+import {
+	loadPortal,
+	NotLinked,
+} from "@/components/dashboard/patient/not-linked";
 import { SchedulePage } from "@/components/dashboard/schedule/schedule-page";
-import { SectionPending } from "@/components/dashboard/section-pending";
+import { LoadPatientAppointments } from "@/lib/core/appointment/use-cases/load-patient-appointments";
 import { LoadSchedule } from "@/lib/core/appointment/use-cases/load-schedule";
 import { auth } from "@/services";
 
 export const metadata: Metadata = { title: "Agenda" };
 
 const loadSchedule = new LoadSchedule();
+const loadPatientAppointments = new LoadPatientAppointments();
 
 export default async function Page({
 	searchParams,
@@ -24,7 +30,10 @@ export default async function Page({
 	}
 
 	if (toDashboardRole(session.user.role) === "patient") {
-		return <SectionPending title="Mis citas" />;
+		const user = session.user;
+		const data = await loadPortal(() => loadPatientAppointments.execute(user));
+		if (!data) return <NotLinked title="Mis citas" />;
+		return <PatientAppointmentsPage data={data} />;
 	}
 
 	const { month } = await searchParams;

@@ -126,6 +126,23 @@ export class PatientRepository {
     return response;
   }
 
+  /** The record a patient account opens in the portal, if the therapist allows it. */
+  async findByAccount(user_id: string) {
+    const [response] = await db
+      .select()
+      .from(patient)
+      .where(
+        and(
+          eq(patient.user_id, user_id),
+          eq(patient.portal_enabled, true),
+          isNull(patient.deleted_at),
+        ),
+      )
+      .limit(1);
+
+    return response;
+  }
+
   /** `patient.user_id` is unique: an account links to one record at most. */
   async isUserLinked(user_id: string) {
     const [response] = await db

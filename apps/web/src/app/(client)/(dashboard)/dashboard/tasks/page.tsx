@@ -2,17 +2,23 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { toDashboardRole } from "@/components/dashboard/navigation";
-import { SectionPending } from "@/components/dashboard/section-pending";
+import {
+	loadPortal,
+	NotLinked,
+} from "@/components/dashboard/patient/not-linked";
+import { PatientTasksPage } from "@/components/dashboard/patient/tasks-page";
 import {
 	TasksBoardView,
 	type TasksView,
 } from "@/components/dashboard/tasks/tasks-board";
+import { LoadPatientTasks } from "@/lib/core/task/use-cases/load-patient-tasks";
 import { LoadTasksBoard } from "@/lib/core/task/use-cases/load-tasks-board";
 import { auth } from "@/services";
 
 export const metadata: Metadata = { title: "Tareas" };
 
 const loadTasksBoard = new LoadTasksBoard();
+const loadPatientTasks = new LoadPatientTasks();
 
 type Param = string | string[] | undefined;
 
@@ -32,9 +38,11 @@ export default async function Page({
 		redirect("/sign-in");
 	}
 
-	// The patient side of tasks lives in the portal, still pending.
 	if (toDashboardRole(session.user.role) === "patient") {
-		return <SectionPending title="Mis tareas" />;
+		const user = session.user;
+		const data = await loadPortal(() => loadPatientTasks.execute(user));
+		if (!data) return <NotLinked title="Mis tareas" />;
+		return <PatientTasksPage data={data} />;
 	}
 
 	const [board, params] = await Promise.all([

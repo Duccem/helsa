@@ -2,7 +2,7 @@ import { and, desc, eq, gte, inArray, isNull, sql } from "@helsa/db/operators";
 import { patient } from "@helsa/db/schema/patient";
 import { patient_task, task_entry } from "@helsa/db/schema/task";
 import { db } from "@/services";
-import type { NewPatientTask, PatientTask } from "../domain/types";
+import type { NewPatientTask, NewTaskEntry, PatientTask } from "../domain/types";
 
 export class TaskRepository {
   async listByPatient(patient_id: string, therapist_id: string) {
@@ -108,6 +108,10 @@ export class TaskRepository {
       .update(patient_task)
       .set(data)
       .where(and(eq(patient_task.id, data.id), eq(patient_task.therapist_id, data.therapist_id)));
+  }
+
+  async createEntry(data: NewTaskEntry) {
+    await db.insert(task_entry).values(data);
   }
 
   async markEntriesSeen(task_id: string) {
