@@ -1,0 +1,27 @@
+{
+	"name": "@helsa/email",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./templates/*": "./src/templates/*.tsx"
+	},
+	"scripts": {
+		"check-types": "tsc --noEmit",
+		"email:dev": "email dev --dir ./src/templates --port 3005"
+	},
+	"dependencies": {
+		"@react-email/render": "^2.3.1",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"react-email": "^6.11.11",
+		"resend": "^6.38.0"
+	},
+	"devDependencies": {
+		"@helsa/config": "workspace:*",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"typescript": "catalog:"
+	}
+}

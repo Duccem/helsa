@@ -12,6 +12,8 @@
     "@better-auth/core": "1.7.7",
     "@better-auth/drizzle-adapter": "1.7.7",
     "@helsa/db": "workspace:*",
+    "@helsa/email": "workspace:*",
+    "@vercel/functions": "^3.11.1",
     "better-auth": "catalog:",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"
