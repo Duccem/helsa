@@ -77,7 +77,8 @@
         "noImgElement": "off"
       },
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noControlCharactersInRegex": "off"
       }
     }
   },
