@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "uq_appointment_reminder" ON "appointment_reminder" ("appointment_id","kind","channel");

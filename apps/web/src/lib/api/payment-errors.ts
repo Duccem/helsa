@@ -8,7 +8,10 @@ import {
 	PaymentSessionMismatch,
 	WhatsAppNotAllowed,
 } from "@/lib/core/payment/domain/errors";
-import { MessageNotDelivered, RecipientMissing } from "@/lib/infra/messaging";
+import {
+	MessageNotDelivered,
+	RecipientMissing,
+} from "@/lib/infra/messaging/types";
 import { type CommonError, NotPermissions } from "@/lib/utils/error";
 
 import { domainError, internalServerError } from "./server";

@@ -8,12 +8,15 @@
     "check-types": "tsc --noEmit",
     "start": "next start",
     "env:generate": "varlock codegen",
-    "auth:generate": "varlock run -- pnpm dlx auth@latest generate --config src/services.ts --output ../../packages/db/src/schema/auth.ts --yes"
+    "auth:generate": "varlock run -- pnpm dlx auth@latest generate --config src/services.ts --output ../../packages/db/src/schema/auth.ts --yes",
+    "kapso:templates": "varlock run -- tsx scripts/kapso-templates.ts"
   },
   "dependencies": {
     "@helsa/auth": "workspace:*",
     "@helsa/db": "workspace:*",
+    "@helsa/email": "workspace:*",
     "@helsa/ui": "workspace:*",
+    "@kapso/whatsapp-cloud-api": "^0.4.0",
     "@swc/helpers": "^0.5.23",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-query": "^5.104.5",

@@ -1,4 +1,5 @@
 import type { BetterUser } from "@helsa/auth";
+import { getAutomatedSender } from "@/lib/infra/messaging";
 import { type DateRange, previousRange, resolveRange } from "@/lib/utils/date-range";
 import { addDays, startOfZonedDay, zonedDay } from "@/lib/utils/zoned-time";
 import { PatientRepository } from "../../patient/adapters/patient-repository";
@@ -114,6 +115,11 @@ export class LoadPaymentsOverview {
         paymentInstructions: therapist?.payment_instructions ?? null,
         paymentMethods: (therapist?.payment_methods ?? []) as PaymentMethod[],
         hasDefaultPrice: therapist?.default_price_usd != null,
+      },
+      /** Channels Helsa delivers itself (Kapso, Resend); the rest open a link. */
+      automatedChannels: {
+        whatsapp: getAutomatedSender("whatsapp") !== null,
+        email: getAutomatedSender("email") !== null,
       },
       summary: {
         collectedUsd,

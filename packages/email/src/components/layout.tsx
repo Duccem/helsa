@@ -31,10 +31,17 @@ type EmailLayoutProps = {
 	baseUrl: string;
 	/** Inbox preview line shown next to the subject. */
 	preview: string;
+	/** Why the person got this email, shown in the footer. */
+	reason?: string;
 	children: ReactNode;
 };
 
-export function EmailLayout({ baseUrl, preview, children }: EmailLayoutProps) {
+export function EmailLayout({
+	baseUrl,
+	preview,
+	reason = "Recibiste este correo porque tienes una cuenta en Helsa.",
+	children,
+}: EmailLayoutProps) {
 	return (
 		<Html lang="es">
 			<Head />
@@ -73,7 +80,7 @@ export function EmailLayout({ baseUrl, preview, children }: EmailLayoutProps) {
 							margin: 0,
 						}}
 					>
-						Recibiste este correo porque tienes una cuenta en Helsa.{" "}
+						{reason}{" "}
 						<Link
 							href={baseUrl}
 							style={{ color: colors.muted, textDecoration: "underline" }}

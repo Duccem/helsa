@@ -252,7 +252,11 @@ export function ReminderDialog({
 			open={patient !== null}
 			onOpenChange={(open) => (open ? null : onClose())}
 			title={patient ? `Recordar a ${patient.shortName}` : "Recordar pago"}
-			description="Revisa el mensaje antes de enviarlo. Se abrirá tu WhatsApp o tu correo con el texto listo."
+			description={
+				overview.automatedChannels.whatsapp || overview.automatedChannels.email
+					? "Revisa el mensaje antes de enviarlo."
+					: "Revisa el mensaje antes de enviarlo. Se abrirá tu WhatsApp o tu correo con el texto listo."
+			}
 		>
 			{patient ? (
 				<ReminderForm
@@ -286,11 +290,20 @@ function ReminderForm({
 		channels[0]?.[0] ?? "whatsapp",
 	);
 	const [message, setMessage] = useState(() => draftMessage(patient, overview));
+	// Helsa delivers it (Kapso / Resend) instead of opening the therapist's app.
+	// WhatsApp from Helsa's line also needs the patient's opt-in.
+	const automated =
+		channel === "whatsapp"
+			? overview.automatedChannels.whatsapp && patient.whatsappOptIn
+			: overview.automatedChannels.email;
+	// Helsa's WhatsApp line only sends the approved template, not this text.
+	const usesTemplate = automated && channel === "whatsapp";
 
 	async function submit(event: React.FormEvent) {
 		event.preventDefault();
 		// Opened now, while the click still counts, so the browser doesn't block it.
-		const popup = channel === "whatsapp" ? window.open("", "_blank") : null;
+		const popup =
+			channel === "whatsapp" && !automated ? window.open("", "_blank") : null;
 		try {
 			const delivery = await send.mutateAsync({
 				patientId: patient.id,
@@ -363,15 +376,23 @@ function ReminderForm({
 					Puedes escribirle tú desde tu teléfono.
 				</p>
 			) : null}
-			<Field id={`${id}-message`} label="Mensaje">
-				<TextArea
-					id={`${id}-message`}
-					value={message}
-					onValueChange={setMessage}
-					maxLength={1500}
-					className="min-h-64"
-				/>
-			</Field>
+			{usesTemplate ? (
+				<p className="rounded-2xl bg-dash-ground px-5 py-3 text-[14px]">
+					Le llegará desde el WhatsApp de Helsa un mensaje estándar con tu
+					nombre, las sesiones pendientes y el monto total. Si quieres enviarle
+					tu propio texto, elige correo.
+				</p>
+			) : (
+				<Field id={`${id}-message`} label="Mensaje">
+					<TextArea
+						id={`${id}-message`}
+						value={message}
+						onValueChange={setMessage}
+						maxLength={1500}
+						className="min-h-64"
+					/>
+				</Field>
+			)}
 			<div className="flex flex-wrap justify-end gap-2">
 				<ActionButton size="small" variant="quiet" onClick={onDone}>
 					Cancelar
@@ -380,14 +401,18 @@ function ReminderForm({
 					type="submit"
 					size="small"
 					pending={send.isPending}
-					disabled={message.trim().length < 10}
+					disabled={!usesTemplate && message.trim().length < 10}
 				>
 					{channel === "whatsapp" ? (
 						<MessageCircle aria-hidden="true" className="size-4" />
 					) : (
 						<Mail aria-hidden="true" className="size-4" />
 					)}
-					{channel === "whatsapp" ? "Abrir WhatsApp" : "Abrir correo"}
+					{automated
+						? "Enviar recordatorio"
+						: channel === "whatsapp"
+							? "Abrir WhatsApp"
+							: "Abrir correo"}
 				</ActionButton>
 			</div>
 		</form>

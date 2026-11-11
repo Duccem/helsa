@@ -23,6 +23,13 @@ type SendInput = {
 	template: ReactElement;
 	/** Lets Resend drop a retry of the same email within 24h. */
 	idempotencyKey?: string;
+	/** Where replies go, e.g. the therapist who sent a reminder. */
+	replyTo?: string;
+};
+
+export type SendResult = {
+	/** Resend email id, or null when nothing was sent (no API key). */
+	id: string | null;
 };
 
 function displayName(user: Recipient) {
@@ -35,12 +42,18 @@ export function createMailer(config: MailerConfig) {
 		: null;
 	const baseUrl = config.BASE_URL.replace(/\/$/, "");
 
-	async function send({ to, subject, template, idempotencyKey }: SendInput) {
+	async function send({
+		to,
+		subject,
+		template,
+		idempotencyKey,
+		replyTo,
+	}: SendInput): Promise<SendResult> {
 		if (!resend) {
 			console.warn(
 				`[email] RESEND_API_KEY not set, skipping "${subject}" to ${to}`,
 			);
-			return;
+			return { id: null };
 		}
 
 		const [html, text] = await Promise.all([
@@ -48,8 +61,8 @@ export function createMailer(config: MailerConfig) {
 			render(template, { plainText: true }),
 		]);
 
-		const { error } = await resend.emails.send(
-			{ from: config.EMAIL_FROM, to, subject, html, text },
+		const { data, error } = await resend.emails.send(
+			{ from: config.EMAIL_FROM, to, subject, html, text, replyTo },
 			idempotencyKey ? { idempotencyKey } : undefined,
 		);
 
@@ -57,9 +70,21 @@ export function createMailer(config: MailerConfig) {
 		if (error) {
 			throw new Error(`[email] "${subject}" to ${to} failed: ${error.message}`);
 		}
+		return { id: data?.id ?? null };
+	}
+
+	/** Auth callbacks expect `Promise<void>`; they don't need the email id. */
+	async function deliver(input: SendInput): Promise<void> {
+		await send(input);
 	}
 
 	return {
+		/** True when emails really go out (a Resend key is configured). */
+		enabled: resend !== null,
+		baseUrl,
+		/** Sends any template; the app's notification code builds its own. */
+		send,
+
 		sendResetPasswordEmail(
 			user: Recipient,
 			url: string,
@@ -67,7 +92,7 @@ export function createMailer(config: MailerConfig) {
 		) {
 			if (!resend)
 				console.info(`[email] reset password link for ${user.email}: ${url}`);
-			return send({
+			return deliver({
 				to: user.email,
 				subject: "Restablece tu contraseña",
 				template: createElement(ResetPasswordEmail, {
@@ -80,7 +105,7 @@ export function createMailer(config: MailerConfig) {
 		},
 
 		sendPasswordChangedEmail(user: Recipient, changedAt = new Date()) {
-			return send({
+			return deliver({
 				to: user.email,
 				subject: "Tu contraseña se cambió",
 				template: createElement(PasswordChangedEmail, {
@@ -94,7 +119,7 @@ export function createMailer(config: MailerConfig) {
 		sendVerificationEmail(user: Recipient, url: string) {
 			if (!resend)
 				console.info(`[email] verification link for ${user.email}: ${url}`);
-			return send({
+			return deliver({
 				to: user.email,
 				subject: "Confirma tu correo electrónico",
 				template: createElement(VerifyEmail, {
@@ -106,7 +131,7 @@ export function createMailer(config: MailerConfig) {
 		},
 
 		sendWelcomeEmail(user: Recipient & { id: string }) {
-			return send({
+			return deliver({
 				to: user.email,
 				subject: "Bienvenido a Helsa",
 				template: createElement(WelcomeEmail, {

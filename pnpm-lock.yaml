@@ -93,9 +93,15 @@ importers:
       '@helsa/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@helsa/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@helsa/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@kapso/whatsapp-cloud-api':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@swc/helpers':
         specifier: ^0.5.23
         version: 0.5.23
@@ -1193,6 +1199,10 @@ packages:
   '@js-temporal/polyfill@0.5.1':
     resolution: {integrity: sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ==}
     engines: {node: '>=12'}
+
+  '@kapso/whatsapp-cloud-api@0.4.0':
+    resolution: {integrity: sha512-N1P6G//TYMvV9sUiplHFoN+fFJ2oQgaHcIky3Eklr6nm9Y8qJHdIun6e/Nt5v5q/msoFCiMhqNnKi7zNDkYZVQ==}
+    engines: {node: '>=20.19'}
 
   '@modelcontextprotocol/sdk@1.32.1':
     resolution: {integrity: sha512-2DdE+SJDtzLEEWzY1ZjY7Q+VcPhcV1KisD3zI4u0XZyktsjHum1mwbMI+JaulUBi2OZk+KJAi2uPXzxichPkdw==}
@@ -4654,6 +4664,10 @@ snapshots:
   '@js-temporal/polyfill@0.5.1':
     dependencies:
       jsbi: 4.3.2
+
+  '@kapso/whatsapp-cloud-api@0.4.0':
+    dependencies:
+      zod: 4.6.7
 
   '@modelcontextprotocol/sdk@1.32.1(zod@3.25.76)':
     dependencies:

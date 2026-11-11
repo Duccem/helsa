@@ -3,6 +3,7 @@ import {
   bytea,
   pgEnum,
   pgTable,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { v7 } from "uuid";
 
@@ -117,4 +118,9 @@ export const appointment_reminder = pgTable(
     responded_at: t.timestamp({ withTimezone: true }),
     created_at: t.timestamp({ withTimezone: true }).notNull().defaultNow(),
   }),
+  // One reminder of each kind per channel: the cron job claims it by inserting
+  // first, so overlapping runs never send the same reminder twice.
+  (t) => [
+    uniqueIndex("uq_appointment_reminder").on(t.appointment_id, t.kind, t.channel),
+  ],
 );

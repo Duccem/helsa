@@ -1,14 +1,20 @@
 import type { BetterUser } from "@helsa/auth";
+import PaymentReminderEmail from "@helsa/email/templates/payment-reminder";
+import { createElement } from "react";
+import { usd } from "@/components/dashboard/payments/format";
 import {
   type Delivery,
+  getLinkSender,
   getMessageSender,
   type MessageChannel,
   MessageNotDelivered,
+  whatsappTemplates,
 } from "@/lib/infra/messaging";
+import { mailer } from "@/services";
 import { EnsurePatientAccess } from "../../patient/use-cases/ensure-patient-access";
 import { TherapistRepository } from "../../therapist/adapters/therapist-repository";
 import { PaymentRepository } from "../adapters/payment-repository";
-import { NothingOwed, WhatsAppNotAllowed } from "../domain/errors";
+import { NothingOwed } from "../domain/errors";
 import { LoadPatientBalances } from "./load-patient-balances";
 
 type SendPaymentReminderInput = {
@@ -42,9 +48,11 @@ export class SendPaymentReminder {
       throw new NothingOwed();
     }
 
-    const sender = getMessageSender(data.channel);
+    // Helsa's own WhatsApp line needs the patient's opt-in. Without it the
+    // therapist still gets the wa.me link to write from their own phone.
+    let sender = getMessageSender(data.channel);
     if (sender.automated && data.channel === "whatsapp" && !patient.whatsapp_opt_in) {
-      throw new WhatsAppNotAllowed();
+      sender = getLinkSender("whatsapp");
     }
 
     const log = {
@@ -56,6 +64,9 @@ export class SendPaymentReminder {
       sessions: balance.sessions.length + balance.noShows.length,
     };
 
+    const therapistName = therapist?.display_name ?? user.name;
+    const sessions = log.sessions;
+
     try {
       const delivery = await sender.send({
         channel: data.channel,
@@ -64,8 +75,24 @@ export class SendPaymentReminder {
           phone: patient.phone_e164,
           email: patient.email,
         },
-        subject: `Recordatorio de pago · ${therapist?.display_name ?? user.name}`,
+        subject: `Recordatorio de pago · ${therapistName}`,
         text: data.message,
+        // Email from Helsa: the patient's reply (e.g. the receipt) reaches the therapist.
+        replyTo: user.email,
+        emailTemplate: createElement(PaymentReminderEmail, {
+          baseUrl: mailer.baseUrl,
+          therapistName,
+          message: data.message,
+          portalUrl: patient.user_id ? `${mailer.baseUrl}/dashboard/payments` : null,
+        }),
+        // WhatsApp from Helsa's number only takes an approved template, so the
+        // therapist's own wording travels by email and wa.me links only.
+        whatsappTemplate: whatsappTemplates.paymentReminder({
+          patient_name: patient.preferred_name || patient.first_name,
+          therapist_name: therapistName,
+          sessions: sessions === 1 ? "1 sesión" : `${sessions} sesiones`,
+          amount: usd(owed),
+        }),
       });
 
       await this.payments.createReminder({

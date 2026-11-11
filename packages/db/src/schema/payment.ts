@@ -90,7 +90,7 @@ export const payment_reminder = pgTable(
     // "sent" when a provider delivered it; "skipped" when it was handed to the
     // therapist to send themselves (a WhatsApp or mail link).
     status: reminder_status().notNull().default("pending"),
-    provider: t.text().notNull(), // e.g. "whatsapp_link", "mailto", "resend", "twilio"
+    provider: t.text().notNull(), // e.g. "whatsapp_link", "mailto", "resend", "kapso"
     provider_message_id: t.text(),
     error: t.text(),
     sent_at: t.timestamp({ withTimezone: true }).notNull().defaultNow(),
