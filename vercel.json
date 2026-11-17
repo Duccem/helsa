@@ -14,11 +14,5 @@
         "service": "web"
       }
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/session-reminders",
-      "schedule": "*/15 * * * *"
-    }
   ]
 }
