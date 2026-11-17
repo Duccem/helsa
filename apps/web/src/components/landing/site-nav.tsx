@@ -16,11 +16,17 @@ import { EASE_OUT } from "./motion/reveal";
 const linkClassName =
 	"rounded-sm text-[15px] text-foreground outline-none transition-colors hover:text-chapter-violet focus-visible:ring-2 focus-visible:ring-ring dark:hover:text-primary";
 
-export function SiteNav() {
+type SiteNavProps = {
+	/** Before launch the header only offers the waitlist: no sign-in or dashboard links. */
+	launched: boolean;
+};
+
+export function SiteNav({ launched }: SiteNavProps) {
 	const [open, setOpen] = useState(false);
 	const close = () => setOpen(false);
 	const { data: session, isPending } = authClient.useSession();
-	const signedIn = Boolean(session?.user);
+	const signedIn = launched && Boolean(session?.user);
+	const showActions = !launched || !isPending;
 
 	return (
 		<header className="sticky top-0 z-50 bg-background">
@@ -46,7 +52,7 @@ export function SiteNav() {
 				</nav>
 
 				<div className="flex items-center gap-5">
-					{!isPending &&
+					{showActions &&
 						(signedIn ? (
 							<CtaLink
 								href="/dashboard"
@@ -57,12 +63,14 @@ export function SiteNav() {
 							</CtaLink>
 						) : (
 							<>
-								<Link
-									href="/sign-in"
-									className={`${linkClassName} hidden sm:inline`}
-								>
-									Entrar
-								</Link>
+								{launched && (
+									<Link
+										href="/sign-in"
+										className={`${linkClassName} hidden sm:inline`}
+									>
+										Entrar
+									</Link>
+								)}
 								<CtaLink
 									href="#lista"
 									size="sm"
@@ -108,7 +116,7 @@ export function SiteNav() {
 									</a>
 								</li>
 							))}
-							{!isPending &&
+							{showActions &&
 								(signedIn ? (
 									<li className="pt-3">
 										<CtaLink
@@ -121,14 +129,16 @@ export function SiteNav() {
 									</li>
 								) : (
 									<>
-										<li>
-											<Link
-												href="/sign-in"
-												className="block py-3 font-display text-2xl"
-											>
-												Entrar
-											</Link>
-										</li>
+										{launched && (
+											<li>
+												<Link
+													href="/sign-in"
+													className="block py-3 font-display text-2xl"
+												>
+													Entrar
+												</Link>
+											</li>
+										)}
 										<li className="pt-3">
 											<CtaLink href="#lista" onClick={close} className="w-full">
 												Quiero acceso anticipado

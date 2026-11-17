@@ -11,6 +11,7 @@ import { SignalSection } from "@/components/landing/signal-section";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { SiteNav } from "@/components/landing/site-nav";
 import { WaitlistSection } from "@/components/landing/waitlist-section";
+import { ENV } from "@/env.server";
 
 export const metadata: Metadata = {
 	title: "Helsa · Tu consulta, en orden",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 export default function Home() {
 	return (
 		<div id="top" className={doodleTokens}>
-			<SiteNav />
+			<SiteNav launched={ENV.LAUNCH_ENABLED ?? false} />
 			<main>
 				<HeroSection />
 				<IntroSection />

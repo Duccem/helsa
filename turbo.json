@@ -52,6 +52,7 @@
     "BETTER_AUTH_URL",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
+    "LAUNCH_ENABLED",
     "CI",
     "DATABASE_URL",
     "NODE_ENV",
